@@ -64,6 +64,7 @@ getIconFromBitmap (_ICON_DIR + "bomb.bmp") 8 "bomb"
 			for c in theChildren do (
 				newNode = theNode.Nodes.add c.name
 				newNode.tag = dotNetMXSValue c
+				newNode.checked = not c.isHidden
 				-- TODO SET THE INDEX AND COLOR ACCORDING TO CUSTOM
 				newNode.imageIndex = newNode.selectedImageIndex = 0
 				newNode.backcolor = (dotNetClass "System.Drawing.Color").fromARGB c.wirecolor.r c.wirecolor.g c.wirecolor.b
@@ -107,6 +108,13 @@ getIconFromBitmap (_ICON_DIR + "bomb.bmp") 8 "bomb"
 			) catch (
 				max select none
 			)
+		)
+		
+		-- handler for checkbox changing the visibility
+		on tv AfterCheck arg do (
+			try (
+				arg.node.tag.value.isHidden = not arg.node.checked
+			) catch ()
 		)
 		
 		-- handler for changing spinner value
