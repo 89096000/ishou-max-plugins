@@ -1,15 +1,47 @@
-﻿-- code inside macroscripts are executed immediately on ActionItem
+﻿_DEFAULT_INDENT = 18
+_ICON_DIR = @"C:\Users\Orbit-Kwa\Desktop\git\ishous-max-plugins\16x16bmps\"
+
+-- code inside macroscripts are executed immediately on ActionItem
 --macroScript SceneTreeView category:"testing"
 --(
-	-- rollouts are UI windows
+
+    -- image list
+	image_list = dotNetObject "System.Windows.Forms.ImageList"
+	image_list.imageSize = dotNetObject "System.Drawing.Size" 16 15
+	
+    -- rollouts are UI windows
 	rollout treeview_rollout "意匠計画シーンブラウザ" (
+
+		-- cache bmp icons
+		fn getIconFromBitmap thePath number iconFileName = (
+			filename = getDir #image + "\\icon_" + iconFileName + ".bmp"
+
+			if not doesFileExist filename do (
+				-- create bmp pixel by pixel
+				tempBmp = openBitmap thePath
+				iconBmp = bitmap 16 15
+				for v = 0 to 14 do (
+					setPixels iconBmp [0,v] (
+						getPixels tempBmp [(number-1)*16, v] 16
+					)
+					iconBmp.filename = filename
+					save iconBmp
+					close iconBmp
+					close tempBmp
+				)
+				img = dotnetClass "System.Drawing.Image"
+				image_list.images.add (img.fromFile filename)
+			)
+		)
 
 		-- initialize rollout control
 		-- init settings found here: https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2015/ENU/MAXScript-Help/files/GUID-C2B51AEE-9C08-4679-B625-A36C72025C91-htm.html
-		-- measurement is in pixels
 		fn initTreeView tv = (
-			tv.Indent = 18
-			-- tv.LineStyle = #tvwTreeLines
+			tv.Indent = _DEFAULT_INDENT
+			tv.CheckBoxes = true
+			-- get bmps and assign image list to treeview
+			getIconFromBitmap (_ICON_DIR + "bulbx.bmp") 1 "bulbie3"
+			tv.imageList = image_list
 		) 
 
 		-- recursive function for node children
@@ -32,13 +64,13 @@
 			rootNodes = for o in objects where o.parent == undefined collect o						
 			addChildren theRoot rootNodes
 		)
-		
+				
 		-- create treeview activeX control in rollout
 		-- activeXControl tv "MSComctlLib.TreeCtrl" width:190 height:290 align:#center
 		dotNetControl tv "TreeView" width:190 height:290 align:#center
 		
 		-- add a spinner to test the indentation of the rollout
-		spinner spn_indent "Indentation" range:[0,100,28] type:#integer fieldwidth:40
+		spinner spn_indent "Indentation" range:[0,100,_DEFAULT_INDENT] type:#integer fieldwidth:40
 		
 		-- HANDLERS
 		-- add event handler to select the object if user clicks on node
@@ -72,3 +104,19 @@
 	
 -- end macroscript
 --)
+	
+	
+	
+-- fn saveTreeData 
+
+	
+	
+	
+/*
+Footnotes: 
+IMAGE LISTS
+- When creating icons for DotNet, it is necessary to create one bitmap for each icon,
+   because the DotNet image list will lock the file for the duration of the script execution.
+- Script writes a separate bitmap with the name passed as third argument
+- Only creates bitmaps if they do not exist yet to avoid bitmap access errors
+*/
