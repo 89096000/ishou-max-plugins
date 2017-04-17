@@ -40,7 +40,7 @@ _ICON_DIR = @"C:\Users\Orbit-Kwa\Desktop\git\ishous-max-plugins\16x16bmps\"
 			tv.Indent = _DEFAULT_INDENT
 			tv.CheckBoxes = true
 			-- get bmps and assign image list to treeview
-			getIconFromBitmap (_ICON_DIR + "bulbx.bmp") 1 "bulbie3"
+			getIconFromBitmap (_ICON_DIR + "bulb.bmp") 1 "bulb"
 			tv.imageList = image_list
 		) 
 
