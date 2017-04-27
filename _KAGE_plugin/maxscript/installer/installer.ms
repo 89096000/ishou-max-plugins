@@ -1,30 +1,27 @@
-global sekaiInstaller;
+global kageInstaller;
 
---Re-init update.ms to work around update bug in 2.1
--- try ( fileIn ((GetDir #userScripts) + "/sekai/update.ms"); ) catch ()
-
-rollout sekai_install ""
+rollout kage_install ""
 (
    edittext progress_txt height:200 readonly:true width:278 align:#center offset:[-1, 0];
    progressbar progress_bar value:0 width:273 align:#center;
    button close_btn "Close" enabled:false width:273 align:#center    
    on close_btn pressed do
-      destroyDialog sekai_install;
+      destroyDialog kage_install;
 )
 
-struct sekai_installer (
+struct kage_installer (
 
 
 --Directories and files.
-private tempDir              = (GetDir #temp) + "/sekai",
+private tempDir              = (GetDir #temp) + "/kage",
 private strings_file         = tempDir + "/installer/strings.ini",
 private installer_data_file  = tempDir + "/installer/installer_data.ini",
 private userUIDir            = pathConfig.removePathLeaf (GetDir #userIcons),
-private userScriptDir        = (GetDir #userScripts) + "/sekai",
+private userScriptDir        = (GetDir #userScripts) + "/kage",
 private userIconsDir         = (GetDir #userIcons),
-private prefs_file           = (GetDir #userScripts) + "/sekai_prefs.ini",
-private user_colors_file     = (GetDir #userScripts) + "/sekai_user_colors.ini",
-private product_info_file    = (GetDir #userScripts) + "/sekai_product_info.ini",
+private prefs_file           = (GetDir #userScripts) + "/kage_prefs.ini",
+private user_colors_file     = (GetDir #userScripts) + "/kage_user_colors.ini",
+private product_info_file    = (GetDir #userScripts) + "/kage_product_info.ini",
 
 
 --Retrieves the string from the strings ini file.
@@ -69,14 +66,14 @@ public function getInstalledVersion =
 
 
 --Returns true if the Program is installed for this 3dsmax installation.
-public function getIsSekaiInstalled =
+public function getIsKageInstalled =
 (
-   (getINISetting product_info_file #General #sekaiInstalled) == "true";
+   (getINISetting product_info_file #General #kageInstalled) == "true";
 ),
 
-private function setIsSekaiInstalled i =
+private function setIsKageInstalled i =
 (
-   setINISetting product_info_file #General #sekaiInstalled (i as string);
+   setINISetting product_info_file #General #kageInstalled (i as string);
 ),
 
 
@@ -107,11 +104,11 @@ private function loadAssembly dll =
 
 
 --Closes if it's still opened.
-private function closeSekai =
+private function closeKage =
 (
-   try ( sekai.ui.closeSekai(); ) catch ()
-   try ( sekai.destroy(); ) catch ()
-   global sekai = undefined;
+   try ( kage.ui.closeKage(); ) catch ()
+   try ( kage.destroy(); ) catch ()
+   global kage = undefined;
 ),
 
 
@@ -125,12 +122,12 @@ private function printException executingFn exception =
 --Adds a post-system-shutdown callback that removes the temporary files.
 public function clearTempDir =
 (
-   local scriptStr = ("local d = (GetDir #temp) + \"/sekai\";
+   local scriptStr = ("local d = (GetDir #temp) + \"/kage\";
       if ((dotNetClass \"System.IO.Directory\").Exists d) do 
          try ( (dotNetClass \"System.IO.Directory\").Delete d true; ) catch ()");
    
-   callbacks.removeScripts #preSystemShutdown id:#sekai_installer;
-   callbacks.addScript #preSystemShutdown scriptStr id:#sekai_installer;
+   callbacks.removeScripts #preSystemShutdown id:#kage_installer;
+   callbacks.addScript #preSystemShutdown scriptStr id:#kage_installer;
 ),
 
 
@@ -142,19 +139,19 @@ private function removeScriptFiles =
 (
    local success = true;
    
-   closeSekai();
+   closeKage();
    
    local System_IO_Directory = dotNetClass "System.IO.Directory";
    
    --Delete all script files (old and current).
-   local oldSekaiDirs = #(
-      ((GetDir #Scripts) + "/sekai"), 
-      ((GetDir #maxroot) + "/stdplugs/stdscripts/sekai"),
-      ((GetDir #ui) + "/macroscripts/sekai"),
-      ((GetDir #userMacros) + "/sekai"),
+   local oldKageDirs = #(
+      ((GetDir #Scripts) + "/kage"), 
+      ((GetDir #maxroot) + "/stdplugs/stdscripts/kage"),
+      ((GetDir #ui) + "/macroscripts/kage"),
+      ((GetDir #userMacros) + "/kage"),
       userScriptDir
    );
-   for d in oldSekaiDirs where (System_IO_Directory.Exists d) do 
+   for d in oldKageDirs where (System_IO_Directory.Exists d) do 
    (
       try (
          System_IO_Directory.Delete d true;
@@ -166,7 +163,7 @@ private function removeScriptFiles =
    )
    
    --Delete other startup files. (in stdscripts)
-   local otherStartupFiles = getFiles ((GetDir #maxroot) + "/stdplugs/stdscripts/sekai*");
+   local otherStartupFiles = getFiles ((GetDir #maxroot) + "/stdplugs/stdscripts/kage*");
    for f in otherStartupFiles do
    (
       if (not (deleteFile f)) do
@@ -175,10 +172,10 @@ private function removeScriptFiles =
    
    -- Remove user macros
    local userMacroDir = (GetDir #userMacros);
-   local oldUserMacros = (getFiles (userMacroDir + "/*Sekai*"));
+   local oldUserMacros = (getFiles (userMacroDir + "/*Kage*"));
    for mcr in oldUserMacros do 
    (
-      if (not (matchPattern mcr pattern:"*Sekai Workflow Tools*")) do
+      if (not (matchPattern mcr pattern:"*Kage Workflow Tools*")) do
       (
          if (not (deleteFile mcr)) do 
             success = false;
@@ -193,7 +190,7 @@ private function removeWorkflowTools =
    local success = true;
    
    local System_IO_Directory = dotNetClass "System.IO.Directory";
-   local oldWfToolsDir = (GetDir #userMacros) + "/sekai_workflowtools";
+   local oldWfToolsDir = (GetDir #userMacros) + "/kage_workflowtools";
    if (System_IO_Directory.Exists oldWfToolsDir) do
    (
       try (
@@ -206,13 +203,13 @@ private function removeWorkflowTools =
    )
    
    -- Remove icon files
-   local iconFiles = getFiles ((GetDir #ui) + "/icons/*Sekai_wftools*");
+   local iconFiles = getFiles ((GetDir #ui) + "/icons/*Kage_wftools*");
    for ico in iconFiles do
    (
       if (not (deleteFile ico)) do 
          success = false;
    )
-   iconFiles = getFiles (userIconsDir + "/*Sekai_wftools*");
+   iconFiles = getFiles (userIconsDir + "/*Kage_wftools*");
    for ico in iconFiles do
    (
       if (not (deleteFile ico)) do 
@@ -222,7 +219,7 @@ private function removeWorkflowTools =
 
    -- Remove user macros
    local userMacroDir = (GetDir #userMacros);
-   local oldUserMacros = (getFiles (userMacroDir + "/*Sekai Workflow Tools*"));
+   local oldUserMacros = (getFiles (userMacroDir + "/*Kage Workflow Tools*"));
    for mcr in oldUserMacros do 
    (
       if (not (deleteFile mcr)) do success = false;
@@ -243,7 +240,7 @@ private function removeHotkeys =
       local kbdFile      = dotnetObject "ScriptCenter.Max.KbdFile" \
                                         (kbdFileClass.MaxGetActiveKbdFile());
       
-      if ((kbdFile.RemoveAction "Sekai") > 0) do
+      if ((kbdFile.RemoveAction "Kage") > 0) do
       (
          kbdFile.Write();
          kbdFile.MaxLoadKbdFile();
@@ -422,7 +419,7 @@ private function assignHotkey =
       local kbdFile      = dotnetObject "ScriptCenter.Max.KbdFile" \
                                         (getActiveKbdFile());
 
-      if (kbdFile.AddAction "toggleSekai" "Sekai" keysClass.H) do
+      if (kbdFile.AddAction "toggleKage" "Kage" keysClass.H) do
       (
          kbdFile.Write();
          kbdFile.MaxLoadKbdFile();
@@ -440,36 +437,36 @@ private function assignHotkey =
 
 public function openInstallWindow height =
 (
-   try ( destroyDialog sekai_install ) catch ()
+   try ( destroyDialog kage_install ) catch ()
    
-   createDialog sekai_install 300 \
+   createDialog kage_install 300 \
                               height \
                               lockWidth:true \
                               lockHeight:true \
                               style:#(#style_sysmenu, #style_toolwindow)
    
-   sekai_install.progress_txt.height = height - 60;
-   sekai_install.progress_bar.pos.y  = height - 48;
-   sekai_install.close_btn.pos.y     = height - 28;
+   kage_install.progress_txt.height = height - 60;
+   kage_install.progress_bar.pos.y  = height - 48;
+   kage_install.close_btn.pos.y     = height - 28;
 ),
 
 
 
 private function setStatusTitle txt =
 (
-   if (sekai_install.open) do
-      sekai_install.title = txt;
+   if (kage_install.open) do
+      kage_install.title = txt;
 ),
 
 private function addStatusText txt newline:true progress:0 =
 (
-   if (sekai_install.open) do
+   if (kage_install.open) do
    (
-      if (newline AND sekai_install.progress_txt.text != "") do 
+      if (newline AND kage_install.progress_txt.text != "") do 
          txt = "\n" + txt;
       
-      sekai_install.progress_txt.text += txt;
-      sekai_install.progress_bar.value += progress;
+      kage_install.progress_txt.text += txt;
+      kage_install.progress_bar.value += progress;
    )
 ),
 
@@ -484,7 +481,7 @@ private function installation_success inst silent:false showHowToUse:false =
       addStatusText "";
       addStatusText inst_txt progress:100;
       
-      sekai_install.close_btn.enabled = true;
+      kage_install.close_btn.enabled = true;
       
       if (showHowToUse) do
          inst_txt += (getString #howto);
@@ -505,7 +502,7 @@ private function uninstallation_success silent:false =
    (
       addStatusText "";
       addStatusText (getString #uninstSuccess) progress:100;
-      sekai_install.close_btn.enabled = true;
+      kage_install.close_btn.enabled = true;
       
       local mb     = dotNetClass "System.Windows.Forms.MessageBox";
       local mbBtn  = dotNetClass "System.Windows.Forms.MessageBoxButtons";
@@ -522,7 +519,7 @@ private function installation_failed inst msg silent:false =
    if (not silent) do
    (
       addStatusText ("\n\n" + inst + " " + (getString #failed));
-      sekai_install.close_btn.enabled = true;
+      kage_install.close_btn.enabled = true;
       messageBox msg title:(getString #error);
    )
 ),
@@ -594,7 +591,7 @@ public function uninstall silent:false =
       return false;
    )
    
-   setIsSekaiInstalled false;   
+   setIsKageInstalled false;   
    uninstallation_success silent:silent;
    
    true;
@@ -669,7 +666,7 @@ public function install silent:false =
    print "Assign hotkey"
    addStatusText (getString #assignHotkey);
    local showHelp = false;
-   if (not (containsHotkeyAction "toggleSekai" "Sekai")) then
+   if (not (containsHotkeyAction "toggleKage" "Kage")) then
    (
       local queryStr   = getString #assignHotkey section:#Queries;
       local queryTitle = getString #assignHotkeyTitle section:#Queries
@@ -717,7 +714,7 @@ public function install silent:false =
       addStatusText (getString #skipped) newline:false progress:progressDelta;
    
    print "Install Complete"
-   setIsSekaiInstalled true;
+   setIsKageInstalled true;
 
    print "Show Complete MsgBox"
    installation_success (getString #inst) \
@@ -738,4 +735,4 @@ on create do
 
 )
 
-sekaiInstaller = sekai_installer();
+kageInstaller = kage_installer();
