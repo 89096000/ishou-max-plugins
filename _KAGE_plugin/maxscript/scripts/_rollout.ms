@@ -136,7 +136,7 @@ rollout treeview_rollout "意匠計画の影" (
 			newNode.tag = dotNetMXSValue theChildren[i]
 			newNode.checked = not theChildren[i].isHidden
 			newNode.imageIndex = newNode.selectedImageIndex = 0
-			newNode.backcolor = (dotNetClass "System.Drawing.Color").fromARGB theChildren[i].wirecolor.r theChildren[i].wirecolor.g theChildren[i].wirecolor.b
+			-- newNode.backcolor = (dotNetClass "System.Drawing.Color").fromARGB theChildren[i].wirecolor.r theChildren[i].wirecolor.g theChildren[i].wirecolor.b
 			addChildren newNode theChildren[i].children
 		)
 	)
@@ -146,7 +146,7 @@ rollout treeview_rollout "意匠計画の影" (
 	-- call recursive function to add children to top level nodes
 	fn fillInTreeView tv = (
 		theRoot = tv.Nodes.add "ワールドルート"
-		rootNodes = for o in objects where o.parent == undefined collect o						
+		rootNodes = for o in objects where o.parent == undefined collect o
 		addChildren theRoot rootNodes
 	)
 	
@@ -175,8 +175,7 @@ rollout treeview_rollout "意匠計画の影" (
 			try ( print _THE_HITNODE.tag.value ) catch ( print "fail test 1" )
 			try ( print _THE_HITNODE.backcolor ) catch ( print "fail test 2" )
 			try ( print _THE_HITNODE.text ) catch ( print "fail test 3" )
-			try ( print _THE_HITNODE.item[0].text ) catch ( print "fail test 4" )
-			try ( print _THE_HITNODE.name ) catch ( print "fail test 5" )
+			try ( print _THE_HITNODE.name ) catch ( print "fail test 4" )
 
 		) else (
 			-- LEFT CLICK - SELECT OBJECT
@@ -186,6 +185,16 @@ rollout treeview_rollout "意匠計画の影" (
 			) catch (
 				max select none
 			)
+
+			for obj in selection do (
+				try ( print obj.text ) catch ( print "fail test 5" )
+				try ( print obj.name ) catch ( print "fail test 6" )
+				if obj.children != undefined do(
+					selectmore obj.children
+				)
+			)
+
+
 		)
 	)
 	
