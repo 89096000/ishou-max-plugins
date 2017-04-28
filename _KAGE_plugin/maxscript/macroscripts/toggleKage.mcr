@@ -10,7 +10,7 @@ macroScript toggleKage
 	function kage_get_instance =
 	(
 		if kage == undefined do
-			fileIn ((getDir #userScripts) + "/kage/colored-treeview.ms");
+			fileIn ((getDir #userScripts) + "/kage/init.ms");
 	
 		kage;
 	)
