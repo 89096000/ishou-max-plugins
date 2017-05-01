@@ -20,6 +20,12 @@ _THE_HITNODE = undefined
 SETTINGS_FILE_LOCATION = ""
 TREE_INI = ""
 
+-- Fonts
+fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
+fontStyle = dotNetClass "system.drawing.fontStyle"
+_ON_FONT = dotNetObject "system.drawing.font" fontFam 8
+_OFF_FONT = dotNetObject "system.drawing.font" fontFam 7 fontStyle.italic
+
 
 -- ROLLOUTS
 
@@ -189,8 +195,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 			if theChildren[i].isHidden then (
 				newNode.foreColor = GetColorForKey "ltblack"
+				newNode.nodeFont = _OFF_FONT
 			) else (
 				newNode.foreColor = GetColorForKey "black"
+				newNode.nodeFont = _ON_FONT
 			)
 
 			-- add node data to ini file
@@ -208,7 +216,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- collect all objects that have no parent (top level nodes)
 	-- call recursive function to add children to top level nodes
 	fn fillInTreeView tv = (
-		theRoot = tv.Nodes.add "ワールドルート"
+		theRoot = tv.Nodes.add "ルート"
+		theRoot.nodeFont = _OFF_FONT
 		rootNodes = for o in objects where o.parent == undefined collect o
 		addChildren theRoot rootNodes
 	)
@@ -266,8 +275,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			arg.node.tag.value.isHidden = not arg.node.checked
 			if arg.node.checked then (
 				arg.node.foreColor = GetColorForKey "black"
+				arg.node.nodeFont = _ON_FONT
 			) else (
 				arg.node.foreColor = GetColorForKey "ltblack"
+				arg.node.nodeFont = _OFF_FONT
 			)
 		) catch ()
 	)

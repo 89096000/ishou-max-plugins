@@ -28,7 +28,7 @@ default_colors = #(
    (ColorIro key:#grey r:233 g:233 b:233 ),
 
    (ColorIro key:#white r:255 g:255 b:255 ),
-   (ColorIro key:#ltblack r:35 g:35 b:35 ),
+   (ColorIro key:#ltblack r:60 g:60 b:60 ),
    (ColorIro key:#black r:0 g:0 b:0 )
 )
 
