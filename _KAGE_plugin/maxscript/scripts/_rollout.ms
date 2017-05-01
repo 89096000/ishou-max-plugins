@@ -2,6 +2,10 @@
 To Open Rollout UI, Just run this script
 */
 
+-- Name
+_MAIN_ROLLOUT_NAME = "意匠計画の影"
+_VERSION = kageInstaller.getVersion asString:true
+
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 200;
@@ -157,7 +161,7 @@ rollout submenu_rollout "何色？" (
 
 
 
-rollout treeview_rollout "意匠計画の影" (
+rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- initialize rollout control
 	-- init settings found here: https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2015/ENU/MAXScript-Help/files/GUID-C2B51AEE-9C08-4679-B625-A36C72025C91-htm.html
@@ -266,6 +270,7 @@ rollout treeview_rollout "意匠計画の影" (
 	on treeview_rollout open do (
 		initTreeView tv
 		fillInTreeView tv
+		tv.ExpandAll()
 	)
 
 	on treeview_rollout close do (
