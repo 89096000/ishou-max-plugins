@@ -7,7 +7,7 @@ _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 200;
 _ROLLOUT_HEIGHT = 400;
 _COLOR_BTN_SIZE = 20;
-_COLOR_ROLLOUT_ROWS = 6;
+_COLOR_ROLLOUT_ROWS = 7;
 
 -- Scripting Vars
 _THE_HITNODE = undefined
@@ -25,6 +25,7 @@ rollout submenu_rollout "何色？" (
 
 	-- close button
 	dotNetControl btn_cancel "System.Windows.Forms.Button" pos:[0,0] height:cbs width:(cbs*2)
+	dotNetControl btn_export "System.Windows.Forms.Button" pos:[0,cbs*6] height:cbs width:(cbs*2)
 
 	-- palette 1
 	dotNetControl btn_pink "System.Windows.Forms.Button" pos:[0,cbs*1] height:cbs width:cbs
@@ -42,8 +43,9 @@ rollout submenu_rollout "何色？" (
 
 	on submenu_rollout open do
 	(
-		btn_cancel.flatStyle=btn_cancel.flatStyle.flat
 		btn_cancel.text = "戻る"
+		btn_export.flatStyle=btn_export.flatStyle.flat
+		btn_export.text = "Export"
 
 		btn_pink.flatStyle=btn_pink.flatStyle.flat
 		btn_orange.flatStyle=btn_orange.flatStyle.flat
