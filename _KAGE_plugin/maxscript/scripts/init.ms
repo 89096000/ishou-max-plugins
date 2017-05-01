@@ -6,6 +6,8 @@ struct Pair
 )
    
 --Import scripts
+fileIn "ini_mgr.ms";
+fileIn "color_mgr.ms";
 fileIn "_rollout.ms";
 
 function init = 
@@ -14,7 +16,7 @@ function init =
 
   try
   (
-    loadAssembly "Outliner.dll";
+--    loadAssembly "Outliner.dll";
     loadAssembly "ScriptCenter.Max.dll";
   )
   catch

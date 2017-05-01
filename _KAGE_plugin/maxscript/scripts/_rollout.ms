@@ -1,14 +1,22 @@
 ﻿/*
-TODO init rollout func from some custom menu
 To Open Rollout UI, Just run this script
 */
+
+-- Rollout Settings
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 200;
 _ROLLOUT_HEIGHT = 400;
-
 _COLOR_BTN_SIZE = 20;
 
+-- Scripting Vars
 _THE_HITNODE = undefined
+
+-- Save Settings
+SETTINGS_FILE_LOCATION = ""
+TREE_INI = ""
+
+
+-- ROLLOUTS
 
 rollout submenu_rollout "何色？" (
 
@@ -42,69 +50,93 @@ rollout submenu_rollout "何色？" (
 		btn_blue.flatStyle=btn_blue.flatStyle.flat
 		btn_grey.flatStyle=btn_grey.flatStyle.flat
 
-		btn_pink.backColor = (dotNetClass "System.Drawing.Color").fromARGB 255 107 107
-		btn_orange.backColor = (dotNetClass "System.Drawing.Color").fromARGB 252 145 58
-		btn_yellow.backColor = (dotNetClass "System.Drawing.Color").fromARGB 249 212 35
-		btn_tan.backColor = (dotNetClass "System.Drawing.Color").fromARGB 237 229 116
-		btn_mint.backColor = (dotNetClass "System.Drawing.Color").fromARGB 79 240 176
+		btn_pink.backColor = GetColorForKey "pink"
+		btn_orange.backColor = GetColorForKey "orange"
+		btn_yellow.backColor = GetColorForKey "yellow"
+		btn_tan.backColor = GetColorForKey "tan"
+		btn_mint.backColor = GetColorForKey "mint"
 
-		btn_dark.backColor = (dotNetClass "System.Drawing.Color").fromARGB 25 25 25 
-		btn_red.backColor = (dotNetClass "System.Drawing.Color").fromARGB 205 78 80
-		btn_violet.backColor = (dotNetClass "System.Drawing.Color").fromARGB 144 96 144
-		btn_blue.backColor = (dotNetClass "System.Drawing.Color").fromARGB 153 178 183
-		btn_grey.backColor = (dotNetClass "System.Drawing.Color").fromARGB 233 233 233
+		btn_dark.backColor = GetColorForKey "dark" 
+		btn_red.backColor = GetColorForKey "red"
+		btn_violet.backColor = GetColorForKey "violet"
+		btn_blue.backColor = GetColorForKey "blue"
+		btn_grey.backColor = GetColorForKey "grey"
 	)
 
 	on btn_pink click do (
-		print "red button has been pressed"
-		_THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 255 107 107
+		color_name = "pink"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
 		try (DestroyDialog submenu_rollout) catch()
 	)
 	on btn_orange click do (
-        print "btn_orange has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 252 145 58
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "orange"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
 	on btn_yellow click do (
-	    print "btn_yellow has been pressed"
-	    _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 249 212 35
-	    try (DestroyDialog submenu_rollout) catch()
+	    color_name = "yellow"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
 	on btn_tan click do (
-        print "btn_tan has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 237 229 116
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "tan"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
 	on btn_mint click do (
-        print "btn_mint has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 79 240 176
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "mint"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
 
 	on btn_dark click do (
-        print "btn_dark has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 25 25 25
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "dark"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
+
 	on btn_red click do (
-        print "btn_red has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 205 78 80
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "red"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
+
 	on btn_violet click do (
-        print "btn_violet has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 144 96 144
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "violet"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
+
 	on btn_blue click do (
-        print "btn_blue has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 153 178 183
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "blue"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
     )
+
 	on btn_grey click do (
-        print "btn_grey has been pressed"
-        _THE_HITNODE.backcolor = (dotNetClass "System.Drawing.Color").fromARGB 233 233 233
-        try (DestroyDialog submenu_rollout) catch()
+        color_name = "grey"
+		print (color_name + " button has been pressed")
+		_THE_HITNODE.backcolor = (GetColorForKey color_name)
+		OverwriteToIni TREE_INI "nodes" (_THE_HITNODE.text as string) color_name
+		try (DestroyDialog submenu_rollout) catch()
 	)
 
 -- end sub rollout
@@ -138,6 +170,15 @@ rollout treeview_rollout "意匠計画の影" (
 			newNode.imageIndex = newNode.selectedImageIndex = 0
 			-- newNode.backcolor = (dotNetClass "System.Drawing.Color").fromARGB theChildren[i].wirecolor.r theChildren[i].wirecolor.g theChildren[i].wirecolor.b
 			addChildren newNode theChildren[i].children
+
+			-- add node data to ini file
+			WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+
+			-- read node ini file data
+			color_val = ReadFromIni TREE_INI "nodes" (newNode.text as string)
+			if color_val != "none" then (
+				newNode.backcolor = (GetColorForKey color_val)
+			)
 		)
 	)
 	
@@ -187,8 +228,7 @@ rollout treeview_rollout "意匠計画の影" (
 			)
 
 			for obj in selection do (
-				try ( print obj.text ) catch ( print "fail test 5" )
-				try ( print obj.name ) catch ( print "fail test 6" )
+				try ( print obj.name ) catch ( print "fail test 5" )
 				if obj.children != undefined do(
 					selectmore obj.children
 				)
@@ -223,10 +263,28 @@ rollout treeview_rollout "意匠計画の影" (
 )
 
 
+-- 1. end previous rollouts
 try (DestroyDialog treeview_rollout) catch()
 try (DestroyDialog submenu_rollout) catch()
 
--- create new dialog
+-- 2. check for settings folder
+if maxFilePath == "" then (
+	messageBox "Unable to load settings, max file not saved"
+) else (
+	SETTINGS_FILE_LOCATION = maxFilePath + @"\settings"
+	makeDir SETTINGS_FILE_LOCATION
+	TREE_INI = SETTINGS_FILE_LOCATION + @"\kage_tree.ini"
+)
+
+if SETTINGS_FILE_LOCATION != "" then (
+	-- 3. check for settings file
+	CreateIniFile TREE_INI
+
+	-- 4. check for color settings file
+	InitColorSettings(SETTINGS_FILE_LOCATION)
+)
+
+-- 5. create new dialog
 CreateDialog treeview_rollout \
 	_ROLLOUT_WIDTH\
  	_ROLLOUT_HEIGHT\
