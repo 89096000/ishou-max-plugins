@@ -7,6 +7,7 @@ _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 200;
 _ROLLOUT_HEIGHT = 400;
 _COLOR_BTN_SIZE = 20;
+_COLOR_ROLLOUT_ROWS = 6;
 
 -- Scripting Vars
 _THE_HITNODE = undefined
@@ -22,22 +23,28 @@ rollout submenu_rollout "何色？" (
 
 	local cbs = _COLOR_BTN_SIZE
 
+	-- close button
+	dotNetControl btn_cancel "System.Windows.Forms.Button" pos:[0,0] height:cbs width:(cbs*2)
+
 	-- palette 1
-	dotNetControl btn_pink "System.Windows.Forms.Button" pos:[0,0] height:cbs width:cbs
-	dotNetControl btn_orange "System.Windows.Forms.Button" pos:[0,cbs*1] height:cbs width:cbs
-	dotNetControl btn_yellow "System.Windows.Forms.Button" pos:[0,cbs*2] height:cbs width:cbs
-	dotNetControl btn_tan "System.Windows.Forms.Button" pos:[0,cbs*3] height:cbs width:cbs
-	dotNetControl btn_mint "System.Windows.Forms.Button" pos:[0,cbs*4] height:cbs width:cbs
+	dotNetControl btn_pink "System.Windows.Forms.Button" pos:[0,cbs*1] height:cbs width:cbs
+	dotNetControl btn_orange "System.Windows.Forms.Button" pos:[0,cbs*2] height:cbs width:cbs
+	dotNetControl btn_yellow "System.Windows.Forms.Button" pos:[0,cbs*3] height:cbs width:cbs
+	dotNetControl btn_tan "System.Windows.Forms.Button" pos:[0,cbs*4] height:cbs width:cbs
+	dotNetControl btn_mint "System.Windows.Forms.Button" pos:[0,cbs*5] height:cbs width:cbs
 
 	-- palette 2
-	dotNetControl btn_dark "System.Windows.Forms.Button" pos:[cbs,0] height:cbs width:cbs
-	dotNetControl btn_red "System.Windows.Forms.Button" pos:[cbs,cbs*1] height:cbs width:cbs
-	dotNetControl btn_violet "System.Windows.Forms.Button" pos:[cbs,cbs*2] height:cbs width:cbs
-	dotNetControl btn_blue "System.Windows.Forms.Button" pos:[cbs,cbs*3] height:cbs width:cbs
-	dotNetControl btn_grey "System.Windows.Forms.Button" pos:[cbs,cbs*4] height:cbs width:cbs
+	dotNetControl btn_dark "System.Windows.Forms.Button" pos:[cbs,cbs*1] height:cbs width:cbs
+	dotNetControl btn_red "System.Windows.Forms.Button" pos:[cbs,cbs*2] height:cbs width:cbs
+	dotNetControl btn_violet "System.Windows.Forms.Button" pos:[cbs,cbs*3] height:cbs width:cbs
+	dotNetControl btn_blue "System.Windows.Forms.Button" pos:[cbs,cbs*4] height:cbs width:cbs
+	dotNetControl btn_grey "System.Windows.Forms.Button" pos:[cbs,cbs*5] height:cbs width:cbs
 
 	on submenu_rollout open do
 	(
+		btn_cancel.flatStyle=btn_cancel.flatStyle.flat
+		btn_cancel.text = "戻る"
+
 		btn_pink.flatStyle=btn_pink.flatStyle.flat
 		btn_orange.flatStyle=btn_orange.flatStyle.flat
 		btn_yellow.flatStyle=btn_yellow.flatStyle.flat
@@ -61,6 +68,10 @@ rollout submenu_rollout "何色？" (
 		btn_violet.backColor = GetColorForKey "violet"
 		btn_blue.backColor = GetColorForKey "blue"
 		btn_grey.backColor = GetColorForKey "grey"
+	)
+
+	on btn_cancel click do (
+		try (DestroyDialog submenu_rollout) catch()
 	)
 
 	on btn_pink click do (
@@ -207,7 +218,7 @@ rollout treeview_rollout "意匠計画の影" (
 				local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
 				local posy = dialog_pos.y + 50
 				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
-											 ((_COLOR_BTN_SIZE*5)+2)\
+											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
 											 pos:[posx, posy] \
 	                                         style:#(#style_border);
 			) catch ( )
