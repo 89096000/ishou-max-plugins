@@ -185,8 +185,13 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			newNode.tag = dotNetMXSValue theChildren[i]
 			newNode.checked = not theChildren[i].isHidden
 			newNode.imageIndex = newNode.selectedImageIndex = 0
-			-- newNode.backcolor = (dotNetClass "System.Drawing.Color").fromARGB theChildren[i].wirecolor.r theChildren[i].wirecolor.g theChildren[i].wirecolor.b
 			addChildren newNode theChildren[i].children
+
+			if theChildren[i].isHidden then (
+				newNode.foreColor = GetColorForKey "ltblack"
+			) else (
+				newNode.foreColor = GetColorForKey "black"
+			)
 
 			-- add node data to ini file
 			WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
@@ -259,6 +264,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on tv AfterCheck arg do (
 		try (
 			arg.node.tag.value.isHidden = not arg.node.checked
+			if arg.node.checked then (
+				arg.node.foreColor = GetColorForKey "black"
+			) else (
+				arg.node.foreColor = GetColorForKey "ltblack"
+			)
 		) catch ()
 	)
 

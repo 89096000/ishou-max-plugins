@@ -25,7 +25,11 @@ default_colors = #(
    (ColorIro key:#red r:205 g:78 b:80 ),
    (ColorIro key:#violet r:144 g:96 b:144 ),
    (ColorIro key:#blue r:153 g:178 b:183 ),
-   (ColorIro key:#grey r:233 g:233 b:233 )
+   (ColorIro key:#grey r:233 g:233 b:233 ),
+
+   (ColorIro key:#white r:255 g:255 b:255 ),
+   (ColorIro key:#ltblack r:35 g:35 b:35 ),
+   (ColorIro key:#black r:0 g:0 b:0 )
 )
 
 -- check for color ini file, if it doesnt exist, create one
