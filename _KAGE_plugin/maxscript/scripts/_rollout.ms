@@ -307,8 +307,13 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		align: #left
 
 	on btn_export pressed do (
-		CreateDialog export_rollout _E_ROLLOUT_WIDTH _E_ROLLOUT_HEIGHT \
-			style:#(#style_border, #style_sunkenedge)
+		if selection.count > 0 then (
+			-- call the export rollout
+			CreateDialog export_rollout _E_ROLLOUT_WIDTH _E_ROLLOUT_HEIGHT \
+				style:#(#style_border, #style_sunkenedge)
+		) else (
+			messageBox "Please select an object group to export."
+		)
 	)
 
 -- end main rollout
