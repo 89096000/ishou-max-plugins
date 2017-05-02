@@ -6,9 +6,10 @@ struct Pair
 )
    
 --Import scripts
-fileIn "ini_mgr.ms";
-fileIn "color_mgr.ms";
-fileIn "_rollout.ms";
+fileIn "ini_mgr.ms";            -- scripts to speak with ini files
+fileIn "color_mgr.ms";          -- sets up color profiles
+fileIn "_rollout.ms";           -- main treeview rollout
+fileIn "rollout_export.ms";     -- export interface rollout
 
 function init = 
 (

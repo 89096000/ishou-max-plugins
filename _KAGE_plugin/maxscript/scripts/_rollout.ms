@@ -11,7 +11,11 @@ _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 200;
 _ROLLOUT_HEIGHT = 400;
 _COLOR_BTN_SIZE = 20;
-_COLOR_ROLLOUT_ROWS = 7;
+_COLOR_ROLLOUT_ROWS = 6;
+
+-- Export Rollout
+_E_ROLLOUT_WIDTH = 200;
+_E_ROLLOUT_HEIGHT = 120;
 
 -- Scripting Vars
 _THE_HITNODE = undefined
@@ -35,7 +39,6 @@ rollout submenu_rollout "何色？" (
 
 	-- close button
 	dotNetControl btn_cancel "System.Windows.Forms.Button" pos:[0,0] height:cbs width:(cbs*2)
-	dotNetControl btn_export "System.Windows.Forms.Button" pos:[0,cbs*6] height:cbs width:(cbs*2)
 
 	-- palette 1
 	dotNetControl btn_pink "System.Windows.Forms.Button" pos:[0,cbs*1] height:cbs width:cbs
@@ -54,8 +57,6 @@ rollout submenu_rollout "何色？" (
 	on submenu_rollout open do
 	(
 		btn_cancel.text = "戻る"
-		btn_export.flatStyle=btn_export.flatStyle.flat
-		btn_export.text = "Export"
 
 		btn_pink.flatStyle=btn_pink.flatStyle.flat
 		btn_orange.flatStyle=btn_orange.flatStyle.flat
@@ -164,7 +165,6 @@ rollout submenu_rollout "何色？" (
 
 -- end sub rollout
 )
-
 
 
 rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
@@ -296,6 +296,16 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on treeview_rollout close do (
 		try (DestroyDialog submenu_rollout) catch()
+	)
+
+	-- export button
+	button btn_export "export" \
+		toolTip: "exports the selected objects" \
+		align: #left
+
+	on btn_export pressed do (
+		CreateDialog export_rollout _E_ROLLOUT_WIDTH _E_ROLLOUT_HEIGHT \
+			style:#(#style_border, #style_sunkenedge)
 	)
 
 -- end main rollout
