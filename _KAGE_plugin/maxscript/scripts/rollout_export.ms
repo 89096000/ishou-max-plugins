@@ -6,6 +6,47 @@ _FIRST_OBJ_NAME = ""
 _OBJECTS_TO_EXPORT = 0
 _SAVE_LOCATION = ""
 
+fn LoadMappingFiles loc = (
+	-- do something for each mapping reference
+	refFiles = #()
+	for bmt in getClassInstances bitmaptex do
+	(
+		-- get reference info
+		fpath = bmt.filename
+		if fpath == undefined then (
+			print "this path is not defined"
+		) else (
+			fname = ""
+			paths = filterString fpath "\\"
+			for p in paths do (
+				fname = p as string
+			)
+			append refFiles fname
+			
+			-- check if reference is valid
+			fpath_exists = doesFileExist fpath
+			fstatus = "FOUND"
+			if fpath_exists == false then (
+				fpath_exists = doesFileExist (maxFilePath + fpath)
+				if fpath_exists == false then (
+					fstatus = "MISSING"
+				)
+			)
+			
+			-- copy files
+			print fstatus
+			if fstatus == "FOUND" then (
+				full_fpath = maxFilePath + fpath
+				print full_fpath
+				new_path = loc + "\\" + fname
+				print new_path
+				copyFile full_fpath new_path
+			)
+		)
+	)
+)
+
+
 
 rollout export_rollout "Export Options" (
 
@@ -31,7 +72,7 @@ rollout export_rollout "Export Options" (
 	-- HANDLERS
 	on ck_export_desktop changed theState do (
 		ck_export_shared.state = not ck_export_shared.state
-		if ck_export_desktop.checked then (
+		if ck_export_shared.checked then (
 			_SAVE_LOCATION = (@"\\IMPORT-3\share1\00_Test")
 		) else (
 			_SAVE_LOCATION = (@"C:\Users\" + sysInfo.username + @"\Desktop")
@@ -41,7 +82,7 @@ rollout export_rollout "Export Options" (
 	)
 	on ck_export_shared changed theState do (
 		ck_export_desktop.state = not ck_export_desktop.state
-		if ck_export_desktop.checked then (
+		if ck_export_shared.checked then (
 			_SAVE_LOCATION = (@"\\IMPORT-3\share1\00_Test")
 		) else (
 			_SAVE_LOCATION = (@"C:\Users\" + sysInfo.username + @"\Desktop")
@@ -56,6 +97,32 @@ rollout export_rollout "Export Options" (
 
 	on btn_test pressed do (
 
+		-- make folder
+		friendly_name = substituteString _FIRST_OBJ_NAME " " "_"
+		file_path = _SAVE_LOCATION + "\\" + friendly_name
+		print "file_path"
+		print file_path
+		makeDir file_path
+
+		-- make map directory
+		map_path = file_path + @"\map"
+		print "map_path"
+		print map_path
+		makeDir map_path
+		
+		-- save selection as
+		very_friendly_name = toLower friendly_name
+		file_name = file_path + "\\" + very_friendly_name
+		print "creating this file"
+		print file_name
+		saveNodes selection file_name -- quiet:true
+		
+		-- complete
+		shellLaunch "explorer.exe" file_path
+		try (DestroyDialog export_rollout) catch ()
+
+		-- copy mapping files
+		LoadMappingFiles map_path
 	)
 
 	-- FUNCTIONS
@@ -87,7 +154,7 @@ rollout export_rollout "Export Options" (
 		print ((_FIRST_OBJ_NAME as string) + " will be exported")
 		print ((_OBJECTS_TO_EXPORT as string) + " Objects")
 
-		lbl_name.text = (_FIRST_OBJ_NAME as string) + " Objects"
+		lbl_name.text = (_FIRST_OBJ_NAME as string)
 		lbl_objcount.text = (_OBJECTS_TO_EXPORT as string) + " Objects" 
 		update_location()
 	)
