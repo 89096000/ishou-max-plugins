@@ -14,8 +14,8 @@ _COLOR_BTN_SIZE = 20;
 _COLOR_ROLLOUT_ROWS = 6;
 
 -- Export Rollout
-_E_ROLLOUT_WIDTH = 200;
-_E_ROLLOUT_HEIGHT = 120;
+_E_ROLLOUT_WIDTH = 300;
+_E_ROLLOUT_HEIGHT = 180;
 
 -- Scripting Vars
 _THE_HITNODE = undefined
@@ -234,6 +234,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			-- RIGHT CLICK - bring up color menu
 			try (
 				try (DestroyDialog submenu_rollout) catch()
+				try (DestroyDialog export_rollout) catch()
 				local dialog_pos = GetDialogPos treeview_rollout
 				local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
 				local posy = dialog_pos.y + 50
@@ -296,8 +297,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on treeview_rollout close do (
 		try (DestroyDialog submenu_rollout) catch()
+		try (DestroyDialog export_rollout) catch()
 	)
 
+	----- ----- -----
 	-- export button
 	button btn_export "export" \
 		toolTip: "exports the selected objects" \
