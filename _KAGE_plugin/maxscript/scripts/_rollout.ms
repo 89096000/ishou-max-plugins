@@ -235,9 +235,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			try (
 				try (DestroyDialog submenu_rollout) catch()
 				try (DestroyDialog export_rollout) catch()
+				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
 				local dialog_pos = GetDialogPos treeview_rollout
 				local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
-				local posy = dialog_pos.y + 50
+				local posy = dialog_pos.y + mousepoint.Y + 30
 				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
 											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
 											 pos:[posx, posy] \
@@ -245,6 +246,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			) catch ( )
 
 			_THE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
+			print "start variable tests"
+			try ( print mousepoint.Y ) catch ( print "fail xy test")
 			try ( print _THE_HITNODE.tag.value ) catch ( print "fail test 1" )
 			try ( print _THE_HITNODE.backcolor ) catch ( print "fail test 2" )
 			try ( print _THE_HITNODE.text ) catch ( print "fail test 3" )
