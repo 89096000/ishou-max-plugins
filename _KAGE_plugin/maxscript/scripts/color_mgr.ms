@@ -38,7 +38,7 @@ fn InitColorSettings settings_folder = (
 	userscripts_folder = (GetDir #userScripts)
 
 	-- check file exists
-	COLOR_INI = userscripts_folder + @"\kage_colors.ini"
+	COLOR_INI = userscripts_folder + "/kage_colors.ini"
 	has_color_ini = (dotNetClass "System.IO.File").Exists(COLOR_INI)
 
 	-- if not exist, make it

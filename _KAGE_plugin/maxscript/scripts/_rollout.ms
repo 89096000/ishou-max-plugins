@@ -4,7 +4,7 @@ To Open Rollout UI, Just run this script
 
 -- Name
 _MAIN_ROLLOUT_NAME = "意匠計画の影"
-_VERSION = kageInstaller.getVersion asString:true
+_VERSION = kageTools.getVersion asString:true
 
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
