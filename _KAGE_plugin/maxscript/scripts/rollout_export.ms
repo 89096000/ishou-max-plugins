@@ -6,6 +6,8 @@ _FIRST_OBJ_NAME = ""
 _OBJECTS_TO_EXPORT = 0
 _SAVE_LOCATION = ""
 
+MAX_FILE_LOC = @"\\IMPORT-3\share1\00_Test\ishoukeikaku_3dmax_tool\latest"
+
 fn LoadMappingFiles loc = (
 	-- do something for each mapping reference
 	refFiles = #()
@@ -48,6 +50,48 @@ fn LoadMappingFiles loc = (
 	)
 
 	return return_string
+)
+
+
+fn copy_ms_file file_path file_sub_path friendly_name = (
+	max_file_included = true
+	try (
+		ms_file = ""
+		ms_filename = ""
+		for f in getFiles (MAX_FILE_LOC + "\\*.*") do (
+			print f as string
+			ms_file = f
+			ms_filename = filenameFromPath ms_file
+		)
+
+		if ms_file != "" then (
+			new_ms_file = (file_path + "\\" + ms_filename)
+			copyfile ms_file new_ms_file
+
+			-- edit max file with new project info
+			local lines = (dotNetClass "System.IO.File").ReadAllLines new_ms_file
+			deleteItem lines 6
+			deleteItem lines 5
+			deleteItem lines 4
+			deleteItem lines 3
+			deleteItem lines 2
+			deleteItem lines 1
+
+			local newlines = #()
+			append newlines ("projectName = @\"" + friendly_name + "\"")
+			append newlines ("projectDir = @\"" + file_sub_path + "\"")
+			join newlines lines
+
+			(dotNetClass "System.IO.File").WriteAllLines new_ms_file newlines
+		) else (
+			max_file_included = false
+			print "ms_file could not be found"
+		)
+	) catch (
+		max_file_included = false
+		print "max file copy failed"
+	)
+	return max_file_included
 )
 
 
@@ -115,24 +159,22 @@ rollout export_rollout "Export Options" (
 		-- check if dir exists
 		friendly_name = get_friendly_name(_FIRST_OBJ_NAME)
 		file_path = _SAVE_LOCATION + "\\" + friendly_name
+		file_sub_path = file_path + "\\新しいフォルダー"
 		export_is_valid = not doesFileExist(file_path)
 
 		if export_is_valid then (
 			-- make folder
-			print "file_path"
-			print file_path
-			makeDir file_path
+			print ("file_path : " + file_sub_path)
+			makeDir file_sub_path
 
 			-- make map directory
-			map_path = file_path + @"\map"
-			print "map_path"
-			print map_path
+			map_path = file_sub_path + @"\map"
+			print ("map_path : " + map_path)
 			makeDir map_path
 			
 			-- save selection as
-			file_name = file_path + "\\" + friendly_name
-			print "creating this file"
-			print file_name
+			file_name = file_sub_path + "\\" + friendly_name
+			print ("creating this file : " + file_name)
 			saveNodes selection file_name -- quiet:true
 
 			-- copy mapping files
@@ -149,6 +191,10 @@ rollout export_rollout "Export Options" (
 			format "%\n" file_path to:f
 			format "%\n" mapping_files to:f
 			close f	
+
+			-- try to copy the maxscript file from shared drive
+			maxscript_did_copy = copy_ms_file file_path file_sub_path friendly_name
+			print maxscript_did_copy as string
 
 			-- complete
 			shellLaunch "explorer.exe" file_path
