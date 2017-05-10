@@ -9,6 +9,7 @@ _SAVE_LOCATION = ""
 fn LoadMappingFiles loc = (
 	-- do something for each mapping reference
 	refFiles = #()
+	return_string = "\nMAPPING FILES:"
 	for bmt in getClassInstances bitmaptex do
 	(
 		-- get reference info
@@ -32,6 +33,7 @@ fn LoadMappingFiles loc = (
 					fstatus = "MISSING"
 				)
 			)
+			return_string += "\n" + fname + " - " + fstatus
 			
 			-- copy files
 			print fstatus
@@ -44,6 +46,8 @@ fn LoadMappingFiles loc = (
 			)
 		)
 	)
+
+	return return_string
 )
 
 
@@ -70,7 +74,6 @@ rollout export_rollout "Export Options" (
 
 	-- project info label
 	label lbl_name " " align:#left
-	label lbl_objcount " " align:#left
 	label lbl_location " " align:#left
 
 	-- CheckBox Handler
@@ -94,6 +97,9 @@ rollout export_rollout "Export Options" (
 		)
 		lbl_location.text = _SAVE_LOCATION
 	)
+
+	-- DESC TEXT BOX
+	edittext txt_desc "ファイル説明:" fieldWidth:225 height: 54 labelOnTop:false
 
 	-- CANCEL BUTTON
 	button btn_close "戻る" align:#center width:50 height:30 across:2
@@ -127,13 +133,25 @@ rollout export_rollout "Export Options" (
 			print "creating this file"
 			print file_name
 			saveNodes selection file_name -- quiet:true
-			
+
+			-- copy mapping files
+			mapping_files = LoadMappingFiles map_path
+
+			-- create description text file
+			description = txt_desc.text
+			readme = file_path + "\\readMe.txt"
+			ts = getLocalTime()
+			f = (openFile readme mode:"a")
+			format "%\n" friendly_name to:f
+			format "%年%月%日 %:%:%\n" ts[1] ts[2] ts[4] ts[5] ts[6] ts[7] to:f
+			format "%\n" description to:f
+			format "%\n" file_path to:f
+			format "%\n" mapping_files to:f
+			close f	
+
 			-- complete
 			shellLaunch "explorer.exe" file_path
 			try (DestroyDialog export_rollout) catch ()
-
-			-- copy mapping files
-			LoadMappingFiles map_path
 
 		) else (
 			-- folder already exists
@@ -172,10 +190,10 @@ rollout export_rollout "Export Options" (
 
 		friendly_name = get_friendly_name(_FIRST_OBJ_NAME as string)
 		print (friendly_name + " will be exported")
-		print ((_OBJECTS_TO_EXPORT as string) + " Objects")
+		print ((_OBJECTS_TO_EXPORT as string) + " objects found")
+		name_desc = friendly_name + " (" + ((_OBJECTS_TO_EXPORT as string) + "個") + ")"
 
-		lbl_name.text = friendly_name as string
-		lbl_objcount.text = (_OBJECTS_TO_EXPORT as string) + " Objects" 
+		lbl_name.text = name_desc
 		update_location()
 	)
 )

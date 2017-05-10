@@ -14,8 +14,8 @@ _COLOR_BTN_SIZE = 20;
 _COLOR_ROLLOUT_ROWS = 6;
 
 -- Export Rollout
-_E_ROLLOUT_WIDTH = 300;
-_E_ROLLOUT_HEIGHT = 180;
+_E_ROLLOUT_WIDTH = 325;
+_E_ROLLOUT_HEIGHT = 200;
 
 -- Scripting Vars
 _THE_HITNODE = undefined
