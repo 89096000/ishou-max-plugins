@@ -73,8 +73,12 @@ rollout export_rollout "Export Options" (
 	)
 
 	-- project info label
-	label lbl_name " " align:#left
-	label lbl_location " " align:#left
+	group "データ" (
+		label lbl_name " " align:#left
+		label lbl_location " " align:#left
+		edittext txt_desc "ファイル説明:" fieldWidth:225 height: 54 labelOnTop:false
+	)
+
 
 	-- CheckBox Handler
 	on ck_export_desktop changed theState do (
@@ -90,16 +94,13 @@ rollout export_rollout "Export Options" (
 	on ck_export_shared changed theState do (
 		ck_export_desktop.state = not ck_export_desktop.state
 		if ck_export_shared.checked then (
-			_SAVE_LOCATION = (@"\\IMPORT-3\share1\00_Test")
+			_SAVE_LOCATION = (@"\\IMPORT-3\share1\00_Test\自動的")
 		) else (
 			_SAVE_LOCATION = (@"C:\Users\" + sysInfo.username + @"\Desktop")
 			placebo = @"\"
 		)
 		lbl_location.text = _SAVE_LOCATION
 	)
-
-	-- DESC TEXT BOX
-	edittext txt_desc "ファイル説明:" fieldWidth:225 height: 54 labelOnTop:false
 
 	-- CANCEL BUTTON
 	button btn_close "戻る" align:#center width:50 height:30 across:2

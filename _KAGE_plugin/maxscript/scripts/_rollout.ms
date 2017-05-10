@@ -9,13 +9,13 @@ _VERSION = kageTools.getVersion asString:true
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 200;
-_ROLLOUT_HEIGHT = 400;
+_ROLLOUT_HEIGHT = 375;
 _COLOR_BTN_SIZE = 20;
 _COLOR_ROLLOUT_ROWS = 6;
 
 -- Export Rollout
-_E_ROLLOUT_WIDTH = 325;
-_E_ROLLOUT_HEIGHT = 200;
+_E_ROLLOUT_WIDTH = 340;
+_E_ROLLOUT_HEIGHT = 210;
 
 -- Scripting Vars
 _THE_HITNODE = undefined
