@@ -221,6 +221,12 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		rootNodes = for o in objects where o.parent == undefined collect o
 		addChildren theRoot rootNodes
 	)
+
+	fn refreshTreeView tv = (
+		tv.Nodes.Clear()
+		fillInTreeView tv
+		tv.ExpandAll()
+	)
 	
 	-- create treeview activeX control in rollout
 	-- activeXControl tv "MSComctlLib.TreeCtrl" width:190 height:290 align:#center
@@ -247,11 +253,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 			_THE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
 			print "start variable tests"
-			try ( print mousepoint.Y ) catch ( print "fail xy test")
-			try ( print _THE_HITNODE.tag.value ) catch ( print "fail test 1" )
-			try ( print _THE_HITNODE.backcolor ) catch ( print "fail test 2" )
-			try ( print _THE_HITNODE.text ) catch ( print "fail test 3" )
-			try ( print _THE_HITNODE.name ) catch ( print "fail test 4" )
+			-- try ( print mousepoint.Y ) catch ( print "fail xy test")
+			-- try ( print _THE_HITNODE.tag.value ) catch ( print "fail test 1" )
+			-- try ( print _THE_HITNODE.backcolor ) catch ( print "fail test 2" )
+			-- try ( print _THE_HITNODE.text ) catch ( print "fail test 3" )
+			-- try ( print _THE_HITNODE.name ) catch ( print "fail test 4" )
 
 		) else (
 			-- LEFT CLICK - SELECT OBJECT
@@ -263,7 +269,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			)
 
 			for obj in selection do (
-				try ( print obj.name ) catch ( print "fail test 5" )
+				-- try ( print obj.name ) catch ( print "fail test 5" )
 				if obj.children != undefined do(
 					selectmore obj.children
 				)
@@ -304,10 +310,22 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	----- ----- -----
+	-- refresh button
+	button btn_refresh "refresh" \
+		toolTip: "refreshes the screen" \
+		align: #left \
+		across: 2
+
+	on btn_refresh pressed do (
+		refreshTreeView tv
+	)
+
+	----- ----- -----
 	-- export button
 	button btn_export "export" \
 		toolTip: "exports the selected objects" \
-		align: #left
+		align: #left \
+		across: 2
 
 	on btn_export pressed do (
 		if selection.count > 0 then (
