@@ -47,11 +47,22 @@ fn LoadMappingFiles loc = (
 )
 
 
+fn get_friendly_name filename = (
+	-- creates a more save-friendly filename
+	friendly_name_a = substituteString filename " " "_"
+	friendly_name_b = toLower friendly_name_a
+	friendly_name_c = substituteString friendly_name_b ":" "_"
+	friendly_name_d = substituteString friendly_name_c "\\" "_"
+	friendly_name = substituteString friendly_name_d "/" "_"
+	return friendly_name
+)
+
+
 
 rollout export_rollout "Export Options" (
 
 	-- UI
-	-- checkbox buttons flip
+	-- SAVETO Options
 	group "保存先" (
 		checkbox ck_export_desktop "Desktop" across:2 checked:true
 		checkbox ck_export_shared "Shared Drive" across:2 checked:false
@@ -62,14 +73,7 @@ rollout export_rollout "Export Options" (
 	label lbl_objcount " " align:#left
 	label lbl_location " " align:#left
 
-	-- close box
-	button btn_close "戻る" align:#center
-	on btn_close pressed do (
-		try (DestroyDialog export_rollout) catch ()
-	) 
-
-
-	-- HANDLERS
+	-- CheckBox Handler
 	on ck_export_desktop changed theState do (
 		ck_export_shared.state = not ck_export_shared.state
 		if ck_export_shared.checked then (
@@ -91,38 +95,53 @@ rollout export_rollout "Export Options" (
 		lbl_location.text = _SAVE_LOCATION
 	)
 
-
-	-- TEST BUTTON
-	button btn_test "TEST" align:#center
-
-	on btn_test pressed do (
-
-		-- make folder
-		friendly_name = substituteString _FIRST_OBJ_NAME " " "_"
-		file_path = _SAVE_LOCATION + "\\" + friendly_name
-		print "file_path"
-		print file_path
-		makeDir file_path
-
-		-- make map directory
-		map_path = file_path + @"\map"
-		print "map_path"
-		print map_path
-		makeDir map_path
-		
-		-- save selection as
-		very_friendly_name = toLower friendly_name
-		file_name = file_path + "\\" + very_friendly_name
-		print "creating this file"
-		print file_name
-		saveNodes selection file_name -- quiet:true
-		
-		-- complete
-		shellLaunch "explorer.exe" file_path
+	-- CANCEL BUTTON
+	button btn_close "戻る" align:#center width:50 height:30 across:2
+	on btn_close pressed do (
 		try (DestroyDialog export_rollout) catch ()
+	) 
 
-		-- copy mapping files
-		LoadMappingFiles map_path
+	-- EXPORT BUTTON
+	button btn_process "Export" align:#center width:50 height:30 across:2
+
+	on btn_process pressed do (
+		-- check if dir exists
+		friendly_name = get_friendly_name(_FIRST_OBJ_NAME)
+		file_path = _SAVE_LOCATION + "\\" + friendly_name
+		export_is_valid = not doesFileExist(file_path)
+
+		if export_is_valid then (
+			-- make folder
+			print "file_path"
+			print file_path
+			makeDir file_path
+
+			-- make map directory
+			map_path = file_path + @"\map"
+			print "map_path"
+			print map_path
+			makeDir map_path
+			
+			-- save selection as
+			file_name = file_path + "\\" + friendly_name
+			print "creating this file"
+			print file_name
+			saveNodes selection file_name -- quiet:true
+			
+			-- complete
+			shellLaunch "explorer.exe" file_path
+			try (DestroyDialog export_rollout) catch ()
+
+			-- copy mapping files
+			LoadMappingFiles map_path
+
+		) else (
+			-- folder already exists
+			try (DestroyDialog export_rollout) catch ()
+			messageBox ("Export Failed.\n\n" + \
+                file_path + " already exists.") title:"Export Error";
+
+		)
 	)
 
 	-- FUNCTIONS
@@ -151,10 +170,11 @@ rollout export_rollout "Export Options" (
 			_OBJECTS_TO_EXPORT += 1
 		)
 
-		print ((_FIRST_OBJ_NAME as string) + " will be exported")
+		friendly_name = get_friendly_name(_FIRST_OBJ_NAME as string)
+		print (friendly_name + " will be exported")
 		print ((_OBJECTS_TO_EXPORT as string) + " Objects")
 
-		lbl_name.text = (_FIRST_OBJ_NAME as string)
+		lbl_name.text = friendly_name as string
 		lbl_objcount.text = (_OBJECTS_TO_EXPORT as string) + " Objects" 
 		update_location()
 	)
