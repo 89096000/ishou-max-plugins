@@ -9,17 +9,17 @@ _VERSION = kageTools.getVersion asString:true
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
-_ROLLOUT_HEIGHT = 550;
+_ROLLOUT_HEIGHT = 580;
 _COLOR_BTN_SIZE = 20;
 _COLOR_ROLLOUT_ROWS = 6;
 
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
-_TV_HEIGHT = 440;
+_TV_HEIGHT = 430;
 
 -- Export Rollout
 _E_ROLLOUT_WIDTH = 340;
-_E_ROLLOUT_HEIGHT = 210;
+_E_ROLLOUT_HEIGHT = 200;
 
 -- Scripting Vars
 _THE_HITNODE = undefined
@@ -328,13 +328,17 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	group "コントロール" (
 		button btn_refresh "refresh" \
 		toolTip: "refreshes the screen" \
-		align: #left \
-		across: 2
+		align: #left across: 2
 
 		button btn_export "export" \
 		toolTip: "exports the selected objects" \
-		align: #left \
-		across: 2
+		align: #left across: 2
+
+		button btn_summary "Summary" \
+		align: #left  width:50 across:2
+
+		button btn_all "All" \
+		align: #left  width:50 across:2
 	)
 
 	----- ----- -----
@@ -352,6 +356,21 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				style:#(#style_border, #style_sunkenedge)
 		) else (
 			messageBox "Please select an object group to export."
+		)
+	)
+
+	----- ----- -----
+	-- tree controls
+	on btn_summary pressed do (
+		if _TV_MODE == "group" then (
+			tv.CollapseAll()
+			tv.TopNode.Expand()
+		)
+	)
+
+	on btn_all pressed do (
+		if _TV_MODE == "group" then (
+			tv.ExpandAll()
 		)
 	)
 
