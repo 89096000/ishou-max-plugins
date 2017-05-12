@@ -15,7 +15,7 @@ _COLOR_ROLLOUT_ROWS = 6;
 
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
-_TV_HEIGHT = 430;
+_TV_HEIGHT = 415;
 
 -- Export Rollout
 _E_ROLLOUT_WIDTH = 340;
@@ -28,8 +28,9 @@ _THE_HITNODE = undefined
 SETTINGS_FILE_LOCATION = ""
 TREE_INI = ""
 
--- MODES ENUM (group, layer)
+-- MODES ENUM (group, layer)    ENUM(none, color, white)
 _TV_MODE = "group"
+_VIEW_STYLE = "none"
 
 -- Fonts
 fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
@@ -188,33 +189,87 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- recursive function for node children
 	-- tag contains MXS value, whatever that means
 	-- ref to dotnet treenode class https://msdn.microsoft.com/en-us/library/system.windows.forms.treenode(v=vs.110).aspx
-	fn addChildren theNode theChildren = (
+	fn addChildren theNode theChildren style = (
+		if style == "color" then (
+			for i = 1 to theChildren.count do (
+				try (
+					color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
+				) catch (
+					color_val = "none"
+				)
 
-		for i = 1 to theChildren.count do (
-			-- node_number_padded = padZeros(i)
-			-- node_new_name = node_number_padded + " " + theChildren[i].name
-			-- newNode = theNode.Nodes.add node_new_name
-			newNode = theNode.Nodes.add theChildren[i].name
-			newNode.tag = dotNetMXSValue theChildren[i]
-			newNode.checked = not theChildren[i].isHidden
-			newNode.imageIndex = newNode.selectedImageIndex = 0
-			addChildren newNode theChildren[i].children
+				if color_val != "none" then (
 
-			if theChildren[i].isHidden then (
-				newNode.foreColor = GetColorForKey "ltblack"
-				newNode.nodeFont = _OFF_FONT
-			) else (
-				newNode.foreColor = GetColorForKey "black"
-				newNode.nodeFont = _ON_FONT
+					newNode = theNode.Nodes.add theChildren[i].name
+					newNode.tag = dotNetMXSValue theChildren[i]
+					newNode.checked = not theChildren[i].isHidden
+					newNode.imageIndex = newNode.selectedImageIndex = 0
+					addChildren newNode theChildren[i].children style
+
+					if theChildren[i].isHidden then (
+						newNode.foreColor = GetColorForKey "ltblack"
+						newNode.nodeFont = _OFF_FONT
+					) else (
+						newNode.foreColor = GetColorForKey "black"
+						newNode.nodeFont = _ON_FONT
+					)
+
+					newNode.backcolor = (GetColorForKey color_val)
+				)
 			)
+		) else if style == "white" then (
+			for i = 1 to theChildren.count do (
+				try (
+					color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
+				) catch (
+					color_val = "none"
+				)
 
-			-- add node data to ini file
-			WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+				if color_val == "none" then (
+					newNode = theNode.Nodes.add theChildren[i].name
+					newNode.tag = dotNetMXSValue theChildren[i]
+					newNode.checked = not theChildren[i].isHidden
+					newNode.imageIndex = newNode.selectedImageIndex = 0
+					addChildren newNode theChildren[i].children style
 
-			-- read node ini file data
-			color_val = ReadFromIni TREE_INI "nodes" (newNode.text as string)
-			if color_val != "none" then (
-				newNode.backcolor = (GetColorForKey color_val)
+					if theChildren[i].isHidden then (
+						newNode.foreColor = GetColorForKey "ltblack"
+						newNode.nodeFont = _OFF_FONT
+					) else (
+						newNode.foreColor = GetColorForKey "black"
+						newNode.nodeFont = _ON_FONT
+					)
+
+					WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+				)
+			)
+		) else (
+			for i = 1 to theChildren.count do (
+				-- node_number_padded = padZeros(i)
+				-- node_new_name = node_number_padded + " " + theChildren[i].name
+				-- newNode = theNode.Nodes.add node_new_name
+				newNode = theNode.Nodes.add theChildren[i].name
+				newNode.tag = dotNetMXSValue theChildren[i]
+				newNode.checked = not theChildren[i].isHidden
+				newNode.imageIndex = newNode.selectedImageIndex = 0
+				addChildren newNode theChildren[i].children style
+
+				if theChildren[i].isHidden then (
+					newNode.foreColor = GetColorForKey "ltblack"
+					newNode.nodeFont = _OFF_FONT
+				) else (
+					newNode.foreColor = GetColorForKey "black"
+					newNode.nodeFont = _ON_FONT
+				)
+
+				-- add node data to ini file
+				WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+
+				-- read node ini file data
+				color_val = ReadFromIni TREE_INI "nodes" (newNode.text as string)
+				if color_val != "none" then (
+					newNode.backcolor = (GetColorForKey color_val)
+				)
 			)
 		)
 	)
@@ -226,11 +281,12 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		theRoot = tv.Nodes.add "ルート"
 		theRoot.nodeFont = _OFF_FONT
 		rootNodes = for o in objects where o.parent == undefined collect o
+		-- add to tree
 		if _TV_MODE == "group" then (
-			addChildren theRoot rootNodes
+			addChildren theRoot rootNodes _VIEW_STYLE
 		) else (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) != helper collect r
-			addChildren theRoot rootNodes_filtered
+			addChildren theRoot rootNodes_filtered _VIEW_STYLE
 		)
 	)
 
@@ -311,18 +367,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on tv Close arg do(
 		try (DestroyDialog submenu_rollout) catch()
 	)
-	
-	-- call functions on open
-	on treeview_rollout open do (
-		initTreeView tv
-		fillInTreeView tv
-		tv.ExpandAll()
-	)
-
-	on treeview_rollout close do (
-		try (DestroyDialog submenu_rollout) catch()
-		try (DestroyDialog export_rollout) catch()
-	)
 
 	-- controls ---------------------------------
 	group "コントロール" (
@@ -376,8 +420,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeGroup "Group" width:50 across:2 checked:true
-		checkbutton modeLayer "Layer" width:50 across:2 checked:false
+		checkbutton modeGroup "Group" width:60 across:2 checked:true
+		checkbutton modeLayer "Layer" width:60 across:2 checked:false
+		checkbutton modeAll "All" width:50 across:3 checked:true
+		checkbutton modeColor "Color" width:50 across:3 checked:false
+		checkbutton modeWhite "White" width:50 across:3 checked:false
 		-- slider slr_width "Tree Width" range:[100,1000,_E_ROLLOUT_WIDTH] type:#integer orient:#horizontal width:200
 	)
 
@@ -411,10 +458,49 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		refreshTreeView tv
 	)
 
+	on modeAll changed theState do (
+		print "modeAll was pressed"
+		modeAll.checked = true
+		modeColor.checked = false
+		modeWhite.checked = false
+		_VIEW_STYLE = "none"
+		refreshTreeView tv
+	)
+
+	on modeColor changed theState do (
+		print "modeColor was pressed"
+		modeAll.checked = false
+		modeColor.checked = true
+		modeWhite.checked = false
+		_VIEW_STYLE = "color"
+		refreshTreeView tv
+	)
+
+	on modeWhite changed theState do (
+		print "modeWhite was pressed"
+		modeAll.checked = false
+		modeColor.checked = false
+		modeWhite.checked = true
+		_VIEW_STYLE = "white"
+		refreshTreeView tv
+	)
+
 	-- -- tree height slider handler
 	-- on slr_width changed val do (
 	-- 	tv.width = val
 	-- )
+
+	-- call functions on open
+	on treeview_rollout open do (
+		initTreeView tv
+		fillInTreeView tv
+		tv.ExpandAll()
+	)
+
+	on treeview_rollout close do (
+		try (DestroyDialog submenu_rollout) catch()
+		try (DestroyDialog export_rollout) catch()
+	)
 
 -- end main rollout
 )
