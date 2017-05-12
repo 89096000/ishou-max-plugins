@@ -8,10 +8,14 @@ _VERSION = kageTools.getVersion asString:true
 
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
-_ROLLOUT_WIDTH = 200;
-_ROLLOUT_HEIGHT = 375;
+_ROLLOUT_WIDTH = 250;
+_ROLLOUT_HEIGHT = 550;
 _COLOR_BTN_SIZE = 20;
 _COLOR_ROLLOUT_ROWS = 6;
+
+-- TREEVIEW SETTINGS
+_TV_WIDTH = 240;
+_TV_HEIGHT = 440;
 
 -- Export Rollout
 _E_ROLLOUT_WIDTH = 340;
@@ -23,6 +27,9 @@ _THE_HITNODE = undefined
 -- Save Settings
 SETTINGS_FILE_LOCATION = ""
 TREE_INI = ""
+
+-- MODES ENUM (group, layer)
+_TV_MODE = "group"
 
 -- Fonts
 fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
@@ -219,18 +226,25 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		theRoot = tv.Nodes.add "ルート"
 		theRoot.nodeFont = _OFF_FONT
 		rootNodes = for o in objects where o.parent == undefined collect o
-		addChildren theRoot rootNodes
+		if _TV_MODE == "group" then (
+			addChildren theRoot rootNodes
+		) else (
+			rootNodes_filtered = for r in rootNodes where superclassof(r) != helper collect r
+			addChildren theRoot rootNodes_filtered
+		)
 	)
 
+	----- ----- -----
+	-- refresh button
 	fn refreshTreeView tv = (
 		tv.Nodes.Clear()
-		fillInTreeView tv
+		fillInTreeView tv			
 		tv.ExpandAll()
 	)
 	
 	-- create treeview activeX control in rollout
 	-- activeXControl tv "MSComctlLib.TreeCtrl" width:190 height:290 align:#center
-	dotNetControl tv "TreeView" width:(190) height:290 align:#center
+	dotNetControl tv "TreeView" width:_TV_WIDTH height:_TV_HEIGHT align:#center
 
 	-- HANDLERS
 	-- add event handler to select the object if user clicks on node
@@ -243,7 +257,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				try (DestroyDialog export_rollout) catch()
 				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
 				local dialog_pos = GetDialogPos treeview_rollout
-				local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
+				-- local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
+				local posx = dialog_pos.x + mousepoint.X + 30
 				local posy = dialog_pos.y + mousepoint.Y + 30
 				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
 											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
@@ -309,24 +324,27 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		try (DestroyDialog export_rollout) catch()
 	)
 
-	----- ----- -----
-	-- refresh button
-	button btn_refresh "refresh" \
+	-- controls ---------------------------------
+	group "コントロール" (
+		button btn_refresh "refresh" \
 		toolTip: "refreshes the screen" \
 		align: #left \
 		across: 2
 
+		button btn_export "export" \
+		toolTip: "exports the selected objects" \
+		align: #left \
+		across: 2
+	)
+
+	----- ----- -----
+	-- refresh button
 	on btn_refresh pressed do (
 		refreshTreeView tv
 	)
 
 	----- ----- -----
 	-- export button
-	button btn_export "export" \
-		toolTip: "exports the selected objects" \
-		align: #left \
-		across: 2
-
 	on btn_export pressed do (
 		if selection.count > 0 then (
 			-- call the export rollout
@@ -336,6 +354,48 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			messageBox "Please select an object group to export."
 		)
 	)
+
+	-- mode ---------------------------------
+	group "モード" (
+		checkbutton modeGroup "Group" width:50 across:2 checked:true
+		checkbutton modeLayer "Layer" width:50 across:2 checked:false
+		-- slider slr_width "Tree Width" range:[100,1000,_E_ROLLOUT_WIDTH] type:#integer orient:#horizontal width:200
+	)
+
+	----- ----- -----
+	-- checkbutton states
+	on modeGroup changed theState do (
+		print "modeGroup was pressed"
+		if theState == true then (
+			modeGroup.checked = true
+			modeLayer.checked = false
+			_TV_MODE = "group"
+		) else (
+			modeLayer.checked = false
+			modeLayer.checked = true
+			_TV_MODE = "layer"
+		)
+		refreshTreeView tv
+	)
+
+	on modeLayer changed theState do (
+		print "modeLayer was pressed"
+		if theState == true then (
+			modeLayer.checked = true
+			modeGroup.checked = false
+			_TV_MODE = "layer"
+		) else (
+			modeLayer.checked = false
+			modeGroup.checked = true
+			_TV_MODE = "group"
+		)
+		refreshTreeView tv
+	)
+
+	-- -- tree height slider handler
+	-- on slr_width changed val do (
+	-- 	tv.width = val
+	-- )
 
 -- end main rollout
 )
