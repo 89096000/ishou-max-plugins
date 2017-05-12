@@ -24,27 +24,50 @@ fn LoadMappingFiles loc = (
 			for p in paths do (
 				fname = p as string
 			)
-			append refFiles fname
-			
-			-- check if reference is valid
-			fpath_exists = doesFileExist fpath
-			fstatus = "FOUND"
-			if fpath_exists == false then (
-				fpath_exists = doesFileExist (maxFilePath + fpath)
-				if fpath_exists == false then (
-					fstatus = "MISSING"
+			print ("ref file: " + fname + " @ " + fpath)
+
+			-- sometimes reference files are empty
+			if fname != "" then (
+				append refFiles fname
+
+				-- check if reference is local or on network
+				lstatus = "LOCAL PATH"
+				print fpath
+				print fpath[1] as string
+				if (fpath[1] == "/" or fpath[1] == "\\") then (
+					lstatus = "NETWORK PATH"
+				) else if (substring fpath 1 6) == "import" then (
+					lstatus = "IMPORT PATH"
 				)
-			)
-			return_string += "\n" + fname + " - " + fstatus
-			
-			-- copy files
-			print fstatus
-			if fstatus == "FOUND" then (
-				full_fpath = maxFilePath + fpath
-				print full_fpath
-				new_path = loc + "\\" + fname
-				print new_path
-				copyFile full_fpath new_path
+
+				-- figure out the path to the file
+				if lstatus == "LOCAL PATH" then (
+					full_fpath = (maxFilePath + fpath)
+				) else (
+					full_fpath = fpath
+				)
+				
+				-- check if reference is valid
+				fpath_exists = doesFileExist fpath
+				fstatus = "FOUND"
+				if fpath_exists == false then (
+					fpath_exists = doesFileExist full_fpath
+					if fpath_exists == false then (
+						fstatus = "MISSING"
+					)
+				)
+				return_string += "\n" + fname + " - " + fstatus
+
+				-- create a copy to location
+				new_path = loc + "\\" + fname				
+				print (fstatus + " file with on " + lstatus)
+				print ("copy from : " + full_fpath)
+				print ("copy to : " + new_path)
+
+				-- copy files				
+				if fstatus == "FOUND" then (
+					copyFile full_fpath new_path
+				)
 			)
 		)
 	)
@@ -120,9 +143,9 @@ rollout export_rollout "Export Options" (
 	group "データ" (
 		label lbl_name " " align:#left
 		label lbl_location " " align:#left
-		edittext txt_desc "ファイル説明:" fieldWidth:225 height: 54 labelOnTop:false
+		edittext txt_filename "ファイル名前:" fieldWidth:225 height: 18 labelOnTop:false
+		edittext txt_desc "ファイル説明:" fieldWidth:225 height: 36 labelOnTop:false
 	)
-
 
 	-- CheckBox Handler
 	on ck_export_desktop changed theState do (
@@ -157,7 +180,8 @@ rollout export_rollout "Export Options" (
 
 	on btn_process pressed do (
 		-- check if dir exists
-		friendly_name = get_friendly_name(_FIRST_OBJ_NAME)
+		-- friendly_name = get_friendly_name(_FIRST_OBJ_NAME)
+		friendly_name = txt_filename.text
 		file_path = _SAVE_LOCATION + "\\" + friendly_name
 		file_sub_path = file_path + "\\新しいフォルダー"
 		export_is_valid = not doesFileExist(file_path)
@@ -241,6 +265,7 @@ rollout export_rollout "Export Options" (
 		name_desc = friendly_name + " (" + ((_OBJECTS_TO_EXPORT as string) + "個") + ")"
 
 		lbl_name.text = name_desc
+		txt_filename.text = friendly_name
 		update_location()
 	)
 )
