@@ -284,8 +284,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		-- add to tree
 		if _TV_MODE == "group" then (
 			addChildren theRoot rootNodes _VIEW_STYLE
-		) else (
+		) else if _TV_MODE == "object" then (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) != helper collect r
+			addChildren theRoot rootNodes_filtered _VIEW_STYLE
+		) else (
+			rootNodes_filtered = for r in rootNodes where superclassof(r) == helper collect r
 			addChildren theRoot rootNodes_filtered _VIEW_STYLE
 		)
 	)
@@ -406,25 +409,22 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- tree controls
 	on btn_summary pressed do (
-		if _TV_MODE == "group" then (
-			tv.CollapseAll()
-			tv.TopNode.Expand()
-		)
+		tv.CollapseAll()
+		tv.TopNode.Expand()
 	)
 
 	on btn_all pressed do (
-		if _TV_MODE == "group" then (
-			tv.ExpandAll()
-		)
+		tv.ExpandAll()	
 	)
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeGroup "Group" width:60 across:2 checked:true
-		checkbutton modeLayer "Layer" width:60 across:2 checked:false
-		checkbutton modeAll "All" width:50 across:3 checked:true
-		checkbutton modeColor "Color" width:50 across:3 checked:false
-		checkbutton modeWhite "White" width:50 across:3 checked:false
+		checkbutton modeGroup "Group" width:60 across:3 checked:true
+		checkbutton modeLayer "Layer" width:60 across:3 checked:false
+		checkbutton modeObject "Object" width:60 across:3 checked:false
+		checkbutton modeAll "All" width:60 across:3 checked:true
+		checkbutton modeColor "Color" width:60 across:3 checked:false
+		checkbutton modeWhite "White" width:60 across:3 checked:false
 		-- slider slr_width "Tree Width" range:[100,1000,_E_ROLLOUT_WIDTH] type:#integer orient:#horizontal width:200
 	)
 
@@ -432,29 +432,31 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- checkbutton states
 	on modeGroup changed theState do (
 		print "modeGroup was pressed"
-		if theState == true then (
-			modeGroup.checked = true
-			modeLayer.checked = false
-			_TV_MODE = "group"
-		) else (
-			modeLayer.checked = false
-			modeLayer.checked = true
-			_TV_MODE = "layer"
-		)
+		modeGroup.checked = true
+		modeLayer.checked = false
+		modeObject.checked = false
+		_TV_MODE = "group"		
 		refreshTreeView tv
 	)
 
 	on modeLayer changed theState do (
 		print "modeLayer was pressed"
-		if theState == true then (
-			modeLayer.checked = true
-			modeGroup.checked = false
-			_TV_MODE = "layer"
-		) else (
-			modeLayer.checked = false
-			modeGroup.checked = true
-			_TV_MODE = "group"
-		)
+		modeGroup.checked = false
+		modeLayer.checked = true
+		modeObject.checked = false
+		_TV_MODE = "layer"
+		refreshTreeView tv
+
+		tv.CollapseAll()
+		tv.TopNode.Expand()
+	)
+
+	on modeObject changed theState do (
+		print "modeLayer was pressed"
+		modeGroup.checked = false
+		modeLayer.checked = false
+		modeObject.checked = true
+		_TV_MODE = "object"
 		refreshTreeView tv
 	)
 
