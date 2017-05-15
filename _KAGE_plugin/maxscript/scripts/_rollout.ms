@@ -32,6 +32,7 @@ fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
 fontStyle = dotNetClass "system.drawing.fontStyle"
 _ON_FONT = dotNetObject "system.drawing.font" fontFam 8
 _OFF_FONT = dotNetObject "system.drawing.font" fontFam 7 fontStyle.italic
+_HIDDEN_FONT = dotNetObject "system.drawing.font" fontFam 1
 
 
 rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
@@ -62,6 +63,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					newNode.tag = dotNetMXSValue theChildren[i]
 					newNode.checked = not theChildren[i].isHidden
 					newNode.imageIndex = newNode.selectedImageIndex = 0
+					newNode.ToolTipText = color_val
 					addChildren newNode theChildren[i].children style
 
 					if theChildren[i].isHidden then (
@@ -72,7 +74,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 						newNode.nodeFont = _ON_FONT
 					)
 
-					newNode.backcolor = (GetColorForKey color_val)
+					newNode.backcolor = (GetColorForKey color_val) 
 				)
 			)
 		) else if style == "white" then (
@@ -88,6 +90,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					newNode.tag = dotNetMXSValue theChildren[i]
 					newNode.checked = not theChildren[i].isHidden
 					newNode.imageIndex = newNode.selectedImageIndex = 0
+					newNode.ToolTipText = color_val
 					addChildren newNode theChildren[i].children style
 
 					if theChildren[i].isHidden then (
@@ -131,6 +134,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 				-- read node ini file data
 				color_val = ReadFromIni TREE_INI "nodes" (newNode.text as string)
+				newNode.ToolTipText = color_val
 				if color_val != "none" then (
 					newNode.backcolor = (GetColorForKey color_val)
 				)
@@ -146,6 +150,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		theRoot.nodeFont = _OFF_FONT
 		rootNodes = for o in objects where o.parent == undefined collect o
 		-- add to tree
+		tv.beginUpdate()
 		if _TV_MODE == "group" then (
 			addChildren theRoot rootNodes _VIEW_STYLE
 		) else if _TV_MODE == "object" then (
@@ -155,6 +160,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) == helper collect r
 			addChildren theRoot rootNodes_filtered _VIEW_STYLE
 		)
+		tv.endUpdate()
 	)
 
 	----- ----- -----
@@ -190,12 +196,13 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			) catch ( )
 
 			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
-			-- print "start variable tests"
+			print "start variable tests"
 			-- try ( print mousepoint.Y ) catch ( print "fail xy test")
-			-- try ( print mainVars.THE_HITNODE.tag.value ) catch ( print "fail test 1" )
+			-- try ( print KAGE_HITNODE.tag.value ) catch ( print "fail test 1" )
 			-- try ( print mainVars.THE_HITNODE.backcolor ) catch ( print "fail test 2" )
-			-- try ( print mainVars.THE_HITNODE.text ) catch ( print "fail test 3" )
+			-- try ( print KAGE_HITNODE.text ) catch ( print "fail test 3" )
 			-- try ( print mainVars.THE_HITNODE.name ) catch ( print "fail test 4" )
+			-- try ( print (KAGE_HITNODE.isVisible as string) ) catch ( print "fail test 6" )
 
 		) else (
 			-- LEFT CLICK - SELECT OBJECT
@@ -233,6 +240,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on tv Close arg do(
 		try (DestroyDialog submenu_rollout) catch()
+		try (DestroyDialog export_rollout) catch()
 	)
 
 	-- controls ---------------------------------
@@ -366,6 +374,31 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on treeview_rollout close do (
 		try (DestroyDialog submenu_rollout) catch()
 		try (DestroyDialog export_rollout) catch()
+	)
+
+	-- Filters ---------------------------------
+	button TEST_FILTER "TEST" width:60 across:3
+
+	fn test_recursive tv_node = (
+		-- print tv_node.text
+		color_val = tv_node.ToolTipText	
+		if color_val == "pink" then (
+			tv_node.nodeFont = _ON_FONT
+		) else (
+			tv_node.nodeFont = _HIDDEN_FONT
+		)
+		for n = 0 to (tv_node.Nodes.Count-1) do			
+			test_recursive tv_node.Nodes.Item[n]
+	)
+
+	on TEST_FILTER pressed do (
+		nodes = tv.Nodes
+		-- node_x = nodes.Item[0]
+		-- showProperties node_x
+		-- showMethods nodes
+		for n = 0 to (nodes.Count-1) do (
+			test_recursive nodes.Item[n]
+		)
 	)
 
 -- end main rollout
