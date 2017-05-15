@@ -1,10 +1,13 @@
 --Pair structure for general use.
 struct Pair
 (
-   key,
-   value
+  key,
+  value
 )
-   
+
+--Public shared variables
+global KAGE_HITNODE;
+
 --Import scripts
 fileIn "ini_mgr.ms";            -- scripts to speak with ini files
 fileIn "color_mgr.ms";          -- sets up color profiles
@@ -12,6 +15,7 @@ fileIn "tools.ms";              -- tool palette for misc functions
 
 fileIn "_rollout.ms";           -- main treeview rollout
 fileIn "rollout_export.ms";     -- export interface rollout
+fileIn "rollout_submenu.ms";    -- submenu (color picker) rollout
 
 function init = 
 (
