@@ -23,17 +23,18 @@ _E_ROLLOUT_HEIGHT = 200;
 SETTINGS_FILE_LOCATION = ""
 TREE_INI = ""
 
--- MODES ENUM (group, layer)    ENUM(none, color, white)
-_TV_MODE = "group"
-_VIEW_STYLE = "none"
-
 -- Fonts
 fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
 fontStyle = dotNetClass "system.drawing.fontStyle"
 _ON_FONT = dotNetObject "system.drawing.font" fontFam 8
 _OFF_FONT = dotNetObject "system.drawing.font" fontFam 7 fontStyle.italic
-_HIDDEN_FONT = dotNetObject "system.drawing.font" fontFam 1
 
+-- kills secondary rollouts
+fn killRollouts = (
+	try (DestroyDialog submenu_rollout) catch()
+	try (DestroyDialog export_rollout) catch()
+	try (DestroyDialog filter_rollout) catch()
+)
 
 rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- initialize rollout control
@@ -48,9 +49,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- recursive function for node children
 	-- tag contains MXS value, whatever that means
 	-- ref to dotnet treenode class https://msdn.microsoft.com/en-us/library/system.windows.forms.treenode(v=vs.110).aspx
-	fn addChildren theNode theChildren style = (
-		if style == "color" then (
+	fn addChildren tv theNode theChildren = (		
+		if VIEW_STYLE == "color" then (
 			for i = 1 to theChildren.count do (
+				newNode = undefined
+
 				try (
 					color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
 				) catch (
@@ -59,26 +62,42 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 				if color_val != "none" then (
 
-					newNode = theNode.Nodes.add theChildren[i].name
-					newNode.tag = dotNetMXSValue theChildren[i]
-					newNode.checked = not theChildren[i].isHidden
-					newNode.imageIndex = newNode.selectedImageIndex = 0
-					newNode.ToolTipText = color_val
-					addChildren newNode theChildren[i].children style
+					if CURRENT_FILTER == color_val or CURRENT_FILTER == "all" then (
+						if FLAT_MODE then (
+							newNode = tv.Nodes.add theChildren[i].name
+						) else (
+							newNode = theNode.Nodes.add theChildren[i].name
+						)
+						newNode.tag = dotNetMXSValue theChildren[i]
+						newNode.checked = not theChildren[i].isHidden
+						newNode.imageIndex = newNode.selectedImageIndex = 0
+						newNode.ToolTipText = color_val
 
-					if theChildren[i].isHidden then (
-						newNode.foreColor = GetColorForKey "ltblack"
-						newNode.nodeFont = _OFF_FONT
-					) else (
-						newNode.foreColor = GetColorForKey "black"
-						newNode.nodeFont = _ON_FONT
-					)
+						if theChildren[i].isHidden then (
+							newNode.foreColor = GetColorForKey "ltblack"
+							newNode.nodeFont = _OFF_FONT
+						) else (
+							newNode.foreColor = GetColorForKey "black"
+							newNode.nodeFont = _ON_FONT
+						)
 
-					newNode.backcolor = (GetColorForKey color_val) 
+						newNode.backcolor = (GetColorForKey color_val) 
+					);
+				);
+
+				if FLAT_MODE then (
+					newNode = undefined
+					addChildren tv newNode theChildren[i].children
+				) else (
+					if newNode != undefined then
+						addChildren tv newNode theChildren[i].children
 				)
 			)
-		) else if style == "white" then (
+
+		) else if VIEW_STYLE == "white" then (
 			for i = 1 to theChildren.count do (
+				newNode = undefined
+
 				try (
 					color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
 				) catch (
@@ -86,12 +105,16 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				)
 
 				if color_val == "none" then (
-					newNode = theNode.Nodes.add theChildren[i].name
+					if FLAT_MODE then (
+						newNode = tv.Nodes.add theChildren[i].name
+					) else (
+						newNode = theNode.Nodes.add theChildren[i].name
+					)
 					newNode.tag = dotNetMXSValue theChildren[i]
 					newNode.checked = not theChildren[i].isHidden
 					newNode.imageIndex = newNode.selectedImageIndex = 0
 					newNode.ToolTipText = color_val
-					addChildren newNode theChildren[i].children style
+					-- addChildren tv newNode theChildren[i].children style
 
 					if theChildren[i].isHidden then (
 						newNode.foreColor = GetColorForKey "ltblack"
@@ -102,8 +125,17 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					)
 
 					WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+				);
+
+				if FLAT_MODE then (
+					newNode = undefined
+					addChildren tv newNode theChildren[i].children
+				) else (
+					if newNode != undefined then
+						addChildren tv newNode theChildren[i].children
 				)
 			)
+
 		) else (
 			for i = 1 to theChildren.count do (
 				-- node_number_padded = padZeros(i)
@@ -114,29 +146,44 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				-- print (theChildren[i].name)
 				-- print (classof(theChildren[i]))
 				-- print (superclassof(theChildren[i]))
+				newNode = undefined
+				color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
 
-				newNode = theNode.Nodes.add theChildren[i].name
-				newNode.tag = dotNetMXSValue theChildren[i]
-				newNode.checked = not theChildren[i].isHidden
-				newNode.imageIndex = newNode.selectedImageIndex = 0
-				addChildren newNode theChildren[i].children style
+				if CURRENT_FILTER == color_val or CURRENT_FILTER == "all" then (
+					if FLAT_MODE then (
+						newNode = tv.Nodes.add theChildren[i].name
+					) else (
+						newNode = theNode.Nodes.add theChildren[i].name
+					)
+					newNode.tag = dotNetMXSValue theChildren[i]
+					newNode.checked = not theChildren[i].isHidden
+					newNode.imageIndex = newNode.selectedImageIndex = 0
+					-- addChildren tv newNode theChildren[i].children
 
-				if theChildren[i].isHidden then (
-					newNode.foreColor = GetColorForKey "ltblack"
-					newNode.nodeFont = _OFF_FONT
+					if theChildren[i].isHidden then (
+						newNode.foreColor = GetColorForKey "ltblack"
+						newNode.nodeFont = _OFF_FONT
+					) else (
+						newNode.foreColor = GetColorForKey "black"
+						newNode.nodeFont = _ON_FONT
+					)
+
+					-- add node data to ini file
+					WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+
+					-- read node ini file data
+					newNode.ToolTipText = color_val
+					if color_val != "none" then (
+						newNode.backcolor = (GetColorForKey color_val)
+					)
+				);
+
+				if FLAT_MODE then (
+					newNode = undefined
+					addChildren tv newNode theChildren[i].children
 				) else (
-					newNode.foreColor = GetColorForKey "black"
-					newNode.nodeFont = _ON_FONT
-				)
-
-				-- add node data to ini file
-				WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
-
-				-- read node ini file data
-				color_val = ReadFromIni TREE_INI "nodes" (newNode.text as string)
-				newNode.ToolTipText = color_val
-				if color_val != "none" then (
-					newNode.backcolor = (GetColorForKey color_val)
+					if newNode != undefined then
+						addChildren tv newNode theChildren[i].children
 				)
 			)
 		)
@@ -146,19 +193,21 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- collect all objects that have no parent (top level nodes)
 	-- call recursive function to add children to top level nodes
 	fn fillInTreeView tv = (
-		theRoot = tv.Nodes.add "ルート"
-		theRoot.nodeFont = _OFF_FONT
+		if not FLAT_MODE then (
+			theRoot = tv.Nodes.add "ルート"
+			theRoot.nodeFont = _OFF_FONT
+		)		
 		rootNodes = for o in objects where o.parent == undefined collect o
 		-- add to tree
 		tv.beginUpdate()
-		if _TV_MODE == "group" then (
-			addChildren theRoot rootNodes _VIEW_STYLE
-		) else if _TV_MODE == "object" then (
+		if TV_MODE == "group" then (
+			addChildren tv theRoot rootNodes
+		) else if TV_MODE == "object" then (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) != helper collect r
-			addChildren theRoot rootNodes_filtered _VIEW_STYLE
+			addChildren tv theRoot rootNodes_filtered
 		) else (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) == helper collect r
-			addChildren theRoot rootNodes_filtered _VIEW_STYLE
+			addChildren tv theRoot rootNodes_filtered
 		)
 		tv.endUpdate()
 	)
@@ -184,6 +233,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			try (
 				try (DestroyDialog submenu_rollout) catch()
 				try (DestroyDialog export_rollout) catch()
+				try (DestroyDialog filter_rollout) catch()
 				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
 				local dialog_pos = GetDialogPos treeview_rollout
 				-- local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
@@ -241,23 +291,31 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on tv Close arg do(
 		try (DestroyDialog submenu_rollout) catch()
 		try (DestroyDialog export_rollout) catch()
+		try (DestroyDialog filter_rollout) catch()
 	)
 
 	-- controls ---------------------------------
 	group "コントロール" (
-		button btn_refresh "refresh" \
+		button btn_refresh "Refresh" \
 		toolTip: "refreshes the screen" \
-		align: #left across: 2
+		align: #left across: 3
 
-		button btn_export "export" \
+		button btn_export "Export" \
 		toolTip: "exports the selected objects" \
-		align: #left across: 2
+		align: #left across: 3
+
+		button btn_order "Order" \
+		toolTip: "Sorts the tree" \
+		align: #left across: 3
 
 		button btn_summary "Summary" \
-		align: #left  width:50 across:2
+		align: #left  width:50 across:3
 
 		button btn_all "All" \
-		align: #left  width:50 across:2
+		align: #left  width:50 across:3
+
+		button btn_filter "Filter" \
+		align: #left  width:50 across:3
 	)
 
 	----- ----- -----
@@ -279,13 +337,42 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	----- ----- -----
+	-- order button
+	on btn_order pressed do (
+		messageBox "This feature is not yet available."
+	)
+
+	----- ----- -----
+	-- filter button
+	on btn_filter pressed do (
+		try (DestroyDialog submenu_rollout) catch()
+		try (DestroyDialog export_rollout) catch()
+		try (DestroyDialog filter_rollout) catch()
+
+		-- local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
+		local dialog_pos = GetDialogPos treeview_rollout
+		--local posx = dialog_pos.x + mousepoint.X + 30
+		--local posy = dialog_pos.y + mousepoint.Y + 30
+		local posx = dialog_pos.x - 30 + _TV_WIDTH
+		local posy = dialog_pos.y - 50 + _TV_HEIGHT
+		CreateDialog filter_rollout ((_COLOR_BTN_SIZE*2)+2)\
+									 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
+									 pos:[posx, posy] \
+                                     style:#(#style_border);
+	)
+
+	----- ----- -----
 	-- tree controls
 	on btn_summary pressed do (
+		CURRENT_FILTER = "all"
+		FLAT_MODE = false
 		tv.CollapseAll()
 		tv.TopNode.Expand()
 	)
 
 	on btn_all pressed do (
+		CURRENT_FILTER = "all"
+		FLAT_MODE = false
 		tv.ExpandAll()	
 	)
 
@@ -304,19 +391,23 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- checkbutton states
 	on modeGroup changed theState do (
 		print "modeGroup was pressed"
+		CURRENT_FILTER = "all"
+		FLAT_MODE = false
 		modeGroup.checked = true
 		modeLayer.checked = false
 		modeObject.checked = false
-		_TV_MODE = "group"		
+		TV_MODE = "group"		
 		refreshTreeView tv
 	)
 
 	on modeLayer changed theState do (
 		print "modeLayer was pressed"
+		CURRENT_FILTER = "all"
+		FLAT_MODE = false
 		modeGroup.checked = false
 		modeLayer.checked = true
 		modeObject.checked = false
-		_TV_MODE = "layer"
+		TV_MODE = "layer"
 		refreshTreeView tv
 
 		tv.CollapseAll()
@@ -325,37 +416,44 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on modeObject changed theState do (
 		print "modeLayer was pressed"
+		CURRENT_FILTER = "all"
+		FLAT_MODE = true
 		modeGroup.checked = false
 		modeLayer.checked = false
 		modeObject.checked = true
-		_TV_MODE = "object"
+		TV_MODE = "object"
 		refreshTreeView tv
 	)
 
 	on modeAll changed theState do (
 		print "modeAll was pressed"
+		CURRENT_FILTER = "all"
+		FLAT_MODE = true
 		modeAll.checked = true
 		modeColor.checked = false
 		modeWhite.checked = false
-		_VIEW_STYLE = "none"
+		VIEW_STYLE = "none"
 		refreshTreeView tv
 	)
 
 	on modeColor changed theState do (
 		print "modeColor was pressed"
+		FLAT_MODE = true
+		CURRENT_FILTER = "all"
 		modeAll.checked = false
 		modeColor.checked = true
 		modeWhite.checked = false
-		_VIEW_STYLE = "color"
+		VIEW_STYLE = "color"
 		refreshTreeView tv
 	)
 
 	on modeWhite changed theState do (
 		print "modeWhite was pressed"
+		FLAT_MODE = true
 		modeAll.checked = false
 		modeColor.checked = false
 		modeWhite.checked = true
-		_VIEW_STYLE = "white"
+		VIEW_STYLE = "white"
 		refreshTreeView tv
 	)
 
@@ -374,32 +472,38 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on treeview_rollout close do (
 		try (DestroyDialog submenu_rollout) catch()
 		try (DestroyDialog export_rollout) catch()
+		try (DestroyDialog filter_rollout) catch()
 	)
 
-	-- Filters ---------------------------------
-	button TEST_FILTER "TEST" width:60 across:3
-
-	fn test_recursive tv_node = (
-		-- print tv_node.text
-		color_val = tv_node.ToolTipText	
-		if color_val == "pink" then (
-			tv_node.nodeFont = _ON_FONT
-		) else (
-			tv_node.nodeFont = _HIDDEN_FONT
-		)
-		for n = 0 to (tv_node.Nodes.Count-1) do			
-			test_recursive tv_node.Nodes.Item[n]
+	on treeview_rollout help do (
+		print "help requested which refreshes the callout"
+		refreshTreeView tv
 	)
 
-	on TEST_FILTER pressed do (
-		nodes = tv.Nodes
-		-- node_x = nodes.Item[0]
-		-- showProperties node_x
-		-- showMethods nodes
-		for n = 0 to (nodes.Count-1) do (
-			test_recursive nodes.Item[n]
-		)
-	)
+	-- TEST ---------------------------------
+-- 	button TEST_FILTER "TEST" width:60 across:3
+
+-- 	fn test_recursive tv_node = (
+-- 		-- print tv_node.text
+-- 		color_val = tv_node.ToolTipText	
+-- 		if color_val == "pink" then (
+-- 			tv_node.nodeFont = _ON_FONT
+-- 		) else (
+-- 			tv_node.nodeFont = _OFF_FONT
+-- 		)
+-- 		for n = 0 to (tv_node.Nodes.Count-1) do			
+-- 			test_recursive tv_node.Nodes.Item[n]
+-- 	)
+
+-- 	on TEST_FILTER pressed do (
+-- 		nodes = tv.Nodes
+-- 		-- node_x = nodes.Item[0]
+-- 		-- showProperties node_x
+-- 		-- showMethods nodes
+-- 		for n = 0 to (nodes.Count-1) do (
+-- 			test_recursive nodes.Item[n]
+-- 		)
+-- 	)
 
 -- end main rollout
 )
@@ -408,6 +512,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 -- 1. end previous rollouts
 try (DestroyDialog treeview_rollout) catch()
 try (DestroyDialog submenu_rollout) catch()
+try (DestroyDialog export_rollout) catch()
+try (DestroyDialog filter_rollout) catch()
 
 -- 2. check for settings folder
 if maxFilePath == "" then (

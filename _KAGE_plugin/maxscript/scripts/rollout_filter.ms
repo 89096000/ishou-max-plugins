@@ -1,13 +1,10 @@
 -- Rollout Settings
-_COLOR_BTN_SIZE = 20;
-_COLOR_ROLLOUT_ROWS = 6;
-
-rollout submenu_rollout "何色？" (
+rollout filter_rollout "何色？" (
 
 	local cbs = _COLOR_BTN_SIZE
 
 	-- close button
-	dotNetControl btn_cancel "System.Windows.Forms.Button" pos:[0,0] height:cbs width:(cbs*2)
+	dotNetControl btn_all "System.Windows.Forms.Button" pos:[0,0] height:cbs width:(cbs*2)
 
 	-- palette 1
 	dotNetControl btn_pink "System.Windows.Forms.Button" pos:[0,cbs*1] height:cbs width:cbs
@@ -23,9 +20,9 @@ rollout submenu_rollout "何色？" (
 	dotNetControl btn_blue "System.Windows.Forms.Button" pos:[cbs,cbs*4] height:cbs width:cbs
 	dotNetControl btn_grey "System.Windows.Forms.Button" pos:[cbs,cbs*5] height:cbs width:cbs
 
-	on submenu_rollout open do
+	on filter_rollout open do
 	(
-		btn_cancel.text = "戻る"
+		btn_all.text = "全部"
 
 		btn_pink.flatStyle=btn_pink.flatStyle.flat
 		btn_orange.flatStyle=btn_orange.flatStyle.flat
@@ -52,51 +49,56 @@ rollout submenu_rollout "何色？" (
 		btn_grey.backColor = GetColorForKey "grey"
 	)
 
-	fn change_color color_name = (
-		print (color_name + " button has been pressed")
-		KAGE_HITNODE.backcolor = (GetColorForKey color_name)
-		OverwriteToIni TREE_INI "nodes" (KAGE_HITNODE.text as string) color_name
-		try (DestroyDialog submenu_rollout) catch()
+	fn change_filter color_name = (
+		CURRENT_FILTER = color_name
+		if color_name == "all" then (
+			FLAT_MODE = false
+		) else (
+			FLAT_MODE = true
+		)
+		print (color_name + " filter requested")
+
+		try (DestroyDialog filter_rollout) catch()
 	)
 
-	on btn_cancel click do (
-		try (DestroyDialog submenu_rollout) catch()
+	on btn_all click do (
+		change_filter("all")
 	)
 
 	on btn_pink click do (
-		change_color("pink")
+		change_filter("pink")
 	)
 	on btn_orange click do (
-        change_color("orange")
+        change_filter("orange")
     )
 	on btn_yellow click do (
-	    change_color("yellow")
+	    change_filter("yellow")
     )
 	on btn_tan click do (
-        change_color("tan")
+        change_filter("tan")
     )
 	on btn_mint click do (
-		change_color("mint")
+		change_filter("mint")
     )
 
 	on btn_dark click do (
-		change_color("dark")
+		change_filter("dark")
     )
 
 	on btn_red click do (
-		change_color("red")
+		change_filter("red")
     )
 
 	on btn_violet click do (
-		change_color("violet")
+		change_filter("violet")
     )
 
 	on btn_blue click do (
-		change_color("blue")
+		change_filter("blue")
     )
 
 	on btn_grey click do (
-		change_color("grey")
+		change_filter("grey")
 	)
 
 -- end sub rollout

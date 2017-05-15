@@ -7,6 +7,10 @@ struct Pair
 
 --Public shared variables
 global KAGE_HITNODE;
+global CURRENT_FILTER = "all";  -- all or some color
+global TV_MODE = "group";       -- group / layer / object
+global VIEW_STYLE = "none";     -- none / color / white
+global FLAT_MODE = false;       -- doesnt draw any nodes
 
 --Import scripts
 fileIn "ini_mgr.ms";            -- scripts to speak with ini files
@@ -16,6 +20,7 @@ fileIn "tools.ms";              -- tool palette for misc functions
 fileIn "_rollout.ms";           -- main treeview rollout
 fileIn "rollout_export.ms";     -- export interface rollout
 fileIn "rollout_submenu.ms";    -- submenu (color picker) rollout
+fileIn "rollout_filter.ms";     -- filter tree rollout
 
 function init = 
 (
