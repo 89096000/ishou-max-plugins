@@ -23,11 +23,54 @@ _E_ROLLOUT_HEIGHT = 200;
 SETTINGS_FILE_LOCATION = ""
 TREE_INI = ""
 
--- Fonts
+
+-- FONTS
 fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
 fontStyle = dotNetClass "system.drawing.fontStyle"
 _ON_FONT = dotNetObject "system.drawing.font" fontFam 8
 _OFF_FONT = dotNetObject "system.drawing.font" fontFam 7 fontStyle.italic
+
+
+-- ICONS
+_ICON_DIR = ((GetDir #userIcons) + "/kage")
+IMAGE_LIST = dotNetObject "System.Windows.Forms.ImageList"
+IMAGE_LIST.imageSize = dotNetObject "System.Drawing.Size" 24 23
+
+
+-- FUNCTIONS
+
+-- cache bmp icons
+fn getIconFromBitmap number iconFileName = (
+	filepath = (_ICON_DIR + "/" + iconFileName + ".bmp")
+	print ("loading icon from : " + filepath)
+	filename = GetDir #image +"\\icon_"+ iconFileName +".bmp"
+	print ("loading icon to : " + filename)
+
+	-- TODO does it need to delete and remake each time?
+	deleteFile filename
+
+	if not doesFileExist filename do (
+		tempBmp = openBitmap filepath
+		iconBmp = bitmap 24 23
+		for v = 0 to 22 do (
+			setPixels iconBmp [0,v] (
+				getPixels tempBmp [0, v] 24
+			)
+			iconBmp.filename = filename
+			save iconBmp
+			close iconBmp
+			close tempBmp
+		)
+	)
+	img = dotnetClass "System.Drawing.Image"
+	IMAGE_LIST.images.add (img.fromFile filename)
+)
+getIconFromBitmap 0 "box"
+getIconFromBitmap 1 "camera"
+getIconFromBitmap 2 "layer"
+getIconFromBitmap 3 "light"
+getIconFromBitmap 4 "sphere"
+
 
 -- kills secondary rollouts
 fn killRollouts = (
@@ -45,6 +88,40 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		tv.imageList = IMAGE_LIST
 		tv.Sorted = true
 	) 
+
+	-- return id from class
+	fn getIconId layer_obj = (
+		superclassy = (superclassof(layer_obj) as string)
+		classy = (classof(layer_obj) as string)
+		if superclassy == "camera" then (
+			id = 1
+		) else if superclassy == "light" then (
+			id = 3
+		) else if superclassy == "helper" then (
+			id = case classy of (
+				"Dummy": 2
+				"Particle_View": 0
+				default: 0
+			)
+		) else if superclassy == "GeometryClass" then (
+			id = case classy of (
+				"Cylinder": 4
+				"Sphere": 4
+				"Box": 0
+				"Editable_Poly": 0
+				"PolyMeshObject": 0
+				"Editable_mesh": 0
+				default: 0
+			)
+		) else (
+			id = 2
+		)
+
+		--print superclassy
+		--print classy
+		--print (" returned id of " + (id as string))
+		return id
+	)
 
 	-- recursive function for node children
 	-- tag contains MXS value, whatever that means
@@ -70,7 +147,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 						)
 						newNode.tag = dotNetMXSValue theChildren[i]
 						newNode.checked = not theChildren[i].isHidden
-						newNode.imageIndex = newNode.selectedImageIndex = 0
+						icon_ref = getIconId(theChildren[i])
+						newNode.imageIndex = newNode.selectedImageIndex = icon_ref
 						newNode.ToolTipText = color_val
 
 						if theChildren[i].isHidden then (
@@ -112,7 +190,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					)
 					newNode.tag = dotNetMXSValue theChildren[i]
 					newNode.checked = not theChildren[i].isHidden
-					newNode.imageIndex = newNode.selectedImageIndex = 0
+					icon_ref = getIconId(theChildren[i])
+					newNode.imageIndex = newNode.selectedImageIndex = icon_ref
 					newNode.ToolTipText = color_val
 					-- addChildren tv newNode theChildren[i].children style
 
@@ -157,8 +236,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					)
 					newNode.tag = dotNetMXSValue theChildren[i]
 					newNode.checked = not theChildren[i].isHidden
-					newNode.imageIndex = newNode.selectedImageIndex = 0
-					-- addChildren tv newNode theChildren[i].children
+					icon_ref = getIconId(theChildren[i])
+					newNode.imageIndex = newNode.selectedImageIndex = icon_ref
 
 					if theChildren[i].isHidden then (
 						newNode.foreColor = GetColorForKey "ltblack"

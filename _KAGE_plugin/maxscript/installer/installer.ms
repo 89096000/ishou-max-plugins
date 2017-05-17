@@ -287,6 +287,9 @@ private function copyDirectory sourceDir targetDir =
       local targetFileDir = getFilenamePath targetFile;
       if (not (Directory.Exists targetFileDir)) do
          Directory.CreateDirectory targetFileDir;
+      if (doesFileExist targetFile) then (
+         deleteFile targetFile
+      )
       File.Copy sourceFile targetFile;
    )
 ),
@@ -300,12 +303,13 @@ private function copyScriptFiles =
    local Directory = dotNetClass "System.IO.Directory";
    local File      = dotNetClass "System.IO.File";
    
-   try 
-   (
+   try (
+      -- scripts
       copyDirectory (tempDir + "/scripts") userScriptDir;
-   )
-   catch 
-   (
+      -- icons
+      icon_dir = (userIconsDir + "/kage")
+      copyDirectory (tempDir + "/scripts/icons") icon_dir;
+   ) catch (
       printException "copyScriptFiles" (getCurrentException());
       success = false;
    )
