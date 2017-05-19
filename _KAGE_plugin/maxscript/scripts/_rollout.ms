@@ -549,9 +549,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	on treeview_rollout close do (
-		try (DestroyDialog submenu_rollout) catch()
-		try (DestroyDialog export_rollout) catch()
-		try (DestroyDialog filter_rollout) catch()
+		KAGE_MAIN.close_kage()
 	)
 
 	on treeview_rollout help do (
@@ -644,7 +642,6 @@ function close_kage = (
 	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
 
-	KAGE_STATUS = KageStatus()
 	KAGE_STATUS.is_open = false
 )
 
