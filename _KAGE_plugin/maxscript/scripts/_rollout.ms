@@ -588,31 +588,65 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 )
 
 
--- 1. end previous rollouts
-try (DestroyDialog treeview_rollout) catch()
-try (DestroyDialog submenu_rollout) catch()
-try (DestroyDialog export_rollout) catch()
-try (DestroyDialog filter_rollout) catch()
+struct KageStatus (
+	is_open,
 
--- 2. check for settings folder
-if maxFilePath == "" then (
-	messageBox "Unable to load settings, max file not saved"
-) else (
-	SETTINGS_FILE_LOCATION = maxFilePath + @"\settings"
-	makeDir SETTINGS_FILE_LOCATION
-	TREE_INI = SETTINGS_FILE_LOCATION + @"\kage_tree.ini"
+	function reset = (
+		is_open = false
+	),
+
+	on create do ( 
+      reset()
+    )
 )
 
-if SETTINGS_FILE_LOCATION != "" then (
-	-- 3. check for settings file
-	CreateIniFile TREE_INI
 
-	-- 4. check for color settings file
-	InitColorSettings(SETTINGS_FILE_LOCATION)
+struct KageMain (
+
+function open_kage = (
+
+	-- 1. end previous rollouts
+	try (DestroyDialog treeview_rollout) catch()
+	try (DestroyDialog submenu_rollout) catch()
+	try (DestroyDialog export_rollout) catch()
+	try (DestroyDialog filter_rollout) catch()
+
+	-- 2. check for settings folder
+	if maxFilePath == "" then (
+		messageBox "Unable to load settings, max file not saved"
+	) else (
+		SETTINGS_FILE_LOCATION = maxFilePath + @"\settings"
+		makeDir SETTINGS_FILE_LOCATION
+		TREE_INI = SETTINGS_FILE_LOCATION + @"\kage_tree.ini"
+	)
+
+	if SETTINGS_FILE_LOCATION != "" then (
+		-- 3. check for settings file
+		CreateIniFile TREE_INI
+
+		-- 4. check for color settings file
+		InitColorSettings(SETTINGS_FILE_LOCATION)
+	)
+
+	-- 5. create new dialog
+	CreateDialog treeview_rollout \
+		_ROLLOUT_WIDTH\
+	 	_ROLLOUT_HEIGHT\
+	 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
+
+	KAGE_STATUS = KageStatus()
+	KAGE_STATUS.is_open = true
+),
+
+function close_kage = (
+	try (DestroyDialog treeview_rollout) catch()
+	try (DestroyDialog submenu_rollout) catch()
+	try (DestroyDialog export_rollout) catch()
+	try (DestroyDialog filter_rollout) catch()
+
+	KAGE_STATUS = KageStatus()
+	KAGE_STATUS.is_open = false
 )
 
--- 5. create new dialog
-CreateDialog treeview_rollout \
-	_ROLLOUT_WIDTH\
- 	_ROLLOUT_HEIGHT\
- 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
+-- END STRUCT
+)

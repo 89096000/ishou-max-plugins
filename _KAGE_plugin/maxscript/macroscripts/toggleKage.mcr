@@ -4,28 +4,35 @@ macroScript toggleKage
 	buttonText:"Open/Close Kage"
 	icon:#("icon_main", 1)
 (
-	global kage;
-	global kage_status;
+	global KAGE_MAIN;
+	global KAGE_STATUS;
 
 	function kage_get_instance =
 	(
-		if kage == undefined do
+		if KAGE_MAIN == undefined do
 			fileIn ((getDir #userScripts) + "/kage/init.ms");
 	
-		kage;
+		KAGE_MAIN;
 	)
 
 	on isChecked do 
 	(
-		if (kage_status == undefined OR kage_status.windowOpen == false) then
+		if (KAGE_STATUS == undefined or KAGE_STATUS.is_open == false) then
 			false;
 		else
-			kage_status.windowOpen;
+			KAGE_STATUS.is_open;
 	)
-	
+
 	on execute do 
 	(
 		local kageInst = kage_get_instance();
+		if KAGE_STATUS == undefined or KAGE_STATUS.is_open == false then (
+			print "open kage"
+			KAGE_MAIN.open_kage()
+		) else (
+			print "close kage"
+			KAGE_MAIN.close_kage()
+		)
 	)
 		
 )
