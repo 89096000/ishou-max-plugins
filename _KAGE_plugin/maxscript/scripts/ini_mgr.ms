@@ -29,6 +29,11 @@ fn OverwriteToIni ini_file sect k v = (
 
 -- return a specified value
 fn ReadFromIni ini_file sect k = (
-	v = (getINISetting ini_file sect k)
+	already_there = hasINISetting ini_file sect k
+	if already_there then (
+		v = (getINISetting ini_file sect k)
+	) else (
+		v = "none"
+	)
 	return v
 )

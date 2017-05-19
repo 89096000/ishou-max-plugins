@@ -203,7 +203,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 						newNode.nodeFont = _ON_FONT
 					)
 
-					WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+					-- WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
 				);
 
 				if FLAT_MODE then (
@@ -248,7 +248,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					)
 
 					-- add node data to ini file
-					WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+					-- WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
 
 					-- read node ini file data
 					newNode.ToolTipText = color_val
@@ -377,24 +377,27 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	group "コントロール" (
 		button btn_refresh "Refresh" \
 		toolTip: "refreshes the screen" \
-		align: #left across: 3
+		align: #left width:60 across: 3
 
 		button btn_export "Export" \
 		toolTip: "exports the selected objects" \
-		align: #left across: 3
+		align: #left width:60 across: 3
 
 		button btn_order "Order" \
 		toolTip: "Sorts the tree" \
-		align: #left across: 3
+		align: #left width:60 across: 3
 
-		button btn_summary "Summary" \
-		align: #left  width:50 across:3
+		button btn_summary "Collapse" \
+		align: #left  width:50 across:4
 
-		button btn_all "All" \
-		align: #left  width:50 across:3
+		button btn_all "Expand" \
+		align: #left  width:50 across:4
 
 		button btn_filter "Filter" \
-		align: #left  width:50 across:3
+		align: #left  width:50 across:4
+
+		button btn_select "Select" \
+		align: #left  width:50 across:4
 	)
 
 	----- ----- -----
@@ -457,8 +460,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeGroup "Group" width:60 across:3 checked:true
-		checkbutton modeLayer "Layer" width:60 across:3 checked:false
+		checkbutton modeLayer "Layer" width:60 across:3 checked:true
+		checkbutton modeGroup "Scene" width:60 across:3 checked:false
 		checkbutton modeObject "Object" width:60 across:3 checked:false
 		checkbutton modeAll "All" width:60 across:3 checked:true
 		checkbutton modeColor "Color" width:60 across:3 checked:false
@@ -541,6 +544,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- 	tv.width = val
 	-- )
 
+	-- option to refresh the tree
+	fn refresh_tree_externally = (
+		treeview_rollout.refreshTreeView(tv)
+	)
+
 	-- call functions on open
 	on treeview_rollout open do (
 		initTreeView tv
@@ -558,7 +566,25 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	-- TEST ---------------------------------
--- 	button TEST_FILTER "TEST" width:60 across:3
+ 	button TEST_ME "TEST" width:60 across:3
+
+ 	on TEST_ME pressed do (
+ 		-- try printing layers
+ 		-- http://help.autodesk.com/view/3DSMAX/2017/ENU/?guid=__files_GUID_78B79975_7BA5_4A03_8FEF_27E78D14B575_htm
+ 		for i = 0 to layerManager.count-1 do
+		(
+			ilayer = layerManager.getLayer i
+			layerName = ilayer.name
+			layer = ILayerManager.getLayerObject i
+			layerNodes = refs.dependents layer
+			format "Layer: %; nodes: %\n" layerName layerNodes
+
+			parent = layer.getParent()
+			if parent != undefined then (
+				print parent.name
+			)
+		)
+ 	)
 
 -- 	fn test_recursive tv_node = (
 -- 		-- print tv_node.text

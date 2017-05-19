@@ -59,6 +59,8 @@ rollout filter_rollout "何色？" (
 		print (color_name + " filter requested")
 
 		try (DestroyDialog filter_rollout) catch()
+
+		treeview_rollout.refresh_tree_externally()
 	)
 
 	on btn_all click do (

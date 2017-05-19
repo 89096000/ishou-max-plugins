@@ -32,6 +32,9 @@ macroScript toggleKage
 		) else (
 			print "close kage"
 			KAGE_MAIN.close_kage()
+			-- TODO COMMENT BELOW
+			--  (NORMALLY WOULD NOT WANT TO REINIT EVERYTHING EACH TIME)
+			KAGE_MAIN = undefined
 		)
 	)
 		
