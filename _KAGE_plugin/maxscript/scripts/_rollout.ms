@@ -37,6 +37,18 @@ IMAGE_LIST = dotNetObject "System.Windows.Forms.ImageList"
 IMAGE_LIST.imageSize = dotNetObject "System.Drawing.Size" 24 23
 
 
+-- CACHE
+pink_cache = #()
+yellow_cache = #()
+tan_cache = #()
+mint_cache = #()
+dark_cache = #()
+red_cache = #()
+violet_cache = #()
+blue_cache = #()
+grey_cache = #()
+
+
 -- FUNCTIONS
 
 -- cache bmp icons
@@ -77,6 +89,71 @@ fn killRollouts = (
 	try (DestroyDialog submenu_rollout) catch()
 	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
+)
+
+-- load color data from ini files into cache arrays
+fn load_color_cache = (
+	-- clear cache
+	pink_cache = #()
+	yellow_cache = #()
+	tan_cache = #()
+	mint_cache = #()
+	dark_cache = #()
+	red_cache = #()
+	violet_cache = #()
+	blue_cache = #()
+	grey_cache = #()
+
+	-- load cache
+	color_keys = ReadFromIniSection TREE_INI "nodes"
+	for k in color_keys do (
+		v = ReadFromIni TREE_INI "nodes" k
+		-- format "Key: %; Value: %\n" k v
+		if v == "pink" then (
+			insertItem k pink_cache 1
+		) else if v == "yellow" then (
+			insertItem k yellow_cache 1
+		) else if v == "tan" then (
+			insertItem k tan_cache 1
+		) else if v == "mint" then (
+			insertItem k mint_cache 1
+		) else if v == "dark" then (
+			insertItem k dark_cache 1
+		) else if v == "red" then (
+			insertItem k red_cache 1
+		) else if v == "violet" then (
+			insertItem k violet_cache 1
+		) else if v == "blue" then (
+			insertItem k blue_cache 1
+		) else if v == "grey" then (
+			insertItem k grey_cache 1
+		)	
+	)
+	
+	print pink_cache
+)
+
+-- retreives the color of the object name from the cache 
+fn getColorFromName node_name = (
+	x = findItem pink_cache node_name
+	if x > 0 then ( return "pink" )
+	x = findItem yellow_cache node_name
+	if x > 0 then ( return "yellow" )
+	x = findItem tan_cache node_name
+	if x > 0 then ( return "tan" )
+	x = findItem mint_cache node_name
+	if x > 0 then ( return "mint" )
+	x = findItem dark_cache node_name
+	if x > 0 then ( return "dark" )
+	x = findItem red_cache node_name
+	if x > 0 then ( return "red" )
+	x = findItem violet_cache node_name
+	if x > 0 then ( return "violet" )
+	x = findItem blue_cache node_name
+	if x > 0 then ( return "blue" )
+	x = findItem grey_cache node_name
+	if x > 0 then ( return "grey" )
+	return "none"
 )
 
 rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
@@ -131,11 +208,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			for i = 1 to theChildren.count do (
 				newNode = undefined
 
-				try (
-					color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
-				) catch (
-					color_val = "none"
-				)
+				color_val = getColorFromName(theChildren[i].name as string)
 
 				if color_val != "none" then (
 
@@ -176,11 +249,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			for i = 1 to theChildren.count do (
 				newNode = undefined
 
-				try (
-					color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
-				) catch (
-					color_val = "none"
-				)
+				color_val = getColorFromName(theChildren[i].name as string)
 
 				if color_val == "none" then (
 					if FLAT_MODE then (
@@ -226,7 +295,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				-- print (classof(theChildren[i]))
 				-- print (superclassof(theChildren[i]))
 				newNode = undefined
-				color_val = ReadFromIni TREE_INI "nodes" (theChildren[i].name as string)
+				color_val = getColorFromName(theChildren[i].name as string)
 
 				if CURRENT_FILTER == color_val or CURRENT_FILTER == "all" then (
 					if FLAT_MODE then (
@@ -277,6 +346,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			theRoot.nodeFont = _OFF_FONT
 		)		
 		rootNodes = for o in objects where o.parent == undefined collect o
+
+		-- load color information
+		-- TODO dont need to reload the cache every single time!
+		load_color_cache()
+
 		-- add to tree
 		tv.beginUpdate()
 		if TV_MODE == "group" then (
@@ -569,6 +643,9 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
  	button TEST_ME "TEST" width:60 across:3
 
  	on TEST_ME pressed do (
+ 		-- read ini
+ 		load_color_cache()
+
  		-- try printing layers
  		-- http://help.autodesk.com/view/3DSMAX/2017/ENU/?guid=__files_GUID_78B79975_7BA5_4A03_8FEF_27E78D14B575_htm
  		for i = 0 to layerManager.count-1 do

@@ -37,3 +37,14 @@ fn ReadFromIni ini_file sect k = (
 	)
 	return v
 )
+
+-- get all keys from a section
+fn ReadFromIniSection ini_file sect = (
+	already_there = hasINISetting ini_file sect
+	if already_there then (
+		v = (getINISetting ini_file sect)
+	) else (
+		v = "none"
+	)
+	return v
+)
