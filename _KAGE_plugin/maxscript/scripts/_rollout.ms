@@ -47,6 +47,7 @@ red_cache = #()
 violet_cache = #()
 blue_cache = #()
 grey_cache = #()
+LAYER_NODES = #()
 
 
 -- FUNCTIONS
@@ -91,6 +92,7 @@ fn killRollouts = (
 	try (DestroyDialog filter_rollout) catch()
 )
 
+
 -- load color data from ini files into cache arrays
 fn load_color_cache = (
 	-- clear cache
@@ -129,9 +131,8 @@ fn load_color_cache = (
 			insertItem k grey_cache 1
 		)	
 	)
-	
-	print pink_cache
 )
+
 
 -- retreives the color of the object name from the cache 
 fn getColorFromName node_name = (
@@ -155,6 +156,7 @@ fn getColorFromName node_name = (
 	if x > 0 then ( return "grey" )
 	return "none"
 )
+
 
 rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- initialize rollout control
@@ -303,37 +305,169 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					) else (
 						newNode = theNode.Nodes.add theChildren[i].name
 					)
-					newNode.tag = dotNetMXSValue theChildren[i]
-					newNode.checked = not theChildren[i].isHidden
-					icon_ref = getIconId(theChildren[i])
-					newNode.imageIndex = newNode.selectedImageIndex = icon_ref
 
-					if theChildren[i].isHidden then (
-						newNode.foreColor = GetColorForKey "ltblack"
-						newNode.nodeFont = _OFF_FONT
-					) else (
-						newNode.foreColor = GetColorForKey "black"
-						newNode.nodeFont = _ON_FONT
-					)
+					-- TODO REMOVE TRY
+					try (
+						newNode.tag = dotNetMXSValue theChildren[i]
+						newNode.checked = not theChildren[i].isHidden
+						icon_ref = getIconId(theChildren[i])
+						newNode.imageIndex = newNode.selectedImageIndex = icon_ref
 
-					-- add node data to ini file
-					-- WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+						if theChildren[i].isHidden then (
+							newNode.foreColor = GetColorForKey "ltblack"
+							newNode.nodeFont = _OFF_FONT
+						) else (
+							newNode.foreColor = GetColorForKey "black"
+							newNode.nodeFont = _ON_FONT
+						)
 
-					-- read node ini file data
-					newNode.ToolTipText = color_val
-					if color_val != "none" then (
-						newNode.backcolor = (GetColorForKey color_val)
-					)
+						-- add node data to ini file
+						-- WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
+
+						-- read node ini file data
+						newNode.ToolTipText = color_val
+						if color_val != "none" then (
+							newNode.backcolor = (GetColorForKey color_val)
+						)
+
+					) catch ()
+
 				);
 
-				if FLAT_MODE then (
-					newNode = undefined
-					addChildren tv newNode theChildren[i].children
+				-- TODO TAKE OFF TRY
+				if TV_MODE == "layer" then (
+
 				) else (
-					if newNode != undefined then
+					if FLAT_MODE then (
+						newNode = undefined
 						addChildren tv newNode theChildren[i].children
+					) else (
+						if newNode != undefined then
+							addChildren tv newNode theChildren[i].children
+					)
 				)
 			)
+		)
+	)
+
+	fn add_layer tv layer = (
+		newNode = undefined	
+		parent = layer.getParent()
+		if parent == undefined then (
+			-- root layers get added to root
+			format "root layer name : %\n" layer.name
+			if layer.name != "0" do
+				newNode = tv.Nodes.add layer.name
+				append LAYER_NODES newNode
+		) else (
+			format "child layer name %, parent %\n" layer.name parent.name
+			-- find the parent node
+			parent_node = undefined
+
+			/*
+			for z = 1 to LAYER_NODES.count do (
+			 	try (
+			 		print (LAYER_NODES[z].name)
+			 		print (LAYER_NODES[z].text)
+			 		showProperties(LAYER_NODES[z])
+			 	) catch (
+			 		print "properties unable to be shown"
+			 		showProperties(LAYER_NODES[z])
+			 	)
+			)
+			*/
+
+
+			for n = 1 to LAYER_NODES.count do (
+				if parent_node == undefined do
+					if parent.name == "0" then (
+						print "parent node is default"
+						parent_node = LAYER_NODES[n]
+					) else (
+						try (
+							layer_node_name = LAYER_NODES[n].text
+						) catch (
+							layer_node_name = ''
+						)
+						if layer_node_name == parent.name then (
+							parent_node = LAYER_NODES[n]
+						)
+					)
+			)
+
+			if parent_node != undefined then (
+				newNode = parent_node.Nodes.add layer.name
+				append LAYER_NODES newNode
+			) else (
+				format "ERROR: UNABLE TO FIND PARENT FOR %, parent:%\n" layer.name parent.name
+			)
+		)
+
+		if newNode == undefined then (
+			return false
+		) else (
+			try (
+				color_val = getColorFromName(layer.name as string)
+
+				newNode.tag = dotNetMXSValue layer
+				newNode.checked = not layer.isHidden
+				icon_ref = getIconId(layer)
+				newNode.imageIndex = newNode.selectedImageIndex = icon_ref
+
+				if layer.isHidden then (
+					newNode.foreColor = GetColorForKey "ltblack"
+					newNode.nodeFont = _OFF_FONT
+				) else (
+					newNode.foreColor = GetColorForKey "black"
+					newNode.nodeFont = _ON_FONT
+				)
+
+				-- read node ini file data
+				newNode.ToolTipText = color_val
+				if color_val != "none" then (
+					newNode.backcolor = (GetColorForKey color_val)
+				)
+
+			) catch ()
+			return true
+		)
+	)
+
+	fn add_layer_children tv layers = (
+/*
+		print "THIS IS A LIST OF LAYER NODES"
+		print "---------------------------------------"
+		for x = 1 to LAYER_NODES.count do (
+			format "Layer: %; nodes: %\n" LAYER_NODES[x].name (refs.dependents LAYER_NODES[x])
+			print LAYER_NODES[x].text
+		)
+*/
+
+		print "THIS IS A LIST OF LAYERS"
+		print "---------------------------------------"
+		for x = 1 to layers.count do (
+			p = layers[x].getParent()
+			if p == undefined then (
+				pname = "undefined"
+			) else (
+				pname = p.name
+			)
+			format "Layer: %; parent: %\n" layers[x].name pname
+		)
+
+		print "LAYER ADD LOGIC"
+		print "---------------------------------------"
+		MISSED_LAYERS = #()
+		for i = 1 to layers.count do (  -- layers.count do (		
+			new_node_found = add_layer tv layers[i]
+			if not new_node_found do
+				append MISSED_LAYERS layers[i]
+		)
+
+		print "MISSING LAYERS DO TO TREE ORDER"
+		print "---------------------------------------"
+		for i = 1 to MISSED_LAYERS.count do (
+			add_layer tv MISSED_LAYERS[i]
 		)
 	)
 	
@@ -341,10 +475,17 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- collect all objects that have no parent (top level nodes)
 	-- call recursive function to add children to top level nodes
 	fn fillInTreeView tv = (
-		if not FLAT_MODE then (
-			theRoot = tv.Nodes.add "ルート"
-			theRoot.nodeFont = _OFF_FONT
-		)		
+		-- set up root
+		if TV_MODE == "layer" then (
+			theRoot = tv.Nodes.add "0 (default)"
+			LAYER_NODES = #()
+			append LAYER_NODES theRoot
+		) else (
+			if not FLAT_MODE then (
+				theRoot = tv.Nodes.add "ルート"				
+				theRoot.nodeFont = _OFF_FONT
+			)
+		)
 		rootNodes = for o in objects where o.parent == undefined collect o
 
 		-- load color information
@@ -358,11 +499,34 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else if TV_MODE == "object" then (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) != helper collect r
 			addChildren tv theRoot rootNodes_filtered
+		) else if TV_MODE == "layer" then (
+
+			-- LAYER MODE TESTING
+			layerNodes_filtered = #()
+			for i = 0 to layerManager.count-1 do
+			(
+				ilayer = layerManager.getLayer i
+				layerName = ilayer.name
+				-- layer = ILayerManager.getLayerObject i
+				-- layerNodes = refs.dependents layer
+
+				append layerNodes_filtered ilayer
+			)
+
+			add_layer_children tv layerNodes_filtered
+
 		) else (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) == helper collect r
 			addChildren tv theRoot rootNodes_filtered
 		)
 		tv.endUpdate()
+
+		print "COLLAPSE!!"
+		print TV_MODE
+		if TV_MODE == "layer" then (
+			print tv.TopNode.text
+			tv.TopNode.Collapse()
+		)
 	)
 
 	----- ----- -----
@@ -371,6 +535,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		tv.Nodes.Clear()
 		fillInTreeView tv			
 		tv.ExpandAll()
+		if TV_MODE == "layer" do 
+			tv.TopNode.Collapse()
 	)
 	
 	-- create treeview activeX control in rollout
@@ -523,7 +689,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		CURRENT_FILTER = "all"
 		FLAT_MODE = false
 		tv.CollapseAll()
-		tv.TopNode.Expand()
+		if TV_MODE != "layer" do 
+			tv.TopNode.Expand()
 	)
 
 	on btn_all pressed do (

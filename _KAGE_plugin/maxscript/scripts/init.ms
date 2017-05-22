@@ -10,7 +10,7 @@ global KAGE_MAIN;               -- main kage struct
 global KAGE_STATUS;             -- rollout status struct
 global KAGE_HITNODE;            -- current selected node
 global CURRENT_FILTER = "all";  -- all or some color
-global TV_MODE = "group";       -- group / layer / object
+global TV_MODE = "layer";       -- layer / scene / object
 global VIEW_STYLE = "none";     -- none / color / white
 global FLAT_MODE = false;       -- doesnt draw any nodes
 
