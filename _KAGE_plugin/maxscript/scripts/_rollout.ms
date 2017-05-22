@@ -355,12 +355,12 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		parent = layer.getParent()
 		if parent == undefined then (
 			-- root layers get added to root
-			format "root layer name : %\n" layer.name
+			-- format "root layer name : %\n" layer.name
 			if layer.name != "0" do
 				newNode = tv.Nodes.add layer.name
 				append LAYER_NODES newNode
 		) else (
-			format "child layer name %, parent %\n" layer.name parent.name
+			-- format "child layer name %, parent %\n" layer.name parent.name
 			-- find the parent node
 			parent_node = undefined
 
@@ -381,7 +381,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			for n = 1 to LAYER_NODES.count do (
 				if parent_node == undefined do
 					if parent.name == "0" then (
-						print "parent node is default"
 						parent_node = LAYER_NODES[n]
 					) else (
 						try (
@@ -443,8 +442,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 */
 
-		print "THIS IS A LIST OF LAYERS"
-		print "---------------------------------------"
+		-- print "THIS IS A LIST OF LAYERS"
+		-- print "---------------------------------------"
 		for x = 1 to layers.count do (
 			p = layers[x].getParent()
 			if p == undefined then (
@@ -452,11 +451,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			) else (
 				pname = p.name
 			)
-			format "Layer: %; parent: %\n" layers[x].name pname
+		-- 	format "Layer: %; parent: %\n" layers[x].name pname
 		)
 
-		print "LAYER ADD LOGIC"
-		print "---------------------------------------"
+		-- print "LAYER ADD LOGIC"
+		-- print "---------------------------------------"
 		MISSED_LAYERS = #()
 		for i = 1 to layers.count do (  -- layers.count do (		
 			new_node_found = add_layer tv layers[i]
@@ -520,23 +519,24 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			addChildren tv theRoot rootNodes_filtered
 		)
 		tv.endUpdate()
-
-		print "COLLAPSE!!"
-		print TV_MODE
-		if TV_MODE == "layer" then (
-			print tv.TopNode.text
-			tv.TopNode.Collapse()
-		)
 	)
 
 	----- ----- -----
 	-- refresh button
 	fn refreshTreeView tv = (
 		tv.Nodes.Clear()
-		fillInTreeView tv			
+		fillInTreeView tv
 		tv.ExpandAll()
-		if TV_MODE == "layer" do 
-			tv.TopNode.Collapse()
+		if TV_MODE == "layer" then (
+			if TV_MODE == "layer" then (
+				for ln in LAYER_NODES do (
+					try (
+						if ln.text == "0 (default)" do
+							ln.collapse()
+					) catch ( )
+				)
+			)
+		)
 	)
 	
 	-- create treeview activeX control in rollout
@@ -696,7 +696,15 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on btn_all pressed do (
 		CURRENT_FILTER = "all"
 		FLAT_MODE = false
-		tv.ExpandAll()	
+		tv.ExpandAll()
+		if TV_MODE == "layer" then (
+			for ln in LAYER_NODES do (
+				try (
+					if ln.text == "0 (default)" do
+						ln.collapse()
+				) catch ( )
+			)
+		)
 	)
 
 	-- mode ---------------------------------
@@ -793,8 +801,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- call functions on open
 	on treeview_rollout open do (
 		initTreeView tv
-		fillInTreeView tv
-		tv.ExpandAll()
+		refreshTreeView tv
 	)
 
 	on treeview_rollout close do (
