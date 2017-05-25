@@ -720,40 +720,55 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	----- ----- -----
 	-- checkbutton states
-	on modeGroup changed theState do (
-		print "modeGroup was pressed"
-		CURRENT_FILTER = "all"
-		FLAT_MODE = false
-		modeGroup.checked = true
-		modeLayer.checked = false
-		modeObject.checked = false
-		TV_MODE = "group"		
-		refreshTreeView tv
-	)
-
 	on modeLayer changed theState do (
 		print "modeLayer was pressed"
-		CURRENT_FILTER = "all"
-		FLAT_MODE = false
-		modeGroup.checked = false
-		modeLayer.checked = true
-		modeObject.checked = false
-		TV_MODE = "layer"
-		refreshTreeView tv
+		print TV_MODE
+		if TV_MODE != "layer" and modeLayer.checked then (
+			CURRENT_FILTER = "all"
+			FLAT_MODE = false
+			if modeGroup.checked do
+				modeGroup.checked = false
+			if modeObject.checked do
+				modeObject.checked = false
+			TV_MODE = "layer"
+			refreshTreeView tv
+			--TV_MODE = "layer"
+			--modeLayer.checked = true
+		)
+	)
 
-		tv.CollapseAll()
-		tv.TopNode.Expand()
+	on modeGroup changed theState do (
+		print "modeGroup was pressed"
+		print TV_MODE
+		if TV_MODE != "group" and modeGroup.checked then (
+			CURRENT_FILTER = "all"
+			FLAT_MODE = false
+			if modeLayer.checked do
+				modeLayer.checked = false
+			if modeObject.checked do
+				modeObject.checked = false
+			TV_MODE = "group"
+			refreshTreeView tv
+			--TV_MODE = "group"
+			modeGroup.checked = true
+		)
 	)
 
 	on modeObject changed theState do (
-		print "modeLayer was pressed"
-		CURRENT_FILTER = "all"
-		FLAT_MODE = true
-		modeGroup.checked = false
-		modeLayer.checked = false
-		modeObject.checked = true
-		TV_MODE = "object"
-		refreshTreeView tv
+		print "modeObject was pressed"
+		print TV_MODE
+		if TV_MODE != "object" and modeObject.checked then (
+			CURRENT_FILTER = "all"
+			FLAT_MODE = true
+			if modeLayer.checked do
+				modeLayer.checked = false
+			if modeGroup.checked do
+				modeGroup.checked = false			
+			TV_MODE = "object"
+			refreshTreeView tv
+			-- TV_MODE = "object"
+			-- modeObject.checked = true
+		)
 	)
 
 	on modeAll changed theState do (
