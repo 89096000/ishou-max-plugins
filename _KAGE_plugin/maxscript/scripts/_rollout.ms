@@ -334,8 +334,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 				);
 
-				-- TODO TAKE OFF TRY
-				if TV_MODE == "layer" then (
+				if TV_MODE == "layer" or TV_MODE == "detail" then (
 
 				) else (
 					if FLAT_MODE then (
@@ -402,6 +401,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			)
 		)
 
+		-- NEW LAYER PROPERTIES
 		if newNode == undefined then (
 			return false
 		) else (
@@ -469,13 +469,65 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			add_layer tv MISSED_LAYERS[i]
 		)
 	)
+
+	fn add_obj_children tv objs = (
+
+		print "TESTING ADDING LAYER CHILDREN"
+		print "---------------------------------------"
+		-- https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2018/ENU/MAXScript-Help/files/GUID-79537E16-FE25-4567-BEA6-06F39E0A5C1F-htm.html
+
+		for o = 1 to objs.count do (
+			obj = objs[o]
+			format "finding objs for layers mode for %\n" obj.name
+			
+			obj_layer = undefined
+			for x = 1 to LAYER_NODES.count do (
+
+				if obj_layer == undefined then (
+					--print "get dependencies"
+					try (
+						xlayer = LAYER_NODES[x]
+						layer = ILayerManager.getLayerObject x
+						xlayer_nodes = refs.dependents layer
+						--format "Layer: %; nodes: %\n" xlayer.text xlayer_nodes
+					) catch (
+						--format "error on layer at index %\n" (x as string)
+						xlayer_nodes = #()
+					)
+
+					--print "search in dependencies for nodes"
+					for dependent in xlayer_nodes do (
+						try (
+							--print dependent
+							--print dependent.name
+							if dependent.name == obj.name do
+								obj_layer = xlayer
+						) catch (
+							"DEPENDENT FAILED :(???"
+						)
+					)
+				)-- end seach for object's layer
+			) -- end layer iterator
+
+			-- print "check if layer was found"
+			if obj_layer == undefined then (
+				format "layer was NOT found for %\n" obj.name
+			) else (
+				format "FOUND layer and it IS %\n" obj_layer.text
+	
+				-- add object into respective layer
+				newNode = obj_layer.Nodes.add obj.name
+			)
+
+		) -- end object iterator
+	)
 	
 	-- define the content for the treeview
 	-- collect all objects that have no parent (top level nodes)
 	-- call recursive function to add children to top level nodes
 	fn fillInTreeView tv = (
 		-- set up root
-		if TV_MODE == "layer" then (
+		if TV_MODE == "layer" or TV_MODE == "detail" then (
 			theRoot = tv.Nodes.add "0 (default)"
 			LAYER_NODES = #()
 			append LAYER_NODES theRoot
@@ -498,7 +550,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else if TV_MODE == "object" then (
 			rootNodes_filtered = for r in rootNodes where superclassof(r) != helper collect r
 			addChildren tv theRoot rootNodes_filtered
-		) else if TV_MODE == "layer" then (
+		) else if TV_MODE == "layer" or TV_MODE == "detail" then (
 
 			-- LAYER MODE TESTING
 			layerNodes_filtered = #()
@@ -506,15 +558,19 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			(
 				ilayer = layerManager.getLayer i
 				layerName = ilayer.name
-				-- layer = ILayerManager.getLayerObject i
-				-- layerNodes = refs.dependents layer
-
 				append layerNodes_filtered ilayer
 			)
 
 			add_layer_children tv layerNodes_filtered
 
+			-- ADD OBJECTS TO LAYER
+			if TV_MODE == "detail" then (
+				print "PART ONE TEST"
+				add_obj_children tv rootNodes
+			)
+
 		) else (
+			-- THIS IS THE NON LAYER CASE
 			rootNodes_filtered = for r in rootNodes where superclassof(r) == helper collect r
 			addChildren tv theRoot rootNodes_filtered
 		)
@@ -527,14 +583,12 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		tv.Nodes.Clear()
 		fillInTreeView tv
 		tv.ExpandAll()
-		if TV_MODE == "layer" then (
-			if TV_MODE == "layer" then (
-				for ln in LAYER_NODES do (
-					try (
-						if ln.text == "0 (default)" do
-							ln.collapse()
-					) catch ( )
-				)
+		if TV_MODE == "layer" or TV_MODE == "detail" then (
+			for ln in LAYER_NODES do (
+				try (
+					if ln.text == "0 (default)" do
+						ln.collapse()
+				) catch ( )
 			)
 		)
 	)
@@ -689,7 +743,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		CURRENT_FILTER = "all"
 		FLAT_MODE = false
 		tv.CollapseAll()
-		if TV_MODE != "layer" do 
+		if TV_MODE != "layer" and TV_MODE != "detail" do 
 			tv.TopNode.Expand()
 	)
 
@@ -697,7 +751,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		CURRENT_FILTER = "all"
 		FLAT_MODE = false
 		tv.ExpandAll()
-		if TV_MODE == "layer" then (
+		if TV_MODE != "layer" and TV_MODE != "detail" then (
 			for ln in LAYER_NODES do (
 				try (
 					if ln.text == "0 (default)" do
@@ -709,9 +763,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeLayer "Layer" width:60 across:3 checked:true
-		checkbutton modeGroup "Scene" width:60 across:3 checked:false
-		checkbutton modeObject "Object" width:60 across:3 checked:false
+		checkbutton modeLayer "Layer" width:60 across:4 checked:true
+		checkbutton modeDetail "Detail" width:60 across:4 checked:false
+		checkbutton modeGroup "Scene" width:60 across:4 checked:false
+		checkbutton modeObject "Object" width:60 across:4 checked:false
 		checkbutton modeAll "All" width:60 across:3 checked:true
 		checkbutton modeColor "Color" width:60 across:3 checked:false
 		checkbutton modeWhite "White" width:60 across:3 checked:false
@@ -726,6 +781,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE != "layer" and modeLayer.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
+			if modeDetail.checked do
+				modeDetail.checked = false
 			if modeGroup.checked do
 				modeGroup.checked = false
 			if modeObject.checked do
@@ -737,12 +794,31 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 	)
 
+	on modeDetail changed theState do (
+		print "modeDetail was pressed"
+		print TV_MODE
+		if TV_MODE != "detail" and modeDetail.checked then (
+			CURRENT_FILTER = "all"
+			FLAT_MODE = false
+			if modeLayer.checked do
+				modeLayer.checked = false
+			if modeGroup.checked do
+				modeGroup.checked = false
+			if modeObject.checked do
+				modeObject.checked = false
+			TV_MODE = "detail"
+			refreshTreeView tv
+		)
+	)
+
 	on modeGroup changed theState do (
 		print "modeGroup was pressed"
 		print TV_MODE
 		if TV_MODE != "group" and modeGroup.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
+			if modeDetail.checked do
+				modeDetail.checked = false
 			if modeLayer.checked do
 				modeLayer.checked = false
 			if modeObject.checked do
@@ -760,6 +836,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE != "object" and modeObject.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = true
+			if modeDetail.checked do
+				modeDetail.checked = false
 			if modeLayer.checked do
 				modeLayer.checked = false
 			if modeGroup.checked do
