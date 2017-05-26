@@ -178,6 +178,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		classy = (classof(layer_obj) as string)
 		if superclassy == "camera" then (
 			id = 1
+		) else if superclassy == "MixinInterface" then (
+			id = 2
 		) else if superclassy == "light" then (
 			id = 3
 		) else if superclassy == "helper" then (
@@ -187,14 +189,20 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				default: 6
 			)
 		) else if superclassy == "GeometryClass" then (
-			id = case classy of (
-				"Cylinder": 4
-				"Sphere": 4
-				"Box": 0
-				"Editable_Poly": 0
-				"PolyMeshObject": 0
-				"Editable_mesh": 0
-				default: 0
+			subname = substring layer_obj.name 1 3
+			print subname
+			if subname == "Cyl" then (
+				id = 4
+			) else (
+				id = case classy of (
+					"Cylinder": 4
+					"Sphere": 4
+					"Box": 0
+					"Editable_Poly": 0
+					"PolyMeshObject": 0
+					"Editable_mesh": 0
+					default: 0
+					)
 			)
 		) else (
 			id = 2
@@ -295,11 +303,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				-- node_number_padded = padZeros(i)
 				-- node_new_name = node_number_padded + " " + theChildren[i].name
 				-- newNode = theNode.Nodes.add node_new_name
-
-				-- uncomment if you want to see properties
-				-- print (theChildren[i].name)
-				-- print (classof(theChildren[i]))
-				-- print (superclassof(theChildren[i]))
 				newNode = undefined
 				color_val = getColorFromName(theChildren[i].name as string)
 
