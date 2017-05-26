@@ -83,6 +83,9 @@ getIconFromBitmap 1 "camera"
 getIconFromBitmap 2 "layer"
 getIconFromBitmap 3 "light"
 getIconFromBitmap 4 "sphere"
+getIconFromBitmap 5 "root"
+getIconFromBitmap 6 "group"
+getIconFromBitmap 7 "particle"
 
 
 -- kills secondary rollouts
@@ -129,7 +132,8 @@ fn load_color_cache = (
 			insertItem k blue_cache 1
 		) else if v == "grey" then (
 			insertItem k grey_cache 1
-		)	
+		) else if v == "none" then (
+		)
 	)
 )
 
@@ -178,9 +182,9 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			id = 3
 		) else if superclassy == "helper" then (
 			id = case classy of (
-				"Dummy": 0
-				"Particle_View": 0
-				default: 0
+				"Dummy": 6
+				"Particle_View": 7
+				default: 6
 			)
 		) else if superclassy == "GeometryClass" then (
 			id = case classy of (
@@ -472,7 +476,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	-- *******************************************************
-	-- TREE FULFILLMENT SUBFUNC- Adds a layer to the treeview
+	-- TREE FULFILLMENT SUBFUNC- Adds an object for a layer to the treeview
 	fn add_object tv the_node obj = (
 		newNode = the_node.Nodes.add obj.name
 
@@ -497,6 +501,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			if color_val != "none" then (
 				newNode.backcolor = (GetColorForKey color_val)
 			)
+
+			if newNode != undefined then
+				addChildren tv newNode obj.children
+
 			return true
 
 --		) catch (
@@ -561,7 +569,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			if obj_layer_node == undefined then (
 				format "ERROR: layer was NOT found for %\n" obj.name
 			) else (
-				-- successful: add object into respective layer	
+				-- successful: add object into respective layer
 				add_object tv obj_layer_node obj
 			)
 
@@ -575,19 +583,22 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		-- set up root
 		if TV_MODE == "layer" or TV_MODE == "detail" then (
 			theRoot = tv.Nodes.add "0 (default)"
+			theRoot.imageIndex = 5
+
 			LAYER_NODES = #()
 			append LAYER_NODES theRoot
 		) else (
 			if not FLAT_MODE then (
 				theRoot = tv.Nodes.add "ルート"				
 				theRoot.nodeFont = _OFF_FONT
+				theRoot.imageIndex = 5
 			)
 		)
 		rootNodes = for o in objects where o.parent == undefined collect o
 
 		-- load color information
 		-- TODO dont need to reload the cache every single time!
-		load_color_cache()
+		load_color_cache
 
 		-- add to tree
 		tv.beginUpdate()
@@ -642,95 +653,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- create treeview activeX control in rollout
 	-- activeXControl tv "MSComctlLib.TreeCtrl" width:190 height:290 align:#center
 	dotNetControl tv "TreeView" width:_TV_WIDTH height:_TV_HEIGHT align:#center
-
-	-- HANDLERS
-	-- add event handler to select the object if user clicks on node
-	-- have to get node under mouse cursor, then select using the MXS tag
-	on tv Click arg do (
-		if arg.button == tv.mousebuttons.right then(
-			-- RIGHT CLICK - bring up color menu
-			try (
-				try (DestroyDialog submenu_rollout) catch()
-				try (DestroyDialog export_rollout) catch()
-				try (DestroyDialog filter_rollout) catch()
-				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
-				local dialog_pos = GetDialogPos treeview_rollout
-				-- local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
-				local posx = dialog_pos.x + mousepoint.X + 30
-				local posy = dialog_pos.y + mousepoint.Y + 30
-				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
-											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
-											 pos:[posx, posy] \
-	                                         style:#(#style_border);
-			) catch ( )
-
-			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
-			print "start variable tests"
-			-- try ( print mousepoint.Y ) catch ( print "fail xy test")
-			-- try ( print KAGE_HITNODE.tag.value ) catch ( print "fail test 1" )
-			-- try ( print mainVars.THE_HITNODE.backcolor ) catch ( print "fail test 2" )
-			-- try ( print KAGE_HITNODE.text ) catch ( print "fail test 3" )
-			-- try ( print mainVars.THE_HITNODE.name ) catch ( print "fail test 4" )
-			-- try ( print (KAGE_HITNODE.isVisible as string) ) catch ( print "fail test 6" )
-
-		) else (
-			-- LEFT CLICK - SELECT OBJECT
-			hitNode = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
-			if hitNode != undefined do try(
-				select hitNode.tag.value
-			) catch (
-				max select none
-			)
-
-			for obj in selection do (
-				-- try ( print obj.name ) catch ( print "fail test 5" )
-				if obj.children != undefined do(
-					selectmore obj.children
-				)
-			)
-
-
-		)
-	)
-
-	fn recursive_select my_node = (
-		nodes = my_node.Nodes
- 		for i = 0 to (nodes.count-1) do ( 				
-			try (
-				selectmore nodes.item[i].tag.value
-			) catch ()
-			recursive_select nodes.item[i]
-		)
-	)
-
-	on tv DoubleClick arg do (
-		print "there was a double click"
- 		print tv.selectedNode.imageIndex
- 		if tv.selectedNode.imageIndex == 2 then (
- 			max select none
- 			recursive_select tv.selectedNode
- 		)
-	)
-	
-	-- handler for checkbox changing the visibility
-	on tv AfterCheck arg do (
-		try (
-			arg.node.tag.value.isHidden = not arg.node.checked
-			if arg.node.checked then (
-				arg.node.foreColor = GetColorForKey "black"
-				arg.node.nodeFont = _ON_FONT
-			) else (
-				arg.node.foreColor = GetColorForKey "ltblack"
-				arg.node.nodeFont = _OFF_FONT
-			)
-		) catch ()
-	)
-
-	on tv Close arg do(
-		try (DestroyDialog submenu_rollout) catch()
-		try (DestroyDialog export_rollout) catch()
-		try (DestroyDialog filter_rollout) catch()
-	)
 
 	-- controls ---------------------------------
 	group "コントロール" (
@@ -843,7 +765,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on modeSummary changed theState do (
 		print "modeSummary was pressed"
 		print TV_MODE
-		if TV_MODE != "layer" and modeLayer.checked then (
+		if TV_MODE != "layer" and modeSummary.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
 			if modeLayer.checked do
@@ -865,8 +787,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE != "detail" and modeLayer.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
-			if modeLayer.checked do
-				modeLayer.checked = false
+			if modeSummary.checked do
+				modeSummary.checked = false
 			if modeGroup.checked do
 				modeGroup.checked = false
 			if modeObject.checked do
@@ -882,8 +804,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE != "group" and modeGroup.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
-			if modeLayer.checked do
-				modeLayer.checked = false
+			if modeSummary.checked do
+				modeSummary.checked = false
 			if modeLayer.checked do
 				modeLayer.checked = false
 			if modeObject.checked do
@@ -891,7 +813,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			TV_MODE = "group"
 			refreshTreeView tv
 			--TV_MODE = "group"
-			modeGroup.checked = true
+			--modeGroup.checked = true
 		)
 	)
 
@@ -901,8 +823,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE != "object" and modeObject.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = true
-			if modeLayer.checked do
-				modeLayer.checked = false
+			if modeSummary.checked do
+				modeSummary.checked = false
 			if modeLayer.checked do
 				modeLayer.checked = false
 			if modeGroup.checked do
@@ -981,6 +903,117 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
  		print tv.selectedNode.text
  		print tv.selectedNode.imageIndex
  	)
+
+	-- HANDLERS
+	-- add event handler to select the object if user clicks on node
+	-- have to get node under mouse cursor, then select using the MXS tag
+	on tv Click arg do (
+		if arg.button == tv.mousebuttons.right then(
+			-- RIGHT CLICK - bring up color menu
+			try (
+				try (DestroyDialog submenu_rollout) catch()
+				try (DestroyDialog export_rollout) catch()
+				try (DestroyDialog filter_rollout) catch()
+				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
+				local dialog_pos = GetDialogPos treeview_rollout
+				-- local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
+				local posx = dialog_pos.x + mousepoint.X + 30
+				local posy = dialog_pos.y + mousepoint.Y + 30
+				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
+											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
+											 pos:[posx, posy] \
+	                                         style:#(#style_border);
+			) catch ( )
+
+			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
+			print "start variable tests"
+			-- try ( print mousepoint.Y ) catch ( print "fail xy test")
+			-- try ( print KAGE_HITNODE.tag.value ) catch ( print "fail test 1" )
+			-- try ( print mainVars.THE_HITNODE.backcolor ) catch ( print "fail test 2" )
+			-- try ( print KAGE_HITNODE.text ) catch ( print "fail test 3" )
+			-- try ( print mainVars.THE_HITNODE.name ) catch ( print "fail test 4" )
+			-- try ( print (KAGE_HITNODE.isVisible as string) ) catch ( print "fail test 6" )
+
+		) else (
+			-- LEFT CLICK - SELECT OBJECT
+			hitNode = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
+			if hitNode != undefined do try(
+				select hitNode.tag.value
+			) catch (
+				max select none
+			)
+
+			for obj in selection do (
+				-- try ( print obj.name ) catch ( print "fail test 5" )
+				if obj.children != undefined do(
+					selectmore obj.children
+				)
+			)
+
+
+		)
+	)
+
+	fn recursive_select my_node = (
+		nodes = my_node.Nodes
+ 		for i = 0 to (nodes.count-1) do ( 				
+			try (
+				selectmore nodes.item[i].tag.value
+			) catch ()
+			recursive_select nodes.item[i]
+		)
+	)
+
+	on tv DoubleClick arg do (
+		print "there was a double click" 		
+ 		if TV_MODE == "detail" then (
+	 		if tv.selectedNode.imageIndex == 2 then (
+	 			disableSceneRedraw() 
+	 			max select none
+	 			recursive_select tv.selectedNode
+	 			enableSceneRedraw() 
+	 		)
+	 	)
+
+ 		if TV_MODE == "layer" then (
+ 			modeLayer.checked = true
+ 			CURRENT_FILTER = "all"
+			FLAT_MODE = false
+			if modeSummary.checked do
+				modeSummary.checked = false
+			if modeGroup.checked do
+				modeGroup.checked = false
+			if modeObject.checked do
+				modeObject.checked = false
+			TV_MODE = "detail"
+			refreshTreeView tv
+ 		)
+	)
+	
+	-- handler for checkbox changing the visibility
+	on tv AfterCheck arg do (
+		try (
+			arg.node.tag.value.isHidden = not arg.node.checked
+			if arg.node.checked then (
+				arg.node.foreColor = GetColorForKey "black"
+				arg.node.nodeFont = _ON_FONT
+			) else (
+				arg.node.foreColor = GetColorForKey "ltblack"
+				arg.node.nodeFont = _OFF_FONT
+			)
+		) catch ()
+	)
+
+	on treeview_rollout resized val do (
+		format "rollout: %\n" val
+		tv.width = (val.x - _ROLLOUT_WIDTH + _TV_WIDTH)
+	)
+
+	on tv Close arg do(
+		try (DestroyDialog submenu_rollout) catch()
+		try (DestroyDialog export_rollout) catch()
+		try (DestroyDialog filter_rollout) catch()
+	)
 
 -- 	on TEST_FILTER pressed do (
 -- 		nodes = tv.Nodes
