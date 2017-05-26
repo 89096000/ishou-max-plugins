@@ -349,6 +349,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 	)
 
+	-- *******************************************************
+	-- TREE FULFILLMENT SUBFUNC - Adds a layer to the treeview
 	fn add_layer tv layer = (
 		newNode = undefined	
 		parent = layer.getParent()
@@ -393,15 +395,14 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					)
 			)
 
+			-- note if parent is undedfined the first time, it will be retried 1 time
 			if parent_node != undefined then (
 				newNode = parent_node.Nodes.add layer.name
 				append LAYER_NODES newNode
-			) else (
-				format "ERROR: UNABLE TO FIND PARENT FOR %, parent:%\n" layer.name parent.name
 			)
 		)
 
-		-- NEW LAYER PROPERTIES
+		-- new layer properties
 		if newNode == undefined then (
 			return false
 		) else (
@@ -432,18 +433,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 	)
 
+	-- *******************************************************
+	-- TREE FULFILLMENT LOGIC- finds layer parent, adds layer, retries 1 time
 	fn add_layer_children tv layers = (
-/*
-		print "THIS IS A LIST OF LAYER NODES"
-		print "---------------------------------------"
-		for x = 1 to LAYER_NODES.count do (
-			format "Layer: %; nodes: %\n" LAYER_NODES[x].name (refs.dependents LAYER_NODES[x])
-			print LAYER_NODES[x].text
-		)
-*/
-
-		-- print "THIS IS A LIST OF LAYERS"
-		-- print "---------------------------------------"
+		-- 1 get layer parent
 		for x = 1 to layers.count do (
 			p = layers[x].getParent()
 			if p == undefined then (
@@ -451,40 +444,84 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			) else (
 				pname = p.name
 			)
-		-- 	format "Layer: %; parent: %\n" layers[x].name pname
+			-- 	format "Layer: %; parent: %\n" layers[x].name pname
 		)
 
 		-- print "LAYER ADD LOGIC"
-		-- print "---------------------------------------"
-		MISSED_LAYERS = #()
+		missed_layers = #()
 		for i = 1 to layers.count do (  -- layers.count do (		
 			new_node_found = add_layer tv layers[i]
 			if not new_node_found do
-				append MISSED_LAYERS layers[i]
+				append missed_layers layers[i]
 		)
 
-		print "MISSING LAYERS DO TO TREE ORDER"
-		print "---------------------------------------"
-		for i = 1 to MISSED_LAYERS.count do (
-			add_layer tv MISSED_LAYERS[i]
+		-- rereun missed layers
+		missed_layers_final = #()
+		for i = 1 to missed_layers.count do (
+			new_node_found = add_layer tv missed_layers[i]
+			if not new_node_found do
+				append missed_layers_final missed_layers[i]
+		)
+
+		-- alert any layers that werent added
+		if missed_layers_final.count > 0 then (
+			for i = 1 to missed_layers_final.count do (
+				format "ERROR: % could not be found\n" missed_layers_final[i].name
+			)
 		)
 	)
 
+	-- *******************************************************
+	-- TREE FULFILLMENT SUBFUNC- Adds a layer to the treeview
+	fn add_object tv the_node obj = (
+		newNode = the_node.Nodes.add obj.name
+
+--		try (
+			color_val = getColorFromName(obj.name as string)
+
+			newNode.tag = dotNetMXSValue obj
+			newNode.checked = not obj.isHidden
+			icon_ref = getIconId(obj)
+			newNode.imageIndex = (newNode.selectedImageIndex = icon_ref)
+
+			if obj.isHidden then (
+				newNode.foreColor = GetColorForKey "ltblack"
+				newNode.nodeFont = _OFF_FONT
+			) else (
+				newNode.foreColor = GetColorForKey "black"
+				newNode.nodeFont = _ON_FONT
+			)
+
+			-- read node ini file data
+			newNode.ToolTipText = color_val
+			if color_val != "none" then (
+				newNode.backcolor = (GetColorForKey color_val)
+			)
+			return true
+
+--		) catch (
+--			format "ERROR: adding %\n" obj.name
+--			return false
+--		)
+	)
+
+	-- *******************************************************
+	-- TREE FULFILLMENT LOGIC- finds layer parent, adds layer, retries 1 time	
 	fn add_obj_children tv objs = (
-
-		print "TESTING ADDING LAYER CHILDREN"
-		print "---------------------------------------"
+		
 		-- https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2018/ENU/MAXScript-Help/files/GUID-79537E16-FE25-4567-BEA6-06F39E0A5C1F-htm.html
-
 		for o = 1 to objs.count do (
-			obj = objs[o]
-			format "finding objs for layers mode for %\n" obj.name
-			
+
+			-- format "finding objs for layers mode for %\n" obj.name
+			obj = objs[o]			
 			obj_layer = undefined
+
+			-- loops through every layer (cached)
 			for x = 1 to LAYER_NODES.count do (
 
 				if obj_layer == undefined then (
-					--print "get dependencies"
+
+					-- get layer dependencies
 					try (
 						xlayer = LAYER_NODES[x]
 						layer = ILayerManager.getLayerObject x
@@ -495,28 +532,23 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 						xlayer_nodes = #()
 					)
 
-					--print "search in dependencies for nodes"
+					-- search through layer dependencies for ob
 					for dependent in xlayer_nodes do (
 						try (
-							--print dependent
-							--print dependent.name
 							if dependent.name == obj.name do
 								obj_layer = xlayer
-						) catch (
-							"DEPENDENT FAILED :(???"
-						)
+						) catch ()
 					)
 				)-- end seach for object's layer
+			
 			) -- end layer iterator
 
-			-- print "check if layer was found"
+			-- was there a layer dependencies match?  if not, should be layer 0
 			if obj_layer == undefined then (
-				format "layer was NOT found for %\n" obj.name
+				format "ERROR: layer was NOT found for %\n" obj.name
 			) else (
-				format "FOUND layer and it IS %\n" obj_layer.text
-	
-				-- add object into respective layer
-				newNode = obj_layer.Nodes.add obj.name
+				-- successful: add object into respective layer	
+				add_object tv obj_layer obj
 			)
 
 		) -- end object iterator
