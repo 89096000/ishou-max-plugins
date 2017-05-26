@@ -178,7 +178,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			id = 3
 		) else if superclassy == "helper" then (
 			id = case classy of (
-				"Dummy": 2
+				"Dummy": 0
 				"Particle_View": 0
 				default: 0
 			)
@@ -678,6 +678,25 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 		)
 	)
+
+	fn recursive_select my_node = (
+		nodes = my_node.Nodes
+ 		for i = 0 to (nodes.count-1) do ( 				
+			try (
+				selectmore nodes.item[i].tag.value
+			) catch ()
+			recursive_select nodes.item[i]
+		)
+	)
+
+	on tv DoubleClick arg do (
+		print "there was a double click"
+ 		print tv.selectedNode.imageIndex
+ 		if tv.selectedNode.imageIndex == 2 then (
+ 			max select none
+ 			recursive_select tv.selectedNode
+ 		)
+	)
 	
 	-- handler for checkbox changing the visibility
 	on tv AfterCheck arg do (
@@ -925,8 +944,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- call functions on open
 	on treeview_rollout open do (
-		initTreeView tv
-		refreshTreeView tv
+		try (
+			initTreeView tv
+			refreshTreeView tv
+		) catch ()
 	)
 
 	on treeview_rollout close do (
@@ -942,37 +963,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
  	button TEST_ME "TEST" width:60 across:3
 
  	on TEST_ME pressed do (
- 		-- read ini
- 		load_color_cache()
-
- 		-- try printing layers
- 		-- http://help.autodesk.com/view/3DSMAX/2017/ENU/?guid=__files_GUID_78B79975_7BA5_4A03_8FEF_27E78D14B575_htm
- 		for i = 0 to layerManager.count-1 do
-		(
-			ilayer = layerManager.getLayer i
-			layerName = ilayer.name
-			layer = ILayerManager.getLayerObject i
-			layerNodes = refs.dependents layer
-			format "Layer: %; nodes: %\n" layerName layerNodes
-
-			parent = layer.getParent()
-			if parent != undefined then (
-				print parent.name
-			)
-		)
+ 		-- get currently selected nodes .imageIndex
+ 		print tv.selectedNode.text
+ 		print tv.selectedNode.imageIndex
  	)
-
--- 	fn test_recursive tv_node = (
--- 		-- print tv_node.text
--- 		color_val = tv_node.ToolTipText	
--- 		if color_val == "pink" then (
--- 			tv_node.nodeFont = _ON_FONT
--- 		) else (
--- 			tv_node.nodeFont = _OFF_FONT
--- 		)
--- 		for n = 0 to (tv_node.Nodes.Count-1) do			
--- 			test_recursive tv_node.Nodes.Item[n]
--- 	)
 
 -- 	on TEST_FILTER pressed do (
 -- 		nodes = tv.Nodes
