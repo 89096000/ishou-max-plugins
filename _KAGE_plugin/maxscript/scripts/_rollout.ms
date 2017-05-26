@@ -506,24 +506,25 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	-- *******************************************************
-	-- TREE FULFILLMENT LOGIC- finds layer parent, adds layer, retries 1 time	
+	-- TREE FULFILLMENT LOGIC- finds layer parent, adds layer, retries 1 time
 	fn add_obj_children tv objs = (
 		
 		-- https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2018/ENU/MAXScript-Help/files/GUID-79537E16-FE25-4567-BEA6-06F39E0A5C1F-htm.html
 		for o = 1 to objs.count do (
 
 			-- format "finding objs for layers mode for %\n" obj.name
-			obj = objs[o]			
+			obj = objs[o]
 			obj_layer = undefined
+			obj_layer_node = undefined
 
 			-- loops through every layer (cached)
-			for x = 1 to LAYER_NODES.count do (
+			for x = 0 to (layerManager.count-1) do (
 
 				if obj_layer == undefined then (
 
 					-- get layer dependencies
 					try (
-						xlayer = LAYER_NODES[x]
+						xlayer = layerManager.getLayer x
 						layer = ILayerManager.getLayerObject x
 						xlayer_nodes = refs.dependents layer
 						--format "Layer: %; nodes: %\n" xlayer.text xlayer_nodes
@@ -543,12 +544,25 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			
 			) -- end layer iterator
 
+			-- get the layer node for found layer (fromm cache)
+			if obj_layer != undefined then (
+				for y = 1 to LAYER_NODES.count do (
+					if obj_layer_node == undefined then (
+						ynode = LAYER_NODES[y]
+						try (
+							if ynode.text == obj_layer.name do
+								obj_layer_node = ynode
+						) catch ()
+					)
+				)
+			)
+
 			-- was there a layer dependencies match?  if not, should be layer 0
-			if obj_layer == undefined then (
+			if obj_layer_node == undefined then (
 				format "ERROR: layer was NOT found for %\n" obj.name
 			) else (
 				-- successful: add object into respective layer	
-				add_object tv obj_layer obj
+				add_object tv obj_layer_node obj
 			)
 
 		) -- end object iterator
@@ -814,8 +828,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeLayer "Layer" width:60 across:4 checked:true
-		checkbutton modeDetail "Detail" width:60 across:4 checked:false
+		checkbutton modeSummary "Summary" width:60 across:4 checked:true
+		checkbutton modeLayer "Layer" width:60 across:4 checked:false
 		checkbutton modeGroup "Scene" width:60 across:4 checked:false
 		checkbutton modeObject "Object" width:60 across:4 checked:false
 		checkbutton modeAll "All" width:60 across:3 checked:true
@@ -826,14 +840,14 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	----- ----- -----
 	-- checkbutton states
-	on modeLayer changed theState do (
-		print "modeLayer was pressed"
+	on modeSummary changed theState do (
+		print "modeSummary was pressed"
 		print TV_MODE
 		if TV_MODE != "layer" and modeLayer.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
-			if modeDetail.checked do
-				modeDetail.checked = false
+			if modeLayer.checked do
+				modeLayer.checked = false
 			if modeGroup.checked do
 				modeGroup.checked = false
 			if modeObject.checked do
@@ -845,10 +859,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 	)
 
-	on modeDetail changed theState do (
-		print "modeDetail was pressed"
+	on modeLayer changed theState do (
+		print "modeLayer was pressed"
 		print TV_MODE
-		if TV_MODE != "detail" and modeDetail.checked then (
+		if TV_MODE != "detail" and modeLayer.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
 			if modeLayer.checked do
@@ -868,8 +882,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE != "group" and modeGroup.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = false
-			if modeDetail.checked do
-				modeDetail.checked = false
+			if modeLayer.checked do
+				modeLayer.checked = false
 			if modeLayer.checked do
 				modeLayer.checked = false
 			if modeObject.checked do
@@ -887,8 +901,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE != "object" and modeObject.checked then (
 			CURRENT_FILTER = "all"
 			FLAT_MODE = true
-			if modeDetail.checked do
-				modeDetail.checked = false
+			if modeLayer.checked do
+				modeLayer.checked = false
 			if modeLayer.checked do
 				modeLayer.checked = false
 			if modeGroup.checked do
