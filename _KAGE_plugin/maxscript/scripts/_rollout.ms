@@ -78,7 +78,7 @@ fn getIconFromBitmap number iconFileName = (
 	img = dotnetClass "System.Drawing.Image"
 	IMAGE_LIST.images.add (img.fromFile filename)
 )
-getIconFromBitmap 0 "box"
+getIconFromBitmap 0 "max"
 getIconFromBitmap 1 "camera"
 getIconFromBitmap 2 "layer"
 getIconFromBitmap 3 "light"
@@ -86,6 +86,9 @@ getIconFromBitmap 4 "sphere"
 getIconFromBitmap 5 "root"
 getIconFromBitmap 6 "group"
 getIconFromBitmap 7 "particle"
+getIconFromBitmap 8 "line"
+getIconFromBitmap 9 "vray"
+getIconFromBitmap 10 "box"
 
 
 -- kills secondary rollouts
@@ -181,7 +184,12 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else if superclassy == "MixinInterface" then (
 			id = 2
 		) else if superclassy == "light" then (
-			id = 3
+			subname = substring layer_obj.name 1 4
+			if subname == "VRay" then(
+				id = 9
+			) else (
+				id = 3
+			)
 		) else if superclassy == "helper" then (
 			id = case classy of (
 				"Dummy": 6
@@ -190,19 +198,18 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			)
 		) else if superclassy == "GeometryClass" then (
 			subname = substring layer_obj.name 1 3
-			print subname
+			-- print subname
 			if subname == "Cyl" then (
 				id = 4
+			) else if subname == "Lin" then(
+				id = 8
+			) else if subname == "Box" then(
+				id = 10
 			) else (
-				id = case classy of (
-					"Cylinder": 4
-					"Sphere": 4
-					"Box": 0
-					"Editable_Poly": 0
-					"PolyMeshObject": 0
-					"Editable_mesh": 0
-					default: 0
-					)
+				id = 0
+				--"Editable_Poly": 0
+				--"PolyMeshObject": 0
+				--"Editable_mesh": 0
 			)
 		) else (
 			id = 2
