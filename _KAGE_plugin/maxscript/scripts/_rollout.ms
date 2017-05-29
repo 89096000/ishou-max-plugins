@@ -181,7 +181,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		classy = (classof(layer_obj) as string)
 		if superclassy == "camera" then (
 			id = 1
-		) else if superclassy == "MixinInterface" then (
+		) else if superclassy == "MixinInterface" or superclassy == "Value" then (
 			id = 2
 		) else if superclassy == "light" then (
 			subname = substring layer_obj.name 1 4
@@ -211,7 +211,20 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				--"PolyMeshObject": 0
 				--"Editable_mesh": 0
 			)
+		) else if superclassy == "shape" then (
+			subname = substring layer_obj.name 1 3
+			id = case classy of (
+				cylinder: 4
+				sphere: 4
+				"line": 8
+				box: 10
+				default: 0
+			)
 		) else (
+			print "unidentified"
+			print superclassy
+			print classy
+			print layer_obj.name
 			id = 2
 		)
 
