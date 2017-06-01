@@ -97,6 +97,7 @@ fn killRollouts = (
 	try (DestroyDialog submenu_rollout) catch()
 	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
+	try (DestroyDialog select_rollout) catch()
 )
 
 
@@ -301,7 +302,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 		if FLAT_MODE then (
 			newNode = undefined
-			addChildren tv newNode obj.children
+			-- addChildren tv newNode obj.children
+			for i = 1 to obj.children.count do (
+				add_object tv newNode obj.children[i]
+			)
 		) else (
 			if newNode == undefined then (
 				-- addChildren tv the_node obj.children
@@ -682,6 +686,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		try (DestroyDialog submenu_rollout) catch()
 		try (DestroyDialog export_rollout) catch()
 		try (DestroyDialog filter_rollout) catch()
+		try (DestroyDialog select_rollout) catch()
 
 		-- local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
 		local dialog_pos = GetDialogPos treeview_rollout
@@ -693,6 +698,26 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 									 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
 									 pos:[posx, posy] \
                                      style:#(#style_border);
+	)
+
+	----- ----- -----
+	-- special select button
+	on btn_select pressed do (
+		try (DestroyDialog submenu_rollout) catch()
+		try (DestroyDialog export_rollout) catch()
+		try (DestroyDialog filter_rollout) catch()
+		try (DestroyDialog select_rollout) catch()
+
+		-- local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
+		local dialog_pos = GetDialogPos treeview_rollout
+		--local posx = dialog_pos.x + mousepoint.X + 30
+		--local posy = dialog_pos.y + mousepoint.Y + 30
+		local posx = dialog_pos.x - 30 + _TV_WIDTH
+		local posy = dialog_pos.y - 50 + _TV_HEIGHT
+		CreateDialog select_rollout ((_COLOR_BTN_SIZE*2)+2)\
+									((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
+									pos:[posx, posy] \
+                                    style:#(#style_border);
 	)
 
 	----- ----- -----
@@ -883,6 +908,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				try (DestroyDialog submenu_rollout) catch()
 				try (DestroyDialog export_rollout) catch()
 				try (DestroyDialog filter_rollout) catch()
+				try (DestroyDialog select_rollout) catch()
 				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
 				local dialog_pos = GetDialogPos treeview_rollout
 				-- local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
@@ -981,6 +1007,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		try (DestroyDialog submenu_rollout) catch()
 		try (DestroyDialog export_rollout) catch()
 		try (DestroyDialog filter_rollout) catch()
+		try (DestroyDialog select_rollout) catch()
 	)
 
 -- 	on TEST_FILTER pressed do (
@@ -1018,6 +1045,7 @@ function open_kage = (
 	try (DestroyDialog submenu_rollout) catch()
 	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
+	try (DestroyDialog select_rollout) catch()
 
 	-- 2. check for settings folder
 	if maxFilePath == "" then (
@@ -1051,6 +1079,7 @@ function close_kage = (
 	try (DestroyDialog submenu_rollout) catch()
 	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
+	try (DestroyDialog select_rollout) catch()
 
 	KAGE_STATUS.is_open = false
 )

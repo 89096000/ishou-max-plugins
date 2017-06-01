@@ -25,6 +25,7 @@ fileIn "_rollout.ms";           -- main treeview rollout
 fileIn "rollout_export.ms";     -- export interface rollout
 fileIn "rollout_submenu.ms";    -- submenu (color picker) rollout
 fileIn "rollout_filter.ms";     -- filter tree rollout
+fileIn "rollout_select.ms";     -- select tree rollout
 
 -- load scripts
 /*

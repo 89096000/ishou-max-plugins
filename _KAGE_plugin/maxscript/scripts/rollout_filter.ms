@@ -51,11 +51,11 @@ rollout filter_rollout "何色？" (
 
 	fn change_filter color_name = (
 		CURRENT_FILTER = color_name
-		if color_name == "all" then (
-			FLAT_MODE = false
-		) else (
-			FLAT_MODE = true
-		)
+		--if color_name == "all" then (
+		--	FLAT_MODE = false
+		--) else (
+		--	FLAT_MODE = true
+		--)
 		print (color_name + " filter requested")
 
 		try (DestroyDialog filter_rollout) catch()
