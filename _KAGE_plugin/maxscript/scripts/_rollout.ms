@@ -244,7 +244,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			color_val = getColorFromName(theChildren[i].name as string)
 			-- VIEW STYLES: color, white, default
 			-- CURRENT FILTER: *color name, all
-
 			if VIEW_STYLE == "color" then (
 				if color_val == "none" then (
 					node_is_valid = false
@@ -255,6 +254,13 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				node_is_valid = color_val == "none"
 			) else (
 				node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
+			)
+
+			-- TV_MODE: layer, detail, group, object
+			if TV_MODE == "object" then (
+				superclassy = (superclassof(theChildren[i]) as string)
+				if superclassy == "helper" do
+					node_is_valid = false
 			)
 
 			-- format "node_is_valid for % : %\n" theChildren[i].name color_val
@@ -288,8 +294,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				newNode = undefined
 				addChildren tv newNode theChildren[i].children
 			) else (
-				if newNode != undefined then
+				if newNode == undefined then (
+					addChildren tv theNode theChildren[i].children
+				) else (
 					addChildren tv newNode theChildren[i].children
+				)
 			)
 		)-- end child loop
 
@@ -559,8 +568,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		if TV_MODE == "group" then (
 			addChildren tv theRoot rootNodes
 		) else if TV_MODE == "object" then (
-			rootNodes_filtered = for r in rootNodes where superclassof(r) != helper collect r
-			addChildren tv theRoot rootNodes_filtered
+			addChildren tv theRoot rootNodes
 		) else if TV_MODE == "layer" or TV_MODE == "detail" then (
 
 			-- LAYER MODE TESTING
@@ -581,8 +589,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 		) else (
 			-- THIS IS THE NON LAYER CASE
-			rootNodes_filtered = for r in rootNodes where superclassof(r) == helper collect r
-			addChildren tv theRoot rootNodes_filtered
+			addChildren tv theRoot rootNodes
 		)
 		tv.endUpdate()
 	)
