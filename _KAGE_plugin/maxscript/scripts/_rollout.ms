@@ -116,9 +116,8 @@ fn load_color_cache = (
 	color_keys = ReadFromIniSection TREE_INI "nodes"
 	for k in color_keys do (
 		v = ReadFromIni TREE_INI "nodes" k
-		format "Key: %; Value: %\n" k v
+		-- format "Key: %; Value: %\n" k v
 		if v == "pink" then (
-			-- print v
 			insertItem k pink_cache 1
 		) else if v == "yellow" then (
 			insertItem k yellow_cache 1
@@ -246,44 +245,44 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			-- VIEW STYLES: color, white, default
 			-- CURRENT FILTER: *color name, all
 
-			if CURRENT_FILTER == "all" then (
-				node_is_valid = true
-			) else (
-				if VIEW_STYLE == "white" then (
-					node_is_valid = color_val == "none"
+			if VIEW_STYLE == "color" then (
+				if color_val == "none" then (
+					node_is_valid = false
 				) else (
-					node_is_valid = CURRENT_FILTER == color_val
+					node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
 				)
+			) else if VIEW_STYLE == "white" then (
+				node_is_valid = color_val == "none"
+			) else (
+				node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
 			)
 
-			-- format "node_is_valid for %\n" theChildren[i].name
+			-- format "node_is_valid for % : %\n" theChildren[i].name color_val
 			-- print node_is_valid
 
-			if color_val != "none" then (
+			if node_is_valid then (
+				if FLAT_MODE then (
+					newNode = tv.Nodes.add theChildren[i].name
+				) else (
+					newNode = theNode.Nodes.add theChildren[i].name
+				)
+				newNode.tag = dotNetMXSValue theChildren[i]
+				newNode.checked = not theChildren[i].isHidden
+				icon_ref = getIconId(theChildren[i])
+				newNode.imageIndex = newNode.selectedImageIndex = icon_ref
+				newNode.ToolTipText = color_val
 
-				if CURRENT_FILTER == color_val or CURRENT_FILTER == "all" then (
-					if FLAT_MODE then (
-						newNode = tv.Nodes.add theChildren[i].name
-					) else (
-						newNode = theNode.Nodes.add theChildren[i].name
-					)
-					newNode.tag = dotNetMXSValue theChildren[i]
-					newNode.checked = not theChildren[i].isHidden
-					icon_ref = getIconId(theChildren[i])
-					newNode.imageIndex = newNode.selectedImageIndex = icon_ref
-					newNode.ToolTipText = color_val
+				if theChildren[i].isHidden then (
+					newNode.foreColor = GetColorForKey "ltblack"
+					newNode.nodeFont = _OFF_FONT
+				) else (
+					newNode.foreColor = GetColorForKey "black"
+					newNode.nodeFont = _ON_FONT
+				)
 
-					if theChildren[i].isHidden then (
-						newNode.foreColor = GetColorForKey "ltblack"
-						newNode.nodeFont = _OFF_FONT
-					) else (
-						newNode.foreColor = GetColorForKey "black"
-						newNode.nodeFont = _ON_FONT
-					)
-
-					newNode.backcolor = (GetColorForKey color_val) 
-				);
-			);
+				if color_val != "none" do
+					newNode.backcolor = (GetColorForKey color_val)
+			)
 
 			if FLAT_MODE then (
 				newNode = undefined
@@ -292,144 +291,20 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				if newNode != undefined then
 					addChildren tv newNode theChildren[i].children
 			)
-		)
+		)-- end child loop
 
-		if VIEW_STYLE == "color" then (
-			for i = 1 to theChildren.count do (
-				newNode = undefined
-
-				color_val = getColorFromName(theChildren[i].name as string)
-
-				if color_val != "none" then (
-
-					if CURRENT_FILTER == color_val or CURRENT_FILTER == "all" then (
-						if FLAT_MODE then (
-							newNode = tv.Nodes.add theChildren[i].name
-						) else (
-							newNode = theNode.Nodes.add theChildren[i].name
-						)
-						newNode.tag = dotNetMXSValue theChildren[i]
-						newNode.checked = not theChildren[i].isHidden
-						icon_ref = getIconId(theChildren[i])
-						newNode.imageIndex = newNode.selectedImageIndex = icon_ref
-						newNode.ToolTipText = color_val
-
-						if theChildren[i].isHidden then (
-							newNode.foreColor = GetColorForKey "ltblack"
-							newNode.nodeFont = _OFF_FONT
-						) else (
-							newNode.foreColor = GetColorForKey "black"
-							newNode.nodeFont = _ON_FONT
-						)
-
-						newNode.backcolor = (GetColorForKey color_val) 
-					);
-				);
-
-				if FLAT_MODE then (
-					newNode = undefined
-					addChildren tv newNode theChildren[i].children
-				) else (
-					if newNode != undefined then
-						addChildren tv newNode theChildren[i].children
-				)
-			)
-
-		) else if VIEW_STYLE == "white" then (
-			for i = 1 to theChildren.count do (
-				newNode = undefined
-
-				color_val = getColorFromName(theChildren[i].name as string)
-
-				if color_val == "none" then (
-					if FLAT_MODE then (
-						newNode = tv.Nodes.add theChildren[i].name
-					) else (
-						newNode = theNode.Nodes.add theChildren[i].name
-					)
-					newNode.tag = dotNetMXSValue theChildren[i]
-					newNode.checked = not theChildren[i].isHidden
-					icon_ref = getIconId(theChildren[i])
-					newNode.imageIndex = newNode.selectedImageIndex = icon_ref
-					newNode.ToolTipText = color_val
-					-- addChildren tv newNode theChildren[i].children style
-
-					if theChildren[i].isHidden then (
-						newNode.foreColor = GetColorForKey "ltblack"
-						newNode.nodeFont = _OFF_FONT
-					) else (
-						newNode.foreColor = GetColorForKey "black"
-						newNode.nodeFont = _ON_FONT
-					)
-
-					-- WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
-				);
-
-				if FLAT_MODE then (
-					newNode = undefined
-					addChildren tv newNode theChildren[i].children
-				) else (
-					if newNode != undefined then
-						addChildren tv newNode theChildren[i].children
-				)
-			)
-
+		/*
+		if TV_MODE == "layer" or TV_MODE == "detail" then (
 		) else (
-			for i = 1 to theChildren.count do (
-				-- node_number_padded = padZeros(i)
-				-- node_new_name = node_number_padded + " " + theChildren[i].name
-				-- newNode = theNode.Nodes.add node_new_name
+			if FLAT_MODE then (
 				newNode = undefined
-				color_val = getColorFromName(theChildren[i].name as string)
-
-				if CURRENT_FILTER == color_val or CURRENT_FILTER == "all" then (
-					if FLAT_MODE then (
-						newNode = tv.Nodes.add theChildren[i].name
-					) else (
-						newNode = theNode.Nodes.add theChildren[i].name
-					)
-
-					-- TODO REMOVE TRY
-					try (
-						newNode.tag = dotNetMXSValue theChildren[i]
-						newNode.checked = not theChildren[i].isHidden
-						icon_ref = getIconId(theChildren[i])
-						newNode.imageIndex = newNode.selectedImageIndex = icon_ref
-
-						if theChildren[i].isHidden then (
-							newNode.foreColor = GetColorForKey "ltblack"
-							newNode.nodeFont = _OFF_FONT
-						) else (
-							newNode.foreColor = GetColorForKey "black"
-							newNode.nodeFont = _ON_FONT
-						)
-
-						-- add node data to ini file
-						-- WriteToIni TREE_INI "nodes" (newNode.text as string) "none"
-
-						-- read node ini file data
-						newNode.ToolTipText = color_val
-						if color_val != "none" then (
-							newNode.backcolor = (GetColorForKey color_val)
-						)
-
-					) catch ()
-
-				);
-
-				if TV_MODE == "layer" or TV_MODE == "detail" then (
-
-				) else (
-					if FLAT_MODE then (
-						newNode = undefined
-						addChildren tv newNode theChildren[i].children
-					) else (
-						if newNode != undefined then
-							addChildren tv newNode theChildren[i].children
-					)
-				)
+				addChildren tv newNode theChildren[i].children
+			) else (
+				if newNode != undefined then
+					addChildren tv newNode theChildren[i].children
 			)
 		)
+		*/
 	)
 
 	-- *******************************************************
@@ -677,7 +552,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 		-- load color information
 		-- TODO dont need to reload the cache every single time!
-		print "loading color cache"
 		load_color_cache()
 
 		-- add to tree
