@@ -20,11 +20,14 @@ fn WriteToIni ini_file sect k v = (
 
 -- write to ini file and overwrites current setting
 fn OverwriteToIni ini_file sect k v = (
-	already_there = hasINISetting ini_file sect k
-	if already_there == true then (
-		delIniSetting ini_file k v
-	)
+	RemoveFromIni ini_file sect k
 	setINISetting ini_file sect k v forceUTF16:true
+)
+
+fn RemoveFromIni ini_file sect k = (
+	already_there = hasINISetting ini_file sect k
+	if already_there do
+		delIniSetting ini_file sect k
 )
 
 -- return a specified value

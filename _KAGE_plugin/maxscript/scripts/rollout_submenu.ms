@@ -1,6 +1,7 @@
 -- Rollout Settings
 _COLOR_BTN_SIZE = 20;
 _COLOR_ROLLOUT_ROWS = 6;
+_CURRENT_COLOR_VAL
 
 rollout submenu_rollout "何色？" (
 
@@ -39,23 +40,82 @@ rollout submenu_rollout "何色？" (
 		btn_blue.flatStyle=btn_blue.flatStyle.flat
 		btn_grey.flatStyle=btn_grey.flatStyle.flat
 
-		btn_pink.backColor = GetColorForKey "pink"
-		btn_orange.backColor = GetColorForKey "orange"
-		btn_yellow.backColor = GetColorForKey "yellow"
-		btn_tan.backColor = GetColorForKey "tan"
-		btn_mint.backColor = GetColorForKey "mint"
+		_CURRENT_COLOR_VAL = KAGE_HITNODE.ToolTipText
+		if _CURRENT_COLOR_VAL == "pink" then (
+			btn_pink.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_pink.backColor = GetColorForKey "pink"
+		)
+		if _CURRENT_COLOR_VAL == "orange" then (
+			btn_orange.text = "X"
+			btn_orange.foreColor = GetColorForKey "red"
+		) else (
+			btn_orange.backColor = GetColorForKey "orange"
+		)
+		if _CURRENT_COLOR_VAL == "yellow" then (
+			btn_yellow.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_yellow.backColor = GetColorForKey "yellow"
+		)
+		if _CURRENT_COLOR_VAL == "tan" then (
+			btn_tan.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_tan.backColor = GetColorForKey "tan"
+		)
+		if _CURRENT_COLOR_VAL == "mint" then (
+			btn_mint.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_mint.backColor = GetColorForKey "mint"
+		)
 
-		btn_dark.backColor = GetColorForKey "dark" 
-		btn_red.backColor = GetColorForKey "red"
-		btn_violet.backColor = GetColorForKey "violet"
-		btn_blue.backColor = GetColorForKey "blue"
-		btn_grey.backColor = GetColorForKey "grey"
+		if _CURRENT_COLOR_VAL == "dark" then (
+			btn_dark.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_dark.backColor = GetColorForKey "dark" 
+		)
+		if _CURRENT_COLOR_VAL == "red" then (
+			btn_red.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_red.backColor = GetColorForKey "red"
+		)
+		if _CURRENT_COLOR_VAL == "violet" then (
+			btn_violet.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_violet.backColor = GetColorForKey "violet"
+		)
+		if _CURRENT_COLOR_VAL == "blue" then (
+			btn_blue.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_blue.backColor = GetColorForKey "blue"
+		)
+		if _CURRENT_COLOR_VAL == "grey" then (
+			btn_grey.text = "X"
+			btn_pink.foreColor = GetColorForKey "red"
+		) else (
+			btn_grey.backColor = GetColorForKey "grey"
+		)
 	)
 
 	fn change_color color_name = (
 		print (color_name + " button has been pressed")
-		KAGE_HITNODE.backcolor = (GetColorForKey color_name)
-		OverwriteToIni TREE_INI "nodes" (KAGE_HITNODE.text as string) color_name
+		print (_CURRENT_COLOR_VAL + " is the current color")
+		if _CURRENT_COLOR_VAL == color_name then (
+			KAGE_HITNODE.backcolor = (GetColorForKey "white")
+			KAGE_HITNODE.ToolTipText = "none"
+			RemoveFromIni TREE_INI "nodes" (KAGE_HITNODE.text as string)
+		) else (
+			KAGE_HITNODE.backcolor = (GetColorForKey color_name)
+			KAGE_HITNODE.ToolTipText = color_name
+			OverwriteToIni TREE_INI "nodes" (KAGE_HITNODE.text as string) color_name
+		)		
 		try (DestroyDialog submenu_rollout) catch()
 	)
 

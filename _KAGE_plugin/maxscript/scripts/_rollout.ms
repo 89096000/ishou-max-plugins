@@ -39,6 +39,7 @@ IMAGE_LIST.imageSize = dotNetObject "System.Drawing.Size" 24 23
 
 -- CACHE
 pink_cache = #()
+orange_cache = #()
 yellow_cache = #()
 tan_cache = #()
 mint_cache = #()
@@ -103,6 +104,7 @@ fn killRollouts = (
 fn load_color_cache = (
 	-- clear cache
 	pink_cache = #()
+	orange_cache = #()
 	yellow_cache = #()
 	tan_cache = #()
 	mint_cache = #()
@@ -119,6 +121,8 @@ fn load_color_cache = (
 		-- format "Key: %; Value: %\n" k v
 		if v == "pink" then (
 			insertItem k pink_cache 1
+		) else if v == "orange" then (
+			insertItem k orange_cache 1
 		) else if v == "yellow" then (
 			insertItem k yellow_cache 1
 		) else if v == "tan" then (
@@ -145,6 +149,8 @@ fn load_color_cache = (
 fn getColorFromName node_name = (
 	x = findItem pink_cache node_name
 	if x > 0 then ( return "pink" )
+	x = findItem orange_cache node_name
+	if x > 0 then ( return "orange" )
 	x = findItem yellow_cache node_name
 	if x > 0 then ( return "yellow" )
 	x = findItem tan_cache node_name
@@ -870,6 +876,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on tv Click arg do (
 		if arg.button == tv.mousebuttons.right then(
 			-- RIGHT CLICK - bring up color menu
+			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
 			try (
 				try (DestroyDialog submenu_rollout) catch()
 				try (DestroyDialog export_rollout) catch()
@@ -884,9 +891,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 											 pos:[posx, posy] \
 	                                         style:#(#style_border);
 			) catch ( )
-
-			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
-			print "start variable tests"
+			
+			-- print "start variable tests"
 			-- try ( print mousepoint.Y ) catch ( print "fail xy test")
 			-- try ( print KAGE_HITNODE.tag.value ) catch ( print "fail test 1" )
 			-- try ( print mainVars.THE_HITNODE.backcolor ) catch ( print "fail test 2" )
@@ -1005,7 +1011,6 @@ struct KageStatus (
 struct KageMain (
 
 function open_kage = (
-
 	-- 1. end previous rollouts
 	try (DestroyDialog treeview_rollout) catch()
 	try (DestroyDialog submenu_rollout) catch()
