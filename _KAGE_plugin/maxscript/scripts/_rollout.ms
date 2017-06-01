@@ -240,74 +240,92 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		return id
 	)
 
-	-- recursive function for node children
-	-- tag contains MXS value, whatever that means
-	-- ref to dotnet treenode class https://msdn.microsoft.com/en-us/library/system.windows.forms.treenode(v=vs.110).aspx
-	fn addChildren tv theNode theChildren = (
-		for i = 1 to theChildren.count do (
-			newNode = undefined
+	fn set_node_properties obj newNode color_val = (
+		newNode.tag = dotNetMXSValue obj
+		newNode.checked = not obj.isHidden
+		icon_ref = getIconId(obj)
+		newNode.imageIndex = newNode.selectedImageIndex = icon_ref
+		newNode.ToolTipText = color_val
 
-			color_val = getColorFromName(theChildren[i].name as string)
-			-- VIEW STYLES: color, white, default
-			-- CURRENT FILTER: *color name, all
-			if VIEW_STYLE == "color" then (
-				if color_val == "none" then (
-					node_is_valid = false
-				) else (
-					node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
-				)
-			) else if VIEW_STYLE == "white" then (
-				node_is_valid = color_val == "none"
+		if obj.isHidden then (
+			newNode.foreColor = GetColorForKey "ltblack"
+			newNode.nodeFont = _OFF_FONT
+		) else (
+			newNode.foreColor = GetColorForKey "black"
+			newNode.nodeFont = _ON_FONT
+		)
+
+		if color_val != "none" do
+			newNode.backcolor = (GetColorForKey color_val)
+	)
+
+
+	-- *******************************************************
+	-- TREE FULFILLMENT SUBFUNC- Adds an object for a layer to the treeview
+	fn add_object tv the_node obj = (
+		newNode = undefined
+
+		color_val = getColorFromName(obj.name as string)
+		-- VIEW STYLES: color, white, default
+		-- CURRENT FILTER: *color name, all
+		if VIEW_STYLE == "color" then (
+			if color_val == "none" then (
+				node_is_valid = false
 			) else (
 				node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
 			)
+		) else if VIEW_STYLE == "white" then (
+			node_is_valid = color_val == "none"
+		) else (
+			node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
+		)
 
-			-- TV_MODE: layer, detail, group, object
-			if TV_MODE == "object" then (
-				superclassy = (superclassof(theChildren[i]) as string)
-				if superclassy == "helper" do
-					node_is_valid = false
-			)
+		-- TV_MODE: layer, detail, group, object
+		if TV_MODE == "object" then (
+			superclassy = (superclassof(obj) as string)
+			if superclassy == "helper" do
+				node_is_valid = false
+		)
 
-			-- format "node_is_valid for % : %\n" theChildren[i].name color_val
-			-- print node_is_valid
+		-- format "node_is_valid for % : %\n" theChildren[i].name color_val
+		-- print node_is_valid
 
-			if node_is_valid then (
-				if FLAT_MODE then (
-					newNode = tv.Nodes.add theChildren[i].name
-				) else (
-					newNode = theNode.Nodes.add theChildren[i].name
-				)
-				newNode.tag = dotNetMXSValue theChildren[i]
-				newNode.checked = not theChildren[i].isHidden
-				icon_ref = getIconId(theChildren[i])
-				newNode.imageIndex = newNode.selectedImageIndex = icon_ref
-				newNode.ToolTipText = color_val
-
-				if theChildren[i].isHidden then (
-					newNode.foreColor = GetColorForKey "ltblack"
-					newNode.nodeFont = _OFF_FONT
-				) else (
-					newNode.foreColor = GetColorForKey "black"
-					newNode.nodeFont = _ON_FONT
-				)
-
-				if color_val != "none" do
-					newNode.backcolor = (GetColorForKey color_val)
-			)
-
+		if node_is_valid then (
 			if FLAT_MODE then (
-				newNode = undefined
-				addChildren tv newNode theChildren[i].children
+				newNode = tv.Nodes.add obj.name
 			) else (
-				if newNode == undefined then (
-					addChildren tv theNode theChildren[i].children
-				) else (
-					addChildren tv newNode theChildren[i].children
+				newNode = the_node.Nodes.add obj.name
+			)
+			set_node_properties obj newNode color_val
+		)
+
+		if FLAT_MODE then (
+			newNode = undefined
+			addChildren tv newNode obj.children
+		) else (
+			if newNode == undefined then (
+				-- addChildren tv the_node obj.children
+				for i = 1 to obj.children.count do (
+					add_object tv the_node obj.children[i]
+				)
+			) else (
+				-- addChildren tv newNode obj.children
+				for i = 1 to obj.children.count do (
+					add_object tv newNode obj.children[i]
 				)
 			)
-		)-- end child loop
+		)
 
+
+	)
+
+	-- recursive function for node children
+	-- tag contains MXS value, whatever that means
+	-- ref to dotnet treenode class https://msdn.microsoft.com/en-us/library/system.windows.forms.treenode(v=vs.110).aspx
+	fn addChildren tv the_node theChildren = (
+		for i = 1 to theChildren.count do (
+			add_object tv the_node theChildren[i]
+		)
 		/*
 		if TV_MODE == "layer" or TV_MODE == "detail" then (
 		) else (
@@ -325,33 +343,23 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- *******************************************************
 	-- TREE FULFILLMENT SUBFUNC - Adds a layer to the treeview
 	fn add_layer tv layer = (
+		the_node = undefined
+		node_is_valid = false
+
 		newNode = undefined	
 		parent = layer.getParent()
 		if parent == undefined then (
 			-- root layers get added to root
 			-- format "root layer name : %\n" layer.name
 			if layer.name != "0" do
-				newNode = tv.Nodes.add layer.name
-				append LAYER_NODES newNode
+				node_is_valid = true
+				the_node = tv
+				--newNode = tv.Nodes.add layer.name
+				--append LAYER_NODES newNode
 		) else (
 			-- format "child layer name %, parent %\n" layer.name parent.name
 			-- find the parent node
 			parent_node = undefined
-
-			/*
-			for z = 1 to LAYER_NODES.count do (
-			 	try (
-			 		print (LAYER_NODES[z].name)
-			 		print (LAYER_NODES[z].text)
-			 		showProperties(LAYER_NODES[z])
-			 	) catch (
-			 		print "properties unable to be shown"
-			 		showProperties(LAYER_NODES[z])
-			 	)
-			)
-			*/
-
-
 			for n = 1 to LAYER_NODES.count do (
 				if parent_node == undefined do
 					if parent.name == "0" then (
@@ -370,11 +378,48 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 			-- note if parent is undedfined the first time, it will be retried 1 time
 			if parent_node != undefined then (
-				newNode = parent_node.Nodes.add layer.name
-				append LAYER_NODES newNode
+				node_is_valid = true
+				the_node = parent_node
+				--newNode = parent_node.Nodes.add layer.name
+				--append LAYER_NODES newNode
 			)
 		)
 
+		if node_is_valid then (
+			color_val = getColorFromName(layer.name as string)
+			if the_node.name == "ControlAxSourcingSite" then (
+				node_is_valid = true
+			) else if VIEW_STYLE == "color" then (
+				if color_val == "none" then (
+					node_is_valid = false
+				) else (
+					node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
+				)
+			) else if VIEW_STYLE == "white" then (
+				node_is_valid = color_val == "none"
+			) else (
+				node_is_valid = (CURRENT_FILTER == "all" or CURRENT_FILTER == color_val)
+			)
+
+			if node_is_valid then (
+
+				newNode = the_node.Nodes.add layer.name
+				append LAYER_NODES newNode
+				try (
+					set_node_properties layer newNode color_val
+				) catch ()
+
+				return true
+
+			) else (
+				return false
+			)
+		) else (
+			return false
+		)
+
+
+/*
 		-- new layer properties
 		if newNode == undefined then (
 			return false
@@ -404,6 +449,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			) catch ()
 			return true
 		)
+*/
+
 	)
 
 	-- *******************************************************
@@ -442,44 +489,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				format "ERROR: % could not be found\n" missed_layers_final[i].name
 			)
 		)
-	)
-
-	-- *******************************************************
-	-- TREE FULFILLMENT SUBFUNC- Adds an object for a layer to the treeview
-	fn add_object tv the_node obj = (
-		newNode = the_node.Nodes.add obj.name
-
---		try (
-			color_val = getColorFromName(obj.name as string)
-
-			newNode.tag = dotNetMXSValue obj
-			newNode.checked = not obj.isHidden
-			icon_ref = getIconId(obj)
-			newNode.imageIndex = (newNode.selectedImageIndex = icon_ref)
-
-			if obj.isHidden then (
-				newNode.foreColor = GetColorForKey "ltblack"
-				newNode.nodeFont = _OFF_FONT
-			) else (
-				newNode.foreColor = GetColorForKey "black"
-				newNode.nodeFont = _ON_FONT
-			)
-
-			-- read node ini file data
-			newNode.ToolTipText = color_val
-			if color_val != "none" then (
-				newNode.backcolor = (GetColorForKey color_val)
-			)
-
-			if newNode != undefined then
-				addChildren tv newNode obj.children
-
-			return true
-
---		) catch (
---			format "ERROR: adding %\n" obj.name
---			return false
---		)
 	)
 
 	-- *******************************************************
@@ -571,11 +580,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 		-- add to tree
 		tv.beginUpdate()
-		if TV_MODE == "group" then (
-			addChildren tv theRoot rootNodes
-		) else if TV_MODE == "object" then (
-			addChildren tv theRoot rootNodes
-		) else if TV_MODE == "layer" or TV_MODE == "detail" then (
+		if TV_MODE == "layer" or TV_MODE == "detail" then (
 
 			-- LAYER MODE TESTING
 			layerNodes_filtered = #()
@@ -805,7 +810,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on modeAll changed theState do (
 		print "modeAll was pressed"
 		CURRENT_FILTER = "all"
-		FLAT_MODE = true
 		modeAll.checked = true
 		modeColor.checked = false
 		modeWhite.checked = false
@@ -815,7 +819,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on modeColor changed theState do (
 		print "modeColor was pressed"
-		FLAT_MODE = true
 		CURRENT_FILTER = "all"
 		modeAll.checked = false
 		modeColor.checked = true
@@ -826,7 +829,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on modeWhite changed theState do (
 		print "modeWhite was pressed"
-		FLAT_MODE = true
 		modeAll.checked = false
 		modeColor.checked = false
 		modeWhite.checked = true
