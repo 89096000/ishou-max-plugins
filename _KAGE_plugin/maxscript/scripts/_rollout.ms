@@ -116,8 +116,9 @@ fn load_color_cache = (
 	color_keys = ReadFromIniSection TREE_INI "nodes"
 	for k in color_keys do (
 		v = ReadFromIni TREE_INI "nodes" k
-		-- format "Key: %; Value: %\n" k v
+		format "Key: %; Value: %\n" k v
 		if v == "pink" then (
+			-- print v
 			insertItem k pink_cache 1
 		) else if v == "yellow" then (
 			insertItem k yellow_cache 1
@@ -237,7 +238,62 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- recursive function for node children
 	-- tag contains MXS value, whatever that means
 	-- ref to dotnet treenode class https://msdn.microsoft.com/en-us/library/system.windows.forms.treenode(v=vs.110).aspx
-	fn addChildren tv theNode theChildren = (		
+	fn addChildren tv theNode theChildren = (
+		for i = 1 to theChildren.count do (
+			newNode = undefined
+
+			color_val = getColorFromName(theChildren[i].name as string)
+			-- VIEW STYLES: color, white, default
+			-- CURRENT FILTER: *color name, all
+
+			if CURRENT_FILTER == "all" then (
+				node_is_valid = true
+			) else (
+				if VIEW_STYLE == "white" then (
+					node_is_valid = color_val == "none"
+				) else (
+					node_is_valid = CURRENT_FILTER == color_val
+				)
+			)
+
+			-- format "node_is_valid for %\n" theChildren[i].name
+			-- print node_is_valid
+
+			if color_val != "none" then (
+
+				if CURRENT_FILTER == color_val or CURRENT_FILTER == "all" then (
+					if FLAT_MODE then (
+						newNode = tv.Nodes.add theChildren[i].name
+					) else (
+						newNode = theNode.Nodes.add theChildren[i].name
+					)
+					newNode.tag = dotNetMXSValue theChildren[i]
+					newNode.checked = not theChildren[i].isHidden
+					icon_ref = getIconId(theChildren[i])
+					newNode.imageIndex = newNode.selectedImageIndex = icon_ref
+					newNode.ToolTipText = color_val
+
+					if theChildren[i].isHidden then (
+						newNode.foreColor = GetColorForKey "ltblack"
+						newNode.nodeFont = _OFF_FONT
+					) else (
+						newNode.foreColor = GetColorForKey "black"
+						newNode.nodeFont = _ON_FONT
+					)
+
+					newNode.backcolor = (GetColorForKey color_val) 
+				);
+			);
+
+			if FLAT_MODE then (
+				newNode = undefined
+				addChildren tv newNode theChildren[i].children
+			) else (
+				if newNode != undefined then
+					addChildren tv newNode theChildren[i].children
+			)
+		)
+
 		if VIEW_STYLE == "color" then (
 			for i = 1 to theChildren.count do (
 				newNode = undefined
@@ -621,7 +677,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 		-- load color information
 		-- TODO dont need to reload the cache every single time!
-		load_color_cache
+		print "loading color cache"
+		load_color_cache()
 
 		-- add to tree
 		tv.beginUpdate()
@@ -645,7 +702,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 			-- ADD OBJECTS TO LAYER
 			if TV_MODE == "detail" then (
-				print "PART ONE TEST"
 				add_obj_children tv rootNodes
 			)
 
