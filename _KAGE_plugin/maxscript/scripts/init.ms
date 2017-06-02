@@ -9,6 +9,8 @@ struct Pair
 global KAGE_MAIN;               -- main kage struct
 global KAGE_STATUS;             -- rollout status struct
 global KAGE_HITNODE;            -- current selected node
+global KAGE_CALLBACKS;          -- current selected node
+global CALLBACKS_MODE = true;	-- set to false for actions to not trigger callbacks
 global CURRENT_FILTER = "all";  -- all or some color
 global TV_MODE = "layer";       -- layer / scene / object
 global VIEW_STYLE = "none";     -- none / color / white
@@ -26,6 +28,7 @@ fileIn "rollout_export.ms";     -- export interface rollout
 fileIn "rollout_submenu.ms";    -- submenu (color picker) rollout
 fileIn "rollout_filter.ms";     -- filter tree rollout
 fileIn "rollout_select.ms";     -- select tree rollout
+fileIn "callbacks.ms";     		-- event callbacks
 
 -- load scripts
 /*
@@ -42,3 +45,4 @@ try
 
 -- init rollout
 KAGE_MAIN = KageMain()
+KAGE_CALLBACKS = KageCallbacks()

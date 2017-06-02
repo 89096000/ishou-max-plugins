@@ -23,19 +23,16 @@ _E_ROLLOUT_HEIGHT = 200;
 SETTINGS_FILE_LOCATION = ""
 TREE_INI = ""
 
-
 -- FONTS
 fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
 fontStyle = dotNetClass "system.drawing.fontStyle"
 _ON_FONT = dotNetObject "system.drawing.font" fontFam 8
 _OFF_FONT = dotNetObject "system.drawing.font" fontFam 7 fontStyle.italic
 
-
 -- ICONS
 _ICON_DIR = ((GetDir #userIcons) + "/kage")
 IMAGE_LIST = dotNetObject "System.Windows.Forms.ImageList"
 IMAGE_LIST.imageSize = dotNetObject "System.Drawing.Size" 24 23
-
 
 -- CACHE
 pink_cache = #()
@@ -56,9 +53,9 @@ LAYER_NODES = #()
 -- cache bmp icons
 fn getIconFromBitmap number iconFileName = (
 	filepath = (_ICON_DIR + "/" + iconFileName + ".bmp")
-	print ("loading icon from : " + filepath)
+	-- print ("loading icon from : " + filepath)
 	filename = GetDir #image +"\\icon_"+ iconFileName +".bmp"
-	print ("loading icon to : " + filename)
+	-- print ("loading icon to : " + filename)
 
 	-- TODO does it need to delete and remake each time?
 	deleteFile filename
@@ -173,7 +170,10 @@ fn getColorFromName node_name = (
 
 
 rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
-	-- initialize rollout control
+	-- create treeview activeX control in rollout
+	-- activeXControl tv "MSComctlLib.TreeCtrl" width:190 height:290 align:#center
+	dotNetControl tv "TreeView" width:_TV_WIDTH height:_TV_HEIGHT align:#center
+
 	-- init settings found here: https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2015/ENU/MAXScript-Help/files/GUID-C2B51AEE-9C08-4679-B625-A36C72025C91-htm.html
 	fn initTreeView tv = (
 		tv.Indent = _DEFAULT_INDENT
@@ -241,6 +241,48 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		return id
 	)
 
+	/*
+	-- function to select same object as in scene
+	*/
+ 	fn recursive_tag_search the_node tag = (
+ 		if CALLBACKS_MODE then (
+	 		try (
+		 		if the_node.tag == tag do
+		 			tv.SelectedNode = the_node
+		 	) catch ()
+			for x = 0 to (the_node.Nodes.Count - 1) do (
+				node_x = the_node.Nodes.Item[x]
+				if node_x.tag == tag do
+					tv.SelectedNode = node_x
+				recursive_tag_search node_x tag
+			)
+		)
+ 	)
+
+ 	fn tag_search tv = (
+ 		-- select object thats selected in scene
+ 		if tv != undefined do (
+	 		tag = undefined
+	 		for o in selection do (
+	 			--format "% is in selection\n" o.name
+	 			if tag == undefined do
+		 			tag = dotNetMXSValue o
+	 		)
+
+	 		-- search and select
+	 		tv.SelectedNode = null
+	 		-- node_x = nodes.Item[0]
+	 		-- showProperties node_x
+	 		-- showMethods nodes
+			for x = 0 to (tv.Nodes.Count - 1) do (
+				recursive_tag_search tv.Nodes.Item[x] tag
+			)
+		)
+ 	)
+
+	-- *******************************************************
+	-- TREE FULFILLMENT SUBFUNC- Adds an object for a layer to the treeview
+
 	fn set_node_properties obj newNode color_val = (
 		newNode.tag = dotNetMXSValue obj
 		newNode.checked = not obj.isHidden
@@ -260,9 +302,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			newNode.backcolor = (GetColorForKey color_val)
 	)
 
-
-	-- *******************************************************
-	-- TREE FULFILLMENT SUBFUNC- Adds an object for a layer to the treeview
 	fn add_object tv the_node obj = (
 		newNode = undefined
 
@@ -487,12 +526,14 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				append missed_layers_final missed_layers[i]
 		)
 
+		/*
 		-- alert any layers that werent added
 		if missed_layers_final.count > 0 then (
 			for i = 1 to missed_layers_final.count do (
 				format "ERROR: % could not be found\n" missed_layers_final[i].name
 			)
 		)
+		*/
 	)
 
 	-- *******************************************************
@@ -612,6 +653,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- refresh button
 	fn refreshTreeView tv = (
+		tv.FullRowSelect = true
+		tv.HideSelection = false
 		tv.Nodes.Clear()
 		fillInTreeView tv
 		tv.ExpandAll()
@@ -623,11 +666,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				) catch ( )
 			)
 		)
+		tag_search tv
 	)
-	
-	-- create treeview activeX control in rollout
-	-- activeXControl tv "MSComctlLib.TreeCtrl" width:190 height:290 align:#center
-	dotNetControl tv "TreeView" width:_TV_WIDTH height:_TV_HEIGHT align:#center
 
 	-- controls ---------------------------------
 	group "コントロール" (
@@ -877,6 +917,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			initTreeView tv
 			refreshTreeView tv
 		) catch ()
+		KAGE_MAIN.setTreeInst tv
 	)
 
 	on treeview_rollout close do (
@@ -890,17 +931,15 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- TEST ---------------------------------
  	button TEST_ME "TEST" width:60 across:3
-
  	on TEST_ME pressed do (
- 		-- get currently selected nodes .imageIndex
- 		print tv.selectedNode.text
- 		print tv.selectedNode.imageIndex
+ 		tag_search tv
  	)
 
 	-- HANDLERS
 	-- add event handler to select the object if user clicks on node
 	-- have to get node under mouse cursor, then select using the MXS tag
 	on tv Click arg do (
+		CALLBACKS_MODE = false
 		if arg.button == tv.mousebuttons.right then(
 			-- RIGHT CLICK - bring up color menu
 			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
@@ -946,6 +985,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 
 		)
+		CALLBACKS_MODE = true
 	)
 
 	fn recursive_select my_node = (
@@ -1010,16 +1050,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		try (DestroyDialog select_rollout) catch()
 	)
 
--- 	on TEST_FILTER pressed do (
--- 		nodes = tv.Nodes
--- 		-- node_x = nodes.Item[0]
--- 		-- showProperties node_x
--- 		-- showMethods nodes
--- 		for n = 0 to (nodes.Count-1) do (
--- 			test_recursive nodes.Item[n]
--- 		)
--- 	)
-
 -- end main rollout
 )
 
@@ -1038,6 +1068,14 @@ struct KageStatus (
 
 
 struct KageMain (
+
+tree,
+scene,
+kbdFile,  --not working?
+
+function setTreeInst tv = (
+   tree = tv
+),
 
 function open_kage = (
 	-- 1. end previous rollouts
@@ -1070,6 +1108,10 @@ function open_kage = (
 	 	_ROLLOUT_HEIGHT\
 	 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
 
+	-- 6. callbacks
+	KAGE_CALLBACKS.createCallbacks()
+	
+
 	KAGE_STATUS = KageStatus()
 	KAGE_STATUS.is_open = true
 ),
@@ -1080,6 +1122,8 @@ function close_kage = (
 	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
 	try (DestroyDialog select_rollout) catch()
+
+	KAGE_CALLBACKS.removeCallbacks()
 
 	KAGE_STATUS.is_open = false
 )
