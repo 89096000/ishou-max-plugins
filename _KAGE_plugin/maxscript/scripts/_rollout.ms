@@ -1050,6 +1050,17 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		try (DestroyDialog select_rollout) catch()
 	)
 
+	on treeview_rollout close do (
+		try (DestroyDialog treeview_rollout) catch()
+		try (DestroyDialog submenu_rollout) catch()
+		try (DestroyDialog export_rollout) catch()
+		try (DestroyDialog filter_rollout) catch()
+		try (DestroyDialog select_rollout) catch()
+		KAGE_CALLBACKS.removeCallbacks()
+		KAGE_STATUS.is_open = false
+		print "kage was closed"
+	)
+
 -- end main rollout
 )
 
