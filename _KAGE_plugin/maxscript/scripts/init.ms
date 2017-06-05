@@ -16,6 +16,7 @@ global TV_MODE = "layer";       -- layer / scene / object
 global VIEW_STYLE = "none";     -- none / color / white
 global FLAT_MODE = false;       -- doesnt draw any nodes
 
+global PRODUCT_INFO_INI = (GetDir #userScripts) + "/kage_product_info.ini"
 global treeview_rollout			-- main treeview
 
 -- Import scripts

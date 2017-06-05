@@ -1041,6 +1041,9 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on treeview_rollout resized val do (
 		format "rollout: %\n" val
 		tv.width = (val.x - _ROLLOUT_WIDTH + _TV_WIDTH)
+		OverwriteToIni PRODUCT_INFO_INI "settings" "main_width" val.x
+		tv.height = (val.y - _ROLLOUT_HEIGHT + _TV_HEIGHT)
+		OverwriteToIni PRODUCT_INFO_INI "settings" "main_height" val.y
 	)
 
 	on tv Close arg do(
@@ -1083,7 +1086,7 @@ struct KageMain (
 tree,
 scene,
 kbdFile,  --not working?
-
+ 
 function setTreeInst tv = (
    tree = tv
 ),
@@ -1096,7 +1099,26 @@ function open_kage = (
 	try (DestroyDialog filter_rollout) catch()
 	try (DestroyDialog select_rollout) catch()
 
-	-- 2. check for settings folder
+	-- 2. load user settings
+	try (
+		user_set_width = ReadFromIni PRODUCT_INFO_INI "settings" "main_width"
+		format "user set width: %\n" (user_set_width as string)
+		if user_set_width != "none" do (
+			_ROLLOUT_WIDTH = (user_set_width as Integer)
+			_TV_WIDTH = _ROLLOUT_WIDTH - 10;
+		)
+
+		user_set_height = ReadFromIni PRODUCT_INFO_INI "settings" "main_height"
+		format "user set height: %\n" (user_set_height as string)
+		if user_set_height != "none" do (
+			_ROLLOUT_HEIGHT = (user_set_height as Integer)
+			_TV_HEIGHT = _ROLLOUT_HEIGHT - 165;
+		)
+	) catch (
+		print "error loading settings"
+	)
+
+	-- 3. check for settings folder
 	if maxFilePath == "" then (
 		messageBox "Unable to load settings, max file not saved"
 	) else (
@@ -1106,20 +1128,20 @@ function open_kage = (
 	)
 
 	if SETTINGS_FILE_LOCATION != "" then (
-		-- 3. check for settings file
+		-- 4. check for settings file
 		CreateIniFile TREE_INI
 
-		-- 4. check for color settings file
+		-- 5. check for color settings file
 		InitColorSettings(SETTINGS_FILE_LOCATION)
 	)
 
-	-- 5. create new dialog
+	-- 6. create new dialog
 	CreateDialog treeview_rollout \
 		_ROLLOUT_WIDTH\
 	 	_ROLLOUT_HEIGHT\
 	 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
 
-	-- 6. callbacks
+	-- 7. callbacks
 	KAGE_CALLBACKS.createCallbacks()
 	
 

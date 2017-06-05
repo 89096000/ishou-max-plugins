@@ -21,7 +21,7 @@ fn WriteToIni ini_file sect k v = (
 -- write to ini file and overwrites current setting
 fn OverwriteToIni ini_file sect k v = (
 	RemoveFromIni ini_file sect k
-	setINISetting ini_file sect k v forceUTF16:true
+	setINISetting ini_file sect (k as string) (v as string) forceUTF16:true
 )
 
 fn RemoveFromIni ini_file sect k = (
