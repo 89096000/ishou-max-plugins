@@ -786,7 +786,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeSummary "Summary" width:60 across:4 checked:true
+		checkbutton modeSummary "Summary" width:60 across:4 checked:false
 		checkbutton modeLayer "Layer" width:60 across:4 checked:false
 		checkbutton modeGroup "Scene" width:60 across:4 checked:false
 		checkbutton modeObject "Object" width:60 across:4 checked:false
@@ -811,6 +811,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			if modeObject.checked do
 				modeObject.checked = false
 			TV_MODE = "layer"
+			OverwriteToIni PRODUCT_INFO_INI "settings" "mode" TV_MODE
 			refreshTreeView tv
 			--TV_MODE = "layer"
 			--modeLayer.checked = true
@@ -830,6 +831,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			if modeObject.checked do
 				modeObject.checked = false
 			TV_MODE = "detail"
+			OverwriteToIni PRODUCT_INFO_INI "settings" "mode" TV_MODE
 			refreshTreeView tv
 		)
 	)
@@ -847,9 +849,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			if modeObject.checked do
 				modeObject.checked = false
 			TV_MODE = "group"
+			OverwriteToIni PRODUCT_INFO_INI "settings" "mode" TV_MODE
 			refreshTreeView tv
-			--TV_MODE = "group"
-			--modeGroup.checked = true
 		)
 	)
 
@@ -866,9 +867,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			if modeGroup.checked do
 				modeGroup.checked = false			
 			TV_MODE = "object"
+			OverwriteToIni PRODUCT_INFO_INI "settings" "mode" TV_MODE
 			refreshTreeView tv
-			-- TV_MODE = "object"
-			-- modeObject.checked = true
 		)
 	)
 
@@ -918,6 +918,15 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			refreshTreeView tv
 		) catch ()
 		KAGE_MAIN.setTreeInst tv
+		if TV_MODE == "layer" then (
+			modeSummary.checked = true
+		) else if TV_MODE == "detail" then (
+			modeLayer.checked = true
+		) else if TV_MODE == "group" then (
+			modeGroup.checked = true
+		) else (
+			modeObject.checked = true
+		)
 	)
 
 	on treeview_rollout close do (
@@ -1117,6 +1126,16 @@ function open_kage = (
 	) catch (
 		print "error loading settings"
 	)
+
+	-- 2b. load last rollout mode selected (layer / scene / object) if object, flat=true
+	last_mode = ReadFromIni PRODUCT_INFO_INI "settings" "mode"
+	if last_mode == "none" then (
+		TV_MODE = "layer"
+	) else (
+		TV_MODE = last_mode
+	)
+	FLAT_MODE = TV_MODE == "object"
+	format "last mode was %\n" TV_MODE
 
 	-- 3. check for settings folder
 	if maxFilePath == "" then (
