@@ -671,35 +671,29 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- controls ---------------------------------
 	group "コントロール" (
-		button btn_refresh "Refresh" \
-		toolTip: "refreshes the screen" \
-		align: #left width:60 across: 3
-
 		button btn_export "Export" \
 		toolTip: "exports the selected objects" \
-		align: #left width:60 across: 3
+		align: #left width:55 across: 3
 
-		button btn_order "Order" \
-		toolTip: "Sorts the tree" \
-		align: #left width:60 across: 3
-
-		button btn_summary "Collapse" \
-		align: #left  width:50 across:4
-
-		button btn_all "Expand" \
-		align: #left  width:50 across:4
+		button btn_import "Import" \
+		toolTip: "import an object into project" \
+		align: #left width:55 across: 3
 
 		button btn_filter "Filter" \
-		align: #left  width:50 across:4
+		toolTip: "filter a color" \
+		align: #left  width:55 across:3
+
+		button btn_summary "Collapse" \
+		toolTip: "collapse all tree leaves" \
+		align: #left  width:55 across:3
+
+		button btn_all "Expand" \
+		toolTip: "expand all tree leaves" \
+		align: #left  width:55 across:3
 
 		button btn_select "Select" \
-		align: #left  width:50 across:4
-	)
-
-	----- ----- -----
-	-- refresh button
-	on btn_refresh pressed do (
-		refreshTreeView tv
+		toolTip: "select all of one color" \
+		align: #left  width:55 across:3
 	)
 
 	----- ----- -----
@@ -715,9 +709,9 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	----- ----- -----
-	-- order button
-	on btn_order pressed do (
-		messageBox "This feature is not yet available."
+	-- import button
+	on btn_import pressed do (
+		messageBox "TODO open a import rollout."
 	)
 
 	----- ----- -----
@@ -786,10 +780,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeSummary "Summary" width:60 across:4 checked:false
-		checkbutton modeLayer "Layer" width:60 across:4 checked:false
-		checkbutton modeGroup "Scene" width:60 across:4 checked:false
-		checkbutton modeObject "Object" width:60 across:4 checked:false
+		checkbutton modeSummary "大筋" width:55 across:4 checked:false
+		checkbutton modeLayer "レイヤー" width:55 across:4 checked:false
+		checkbutton modeGroup "シーン" width:55 across:4 checked:false
+		checkbutton modeObject "リスト" width:55 across:4 checked:false
 		checkbutton modeAll "All" width:60 across:3 checked:true
 		checkbutton modeColor "Color" width:60 across:3 checked:false
 		checkbutton modeWhite "White" width:60 across:3 checked:false
