@@ -671,29 +671,29 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- controls ---------------------------------
 	group "コントロール" (
-		button btn_export "Export" \
-		toolTip: "exports the selected objects" \
-		align: #left width:55 across: 3
-
-		button btn_import "Import" \
+		button btn_import "インポート" \
 		toolTip: "import an object into project" \
-		align: #left width:55 across: 3
+		align: #left width:60 across: 3
 
-		button btn_filter "Filter" \
+		button btn_export "エクスポート" \
+		toolTip: "exports the selected objects" \
+		align: #left width:60 across: 3
+
+		button btn_filter "フィルター" \
 		toolTip: "filter a color" \
-		align: #left  width:55 across:3
+		align: #left  width:60 across:3
 
-		button btn_summary "Collapse" \
+		button btn_summary "全て開く" \
 		toolTip: "collapse all tree leaves" \
-		align: #left  width:55 across:3
+		align: #left  width:60 across:3
 
-		button btn_all "Expand" \
+		button btn_all "全て閉じる" \
 		toolTip: "expand all tree leaves" \
-		align: #left  width:55 across:3
+		align: #left  width:60 across:3
 
-		button btn_select "Select" \
+		button btn_select "セレクト" \
 		toolTip: "select all of one color" \
-		align: #left  width:55 across:3
+		align: #left  width:60 across:3
 	)
 
 	----- ----- -----
@@ -780,13 +780,13 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeSummary "大筋" width:55 across:4 checked:false
-		checkbutton modeLayer "レイヤー" width:55 across:4 checked:false
-		checkbutton modeGroup "シーン" width:55 across:4 checked:false
-		checkbutton modeObject "リスト" width:55 across:4 checked:false
-		checkbutton modeAll "All" width:60 across:3 checked:true
-		checkbutton modeColor "Color" width:60 across:3 checked:false
-		checkbutton modeWhite "White" width:60 across:3 checked:false
+		checkbutton modeSummary "大筋" width:50 across:4 checked:false
+		checkbutton modeLayer "レイヤー" width:50 across:4 checked:false
+		checkbutton modeGroup "シーン" width:50 across:4 checked:false
+		checkbutton modeObject "リスト" width:50 across:4 checked:false
+		checkbutton modeAll "全部" width:60 across:3 checked:true
+		checkbutton modeColor "カラー" width:60 across:3 checked:false
+		checkbutton modeWhite "ホワイト" width:60 across:3 checked:false
 		-- slider slr_width "Tree Width" range:[100,1000,_E_ROLLOUT_WIDTH] type:#integer orient:#horizontal width:200
 	)
 
