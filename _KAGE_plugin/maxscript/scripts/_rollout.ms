@@ -95,6 +95,7 @@ fn killRollouts = (
 	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
 	try (DestroyDialog select_rollout) catch()
+	try (DestroyDialog import_rollout) catch()
 )
 
 
@@ -699,6 +700,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- export button
 	on btn_export pressed do (
+		killRollouts()
 		if selection.count > 0 then (
 			-- call the export rollout
 			CreateDialog export_rollout _E_ROLLOUT_WIDTH _E_ROLLOUT_HEIGHT \
@@ -711,21 +713,21 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- import button
 	on btn_import pressed do (
-		messageBox "TODO open a import rollout."
+		killRollouts()
+		local dialog_pos = GetDialogPos treeview_rollout
+		local posx = dialog_pos.x - 250 + _TV_WIDTH
+		local posy = dialog_pos.y - 250 + _TV_HEIGHT
+		CreateDialog import_rollout 450\
+									450\
+									pos:[posx, posy] \
+                                    style:#(#style_border);
 	)
 
 	----- ----- -----
 	-- filter button
 	on btn_filter pressed do (
-		try (DestroyDialog submenu_rollout) catch()
-		try (DestroyDialog export_rollout) catch()
-		try (DestroyDialog filter_rollout) catch()
-		try (DestroyDialog select_rollout) catch()
-
-		-- local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
+		killRollouts()
 		local dialog_pos = GetDialogPos treeview_rollout
-		--local posx = dialog_pos.x + mousepoint.X + 30
-		--local posy = dialog_pos.y + mousepoint.Y + 30
 		local posx = dialog_pos.x - 30 + _TV_WIDTH
 		local posy = dialog_pos.y - 50 + _TV_HEIGHT
 		CreateDialog filter_rollout ((_COLOR_BTN_SIZE*2)+2)\
@@ -737,15 +739,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- special select button
 	on btn_select pressed do (
-		try (DestroyDialog submenu_rollout) catch()
-		try (DestroyDialog export_rollout) catch()
-		try (DestroyDialog filter_rollout) catch()
-		try (DestroyDialog select_rollout) catch()
-
-		-- local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
+		killRollouts()
 		local dialog_pos = GetDialogPos treeview_rollout
-		--local posx = dialog_pos.x + mousepoint.X + 30
-		--local posy = dialog_pos.y + mousepoint.Y + 30
 		local posx = dialog_pos.x - 30 + _TV_WIDTH
 		local posy = dialog_pos.y - 50 + _TV_HEIGHT
 		CreateDialog select_rollout ((_COLOR_BTN_SIZE*2)+2)\
@@ -947,10 +942,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			-- RIGHT CLICK - bring up color menu
 			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
 			try (
-				try (DestroyDialog submenu_rollout) catch()
-				try (DestroyDialog export_rollout) catch()
-				try (DestroyDialog filter_rollout) catch()
-				try (DestroyDialog select_rollout) catch()
+				killRollouts()
 				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
 				local dialog_pos = GetDialogPos treeview_rollout
 				-- local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
@@ -1050,18 +1042,12 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	on tv Close arg do(
-		try (DestroyDialog submenu_rollout) catch()
-		try (DestroyDialog export_rollout) catch()
-		try (DestroyDialog filter_rollout) catch()
-		try (DestroyDialog select_rollout) catch()
+		killRollouts()
 	)
 
 	on treeview_rollout close do (
 		try (DestroyDialog treeview_rollout) catch()
-		try (DestroyDialog submenu_rollout) catch()
-		try (DestroyDialog export_rollout) catch()
-		try (DestroyDialog filter_rollout) catch()
-		try (DestroyDialog select_rollout) catch()
+		killRollouts()
 		KAGE_CALLBACKS.removeCallbacks()
 		KAGE_STATUS.is_open = false
 		print "kage was closed"
@@ -1097,10 +1083,7 @@ function setTreeInst tv = (
 function open_kage = (
 	-- 1. end previous rollouts
 	try (DestroyDialog treeview_rollout) catch()
-	try (DestroyDialog submenu_rollout) catch()
-	try (DestroyDialog export_rollout) catch()
-	try (DestroyDialog filter_rollout) catch()
-	try (DestroyDialog select_rollout) catch()
+	killRollouts()
 
 	-- 2. load user settings
 	try (
@@ -1164,10 +1147,7 @@ function open_kage = (
 
 function close_kage = (
 	try (DestroyDialog treeview_rollout) catch()
-	try (DestroyDialog submenu_rollout) catch()
-	try (DestroyDialog export_rollout) catch()
-	try (DestroyDialog filter_rollout) catch()
-	try (DestroyDialog select_rollout) catch()
+	killRollouts()
 
 	KAGE_CALLBACKS.removeCallbacks()
 
