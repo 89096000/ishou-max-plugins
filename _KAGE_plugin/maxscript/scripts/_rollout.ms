@@ -717,7 +717,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		local dialog_pos = GetDialogPos treeview_rollout
 		local posx = dialog_pos.x - 250 + _TV_WIDTH
 		local posy = dialog_pos.y - 250 + _TV_HEIGHT
-		CreateDialog import_rollout 450\
+		CreateDialog import_rollout 350\
 									450\
 									pos:[posx, posy] \
                                     style:#(#style_border);
