@@ -46,6 +46,8 @@ violet_cache = #()
 blue_cache = #()
 grey_cache = #()
 LAYER_NODES = #()
+LAYER_OBJECTS = #()		-- cache of what object goes to what layer - array of PAIR (key, value)
+CACHED_LAYERS = #()		-- keeps track of what layers were already cached - array of string
 
 
 -- FUNCTIONS
@@ -541,6 +543,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- TREE FULFILLMENT LOGIC- finds layer parent, adds layer, retries 1 time
 	fn add_obj_children tv objs = (
 		
+		--start = timeStamp()
+
 		-- https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2018/ENU/MAXScript-Help/files/GUID-79537E16-FE25-4567-BEA6-06F39E0A5C1F-htm.html
 		for o = 1 to objs.count do (
 
@@ -549,34 +553,68 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			obj_layer = undefined
 			obj_layer_node = undefined
 
+			-- search in cache for dependency
+			for c in LAYER_OBJECTS do (
+				if c.value == obj.name do (
+					-- format "FOUND cache for %\n" obj.name
+					obj_layer = layerManager.getLayerFromName c.key
+					exit
+				)
+			)
+
 			-- loops through every layer (cached)
 			for x = 0 to (layerManager.count-1) do (
 
-				if obj_layer == undefined then (
+				-- exit loop if layer was already found
+				if obj_layer != undefined do
+					exit
+
+				-- check layer was already cached
+				xlayer = layerManager.getLayer x
+				layer = ILayerManager.getLayerObject x
+				xlayer_is_cached = findItem CACHED_LAYERS xlayer.name
+				if xlayer_is_cached > 0 then (
+					was_cached = 1
+				) else (
+					was_cached = 0
+				)
+
+				-- search for object's layer
+				if obj_layer == undefined and was_cached == 0 then (
+
+					-- get cache and objects ready
+					append CACHED_LAYERS xlayer.name
+					layer = ILayerManager.getLayerObject x
 
 					-- get layer dependencies
 					try (
-						xlayer = layerManager.getLayer x
-						layer = ILayerManager.getLayerObject x
 						xlayer_nodes = refs.dependents layer
 						--format "Layer: %; nodes: %\n" xlayer.text xlayer_nodes
 					) catch (
-						--format "error on layer at index %\n" (x as string)
 						xlayer_nodes = #()
 					)
 
-					-- search through layer dependencies for ob
 					for dependent in xlayer_nodes do (
+
 						try (
-							if dependent.name == obj.name do
+							append LAYER_OBJECTS (Pair key:layer.name value:dependent.name)
+						) catch (
+							--showProperties dependent
+						)
+
+						-- search through layer dependencies for ob
+						try (
+							if dependent.name == obj.name do (
 								obj_layer = xlayer
+								-- format "NO cache for %\n" obj.name
+							)
 						) catch ()
 					)
-				)-- end seach for object's layer
+				)-- end search for object's layer
 			
 			) -- end layer iterator
 
-			-- get the layer node for found layer (fromm cache)
+			-- get the layer node for found layer (from cache)
 			if obj_layer != undefined then (
 				for y = 1 to LAYER_NODES.count do (
 					if obj_layer_node == undefined then (
@@ -597,6 +635,15 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				add_object tv obj_layer_node obj
 			)
 
+			--end = timeStamp()
+			--try (
+			--	obj_name = obj.name
+			--) catch (
+			--	obj_name = "undefined"
+			--)
+			--format "TreeView Fill took % seconds to fill %\n" ((end - start) / 1000.0) obj_name
+			--start = timeStamp()
+
 		) -- end object iterator
 	)
 	
@@ -604,6 +651,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- collect all objects that have no parent (top level nodes)
 	-- call recursive function to add children to top level nodes
 	fn fillInTreeView tv = (
+		start = timeStamp()
 		-- set up root
 		if TV_MODE == "layer" or TV_MODE == "detail" then (
 			theRoot = tv.Nodes.add "0 (default)"
@@ -620,15 +668,17 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 		rootNodes = for o in objects where o.parent == undefined collect o
 
-		-- load color information
+		-- caching
 		-- TODO dont need to reload the cache every single time!
+		LAYER_OBJECTS = #()
+		CACHED_LAYERS = #()
 		load_color_cache()
 
 		-- add to tree
 		tv.beginUpdate()
 		if TV_MODE == "layer" or TV_MODE == "detail" then (
 
-			-- LAYER MODE TESTING
+			-- LAYER MODE
 			layerNodes_filtered = #()
 			for i = 0 to layerManager.count-1 do
 			(
@@ -649,6 +699,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			addChildren tv theRoot rootNodes
 		)
 		tv.endUpdate()
+
+		end = timeStamp()
+		format "TreeView Fill took % seconds\n" ((end - start) / 1000.0)
+		start = timeStamp()
 	)
 
 	----- ----- -----

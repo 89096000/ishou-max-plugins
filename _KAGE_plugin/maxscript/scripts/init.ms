@@ -26,13 +26,13 @@ fileIn "color_mgr.ms";          -- sets up color profiles
 fileIn "tools.ms";              -- tool palette for misc functions
 fileIn "import_files.ms";       -- list of share drive import folders and files
 
-fileIn "_rollout.ms";           -- main treeview rollout
 fileIn "rollout_import.ms";     -- import interface rollout
 fileIn "rollout_export.ms";     -- export interface rollout
 fileIn "rollout_submenu.ms";    -- submenu (color picker) rollout
 fileIn "rollout_filter.ms";     -- filter tree rollout
 fileIn "rollout_select.ms";     -- select tree rollout
 fileIn "callbacks.ms";     		-- event callbacks
+fileIn "_rollout.ms";           -- main treeview rollout
 
 -- load scripts
 /*
