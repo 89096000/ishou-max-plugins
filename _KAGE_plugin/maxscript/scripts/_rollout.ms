@@ -117,30 +117,32 @@ fn load_color_cache = (
 
 	-- load cache
 	color_keys = ReadFromIniSection TREE_INI "nodes"
-	for k in color_keys do (
-		v = ReadFromIni TREE_INI "nodes" k
-		-- format "Key: %; Value: %\n" k v
-		if v == "pink" then (
-			insertItem k pink_cache 1
-		) else if v == "orange" then (
-			insertItem k orange_cache 1
-		) else if v == "yellow" then (
-			insertItem k yellow_cache 1
-		) else if v == "tan" then (
-			insertItem k tan_cache 1
-		) else if v == "mint" then (
-			insertItem k mint_cache 1
-		) else if v == "dark" then (
-			insertItem k dark_cache 1
-		) else if v == "red" then (
-			insertItem k red_cache 1
-		) else if v == "violet" then (
-			insertItem k violet_cache 1
-		) else if v == "blue" then (
-			insertItem k blue_cache 1
-		) else if v == "grey" then (
-			insertItem k grey_cache 1
-		) else if v == "none" then (
+	if color_keys != "none" do (
+		for k in color_keys do (
+			v = ReadFromIni TREE_INI "nodes" k
+			-- format "Key: %; Value: %\n" k v
+			if v == "pink" then (
+				insertItem k pink_cache 1
+			) else if v == "orange" then (
+				insertItem k orange_cache 1
+			) else if v == "yellow" then (
+				insertItem k yellow_cache 1
+			) else if v == "tan" then (
+				insertItem k tan_cache 1
+			) else if v == "mint" then (
+				insertItem k mint_cache 1
+			) else if v == "dark" then (
+				insertItem k dark_cache 1
+			) else if v == "red" then (
+				insertItem k red_cache 1
+			) else if v == "violet" then (
+				insertItem k violet_cache 1
+			) else if v == "blue" then (
+				insertItem k blue_cache 1
+			) else if v == "grey" then (
+				insertItem k grey_cache 1
+			) else (
+			)
 		)
 	)
 )
@@ -630,11 +632,13 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			-- was there a layer dependencies match?  if not, should be layer 0
 			if obj_layer_node == undefined then (
 				format "ERROR: layer was NOT found for %\n" obj.name
-			) else (
-				-- successful: add object into respective layer
-				add_object tv obj_layer_node obj
+				format "add % to default %\n" obj.name LAYER_NODES[1].text
+				obj_layer_node = LAYER_NODES[1]
 			)
 
+			-- add object into respective layer
+			add_object tv obj_layer_node obj
+			
 			--end = timeStamp()
 			--try (
 			--	obj_name = obj.name
