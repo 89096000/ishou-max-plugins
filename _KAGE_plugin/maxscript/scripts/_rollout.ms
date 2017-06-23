@@ -631,8 +631,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 			-- was there a layer dependencies match?  if not, should be layer 0
 			if obj_layer_node == undefined then (
-				format "ERROR: layer was NOT found for %\n" obj.name
-				format "add % to default %\n" obj.name LAYER_NODES[1].text
+				format "WARNING: layer was NOT found for %\n" obj.name
 				obj_layer_node = LAYER_NODES[1]
 			)
 
@@ -1052,15 +1051,17 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	on tv DoubleClick arg do (
-		print "there was a double click" 		
- 		if TV_MODE == "detail" then (
-	 		if tv.selectedNode.imageIndex == 2 then (
-	 			disableSceneRedraw() 
-	 			max select none
-	 			recursive_select tv.selectedNode
-	 			enableSceneRedraw() 
-	 		)
-	 	)
+		print "there was a double click" 	
+		try (	
+	 		if TV_MODE == "detail" then (
+		 		if tv.selectedNode.imageIndex == 2 then (
+		 			disableSceneRedraw() 
+		 			max select none
+		 			recursive_select tv.selectedNode
+		 			enableSceneRedraw() 
+		 		)
+		 	)
+		 ) catch ()
 
  		if TV_MODE == "layer" then (
  			modeLayer.checked = true
