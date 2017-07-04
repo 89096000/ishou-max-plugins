@@ -10,6 +10,7 @@ _VERSION = kageTools.getVersion asString:true
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
 _ROLLOUT_HEIGHT = 580;
+_ROLLOUT_CONTROL_PADDING = 210;
 
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
@@ -98,6 +99,7 @@ fn killRollouts = (
 	try (DestroyDialog filter_rollout) catch()
 	try (DestroyDialog select_rollout) catch()
 	try (DestroyDialog import_rollout) catch()
+	try (DestroyDialog clone_rollout) catch()
 )
 
 
@@ -763,7 +765,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			CreateDialog export_rollout _E_ROLLOUT_WIDTH _E_ROLLOUT_HEIGHT \
 				style:#(#style_border, #style_sunkenedge)
 		) else (
-			messageBox "Please select an object group to export."
+			messageBox "オブジェクトをセレクトしてください"
 		)
 	)
 
@@ -984,11 +986,31 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		refreshTreeView tv
 	)
 
-	-- TEST ---------------------------------
- 	button TEST_ME "TEST" width:60 across:3
- 	on TEST_ME pressed do (
- 		tag_search tv
- 	)
+	-- TOOLS ---------------------------------
+ 	--button TEST_ME "TEST" width:60 across:3
+ 	--on TEST_ME pressed do (
+ 	--	tag_search tv
+ 	--)
+
+	-- mode ---------------------------------
+	group "ツール" (
+		button btn_clone "クローン" width:50 across:4 checked:false
+	)
+
+	on btn_clone pressed do (
+		killRollouts()
+		if selection.count > 0 then (
+			-- call the clone rollout
+			killRollouts()
+			local dialog_pos = GetDialogPos treeview_rollout
+			local posx = dialog_pos.x
+			local posy = dialog_pos.y
+			CreateDialog clone_rollout _E_ROLLOUT_WIDTH (_E_ROLLOUT_HEIGHT*2)\
+											 pos:[posx, posy];
+		) else (
+			messageBox "オブジェクトをセレクトしてください"
+		)
+	)
 
 	-- HANDLERS
 	-- add event handler to select the object if user clicks on node
@@ -1002,13 +1024,11 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				killRollouts()
 				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
 				local dialog_pos = GetDialogPos treeview_rollout
-				-- local posx = dialog_pos.x - (_COLOR_BTN_SIZE*2)
 				local posx = dialog_pos.x + mousepoint.X + 30
 				local posy = dialog_pos.y + mousepoint.Y + 30
 				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
 											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
-											 pos:[posx, posy] \
-	                                         style:#(#style_border);
+											 pos:[posx, posy];
 			) catch ( )
 			
 			-- print "start variable tests"
@@ -1157,7 +1177,7 @@ function open_kage = (
 		format "user set height: %\n" (user_set_height as string)
 		if user_set_height != "none" do (
 			_ROLLOUT_HEIGHT = (user_set_height as Integer)
-			_TV_HEIGHT = _ROLLOUT_HEIGHT - 165;
+			_TV_HEIGHT = _ROLLOUT_HEIGHT - _ROLLOUT_CONTROL_PADDING;
 		)
 	) catch (
 		print "error loading settings"

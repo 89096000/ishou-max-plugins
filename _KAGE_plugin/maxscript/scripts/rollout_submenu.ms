@@ -2,6 +2,7 @@
 _COLOR_BTN_SIZE = 20;
 _COLOR_ROLLOUT_ROWS = 6;
 _CURRENT_COLOR_VAL
+UNDO_OBJECTS = #()		-- objects created that can be deleted on undo
 
 rollout submenu_rollout "何色？" (
 
