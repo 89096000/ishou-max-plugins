@@ -9,12 +9,12 @@ _VERSION = kageTools.getVersion asString:true
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
-_ROLLOUT_HEIGHT = 580;
-_ROLLOUT_CONTROL_PADDING = 210;
+_ROLLOUT_HEIGHT = 600;
+_ROLLOUT_CONTROL_PADDING = 220;
 
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
-_TV_HEIGHT = 410;
+_TV_HEIGHT = 400;
 
 -- Export Rollout
 _E_ROLLOUT_WIDTH = 340;
@@ -50,6 +50,8 @@ LAYER_NODES = #()
 LAYER_OBJECTS = #()		-- cache of what object goes to what layer - array of PAIR (key, value)
 CACHED_LAYERS = #()		-- keeps track of what layers were already cached - array of string
 
+-- TIMERS
+_DIALOG_PREVENT_TIMER = dotNetObject "System.Windows.Forms.Timer";
 
 -- FUNCTIONS
 
@@ -298,10 +300,18 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		newNode.ToolTipText = color_val
 
 		if obj.isHidden then (
-			newNode.foreColor = GetColorForKey "ltblack"
+			try (
+				newNode.foreColor = GetColorForKey "ltblack"
+			) catch (
+				newNode.foreColor = (dotNetClass "System.Drawing.Color").fromARGB 60 60 60
+			)
 			newNode.nodeFont = _OFF_FONT
 		) else (
-			newNode.foreColor = GetColorForKey "black"
+			try (
+				newNode.foreColor = GetColorForKey "black"
+			) catch (
+				newNode.foreColor = (dotNetClass "System.Drawing.Color").fromARGB 0 0 0
+			)
 			newNode.nodeFont = _ON_FONT
 		)
 
@@ -995,7 +1005,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- mode ---------------------------------
 	group "ツール" (
 		-- button btn_clone "クローン" width:50 across:4 checked:false
-		checkbutton preventCloneDialog "クロンダイアログ停止" across:2
+		checkbutton preventCloneDialog "クローンダイアログ停止" across:2
 		dropdownlist cloneType "" items:#("Copy", "Instance", "Reference") across:2
 	)
 
@@ -1003,9 +1013,21 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	fn onTick = (
 		try (
 			child = (windows.getChildHWND 0 "Clone Options" parent:#max)
+			if child == undefined do child = (windows.getChildHWND 0 "クローン オプション" parent:#max)
 			if child != undefined do (
-				for btn in (windows.getChildrenHWND child[1]) where (btn[5] == cloneType.selected) do UIAccessor.PressButton btn[1]
+				if cloneType.selected == "Instance" then (
+					nihongoCloneOpt = "インスタンス"
+				) else if cloneType.selected == "Reference" then (
+					nihongoCloneOpt = "参照"
+				) else (
+					nihongoCloneOpt = "コピー"
+				)
+
+				for btn in (windows.getChildrenHWND child[1]) where (btn[5] == cloneType.selected or btn[5] == nihongoCloneOpt) do UIAccessor.PressButton btn[1]
 				for btn in (windows.getChildrenHWND child[1]) where (btn[5] == "OK") do UIAccessor.PressButton btn[1]
+
+				-- refresh the tree
+				if objects.count < 500 do treeview_rollout.refreshTreeView(tv)
 			)
 		) catch ()
 	)
@@ -1128,10 +1150,18 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		try (
 			arg.node.tag.value.isHidden = not arg.node.checked
 			if arg.node.checked then (
-				arg.node.foreColor = GetColorForKey "black"
+				try (
+					arg.node.foreColor = GetColorForKey "black"
+				) catch (
+					arg.node.foreColor = (dotNetClass "System.Drawing.Color").fromARGB 0 0 0
+				)
 				arg.node.nodeFont = _ON_FONT
 			) else (
-				arg.node.foreColor = GetColorForKey "ltblack"
+				try (
+					arg.node.foreColor = GetColorForKey "ltblack"
+				) catch (
+					arg.node.foreColor = (dotNetClass "System.Drawing.Color").fromARGB 60 60 60
+				)
 				arg.node.nodeFont = _OFF_FONT
 			)
 		) catch ()

@@ -667,6 +667,7 @@ public function install silent:false =
       return false;
    )
 
+/*
    print "Assign hotkey"
    addStatusText (getString #assignHotkey);
    local showHelp = false;
@@ -716,14 +717,17 @@ public function install silent:false =
    )
    else
       addStatusText (getString #skipped) newline:false progress:progressDelta;
+*/
    
    print "Install Complete"
    setIsKageInstalled true;
 
    print "Show Complete MsgBox"
-   installation_success (getString #inst) \
-                        silent:silent \
-                        showHowToUse:showHelp;
+   --installation_success (getString #inst) \
+   --                     silent:silent \
+   --                     showHowToUse:showHelp;
+
+   messageBox "インストールをできました！"
                         
    
    true;
