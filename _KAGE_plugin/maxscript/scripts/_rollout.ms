@@ -14,7 +14,7 @@ _ROLLOUT_CONTROL_PADDING = 210;
 
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
-_TV_HEIGHT = 415;
+_TV_HEIGHT = 410;
 
 -- Export Rollout
 _E_ROLLOUT_WIDTH = 340;
@@ -633,7 +633,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 			-- was there a layer dependencies match?  if not, should be layer 0
 			if obj_layer_node == undefined then (
-				format "WARNING: layer was NOT found for %\n" obj.name
+				-- format "WARNING: layer was NOT found for %\n" obj.name
 				obj_layer_node = LAYER_NODES[1]
 			)
 
@@ -994,23 +994,48 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "ツール" (
-		button btn_clone "クローン" width:50 across:4 checked:false
+		-- button btn_clone "クローン" width:50 across:4 checked:false
+		checkbutton preventCloneDialog "クロンダイアログ停止" across:2
+		dropdownlist cloneType "" items:#("Copy", "Instance", "Reference") across:2
 	)
 
-	on btn_clone pressed do (
-		killRollouts()
-		if selection.count > 0 then (
-			-- call the clone rollout
-			killRollouts()
-			local dialog_pos = GetDialogPos treeview_rollout
-			local posx = dialog_pos.x
-			local posy = dialog_pos.y
-			CreateDialog clone_rollout _E_ROLLOUT_WIDTH (_E_ROLLOUT_HEIGHT*2)\
-											 pos:[posx, posy];
+	-- prevent clone dialog
+	fn onTick = (
+		try (
+			child = (windows.getChildHWND 0 "Clone Options" parent:#max)
+			if child != undefined do (
+				for btn in (windows.getChildrenHWND child[1]) where (btn[5] == cloneType.selected) do UIAccessor.PressButton btn[1]
+				for btn in (windows.getChildrenHWND child[1]) where (btn[5] == "OK") do UIAccessor.PressButton btn[1]
+			)
+		) catch ()
+	)
+
+	on preventCloneDialog changed theState do (
+		format "preventCloneDialog was pressed for copy type %s\n" cloneType.selected
+		if preventCloneDialog.checked then (
+			_DIALOG_PREVENT_TIMER.interval = 1
+		  	dotnet.addEventHandler _DIALOG_PREVENT_TIMER "tick" onTick
+		  	_DIALOG_PREVENT_TIMER.Start()
 		) else (
-			messageBox "オブジェクトをセレクトしてください"
+			_DIALOG_PREVENT_TIMER.Stop()
 		)
 	)
+
+
+	--on btn_clone pressed do (
+	--	killRollouts()
+	--	if selection.count > 0 then (
+	--		-- call the clone rollout
+	--		killRollouts()
+	--		local dialog_pos = GetDialogPos treeview_rollout
+	--		local posx = dialog_pos.x
+	--		local posy = dialog_pos.y
+	--		CreateDialog clone_rollout _E_ROLLOUT_WIDTH (_E_ROLLOUT_HEIGHT*2)\
+	--										 pos:[posx, posy];
+	--	) else (
+	--		messageBox "オブジェクトをセレクトしてください"
+	--	)
+	--)
 
 	-- HANDLERS
 	-- add event handler to select the object if user clicks on node

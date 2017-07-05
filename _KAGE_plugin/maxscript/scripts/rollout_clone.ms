@@ -12,13 +12,23 @@ _DIALOG_PREVENT_TIMER = dotNetObject "System.Windows.Forms.Timer";
 UNDO_OBJECTS = #()		-- objects created that can be deleted on undo
 
 fn onTick = (
-	try (
-		child = (windows.getChildHWND 0 "Clone Options" )
+	-- http://help.autodesk.com/view/3DSMAX/2017/ENU/?guid=__files_GUID_282F32AC_5A80_4FDB_B8C0_275D2CC15845_htm
+	-- exposes window classess
+	-- print (windows.getChildrenHWND #max)
+
+	--try (
+		child = (windows.getChildHWND 0 "Clone Options" parent:#max)
 		if child != undefined do (
-			print "found clone window! close it!"
+			print (windows.getChildrenHWND child[1])
+			--h = windows.GetChildWindows child[1]
+			--counter = 1
+			--for a in (windows.getChildrenHWND child) do (
+		--		format "% : %\n" (counter as string) a
+		--		counter += 1
+		--	)
 			for btn in (windows.getChildrenHWND child[1]) where (btn[5] == "OK") do UIAccessor.PressButton btn[1]
 		)
-	) catch ()
+	--) catch ()
 )
 
 fn get_friendly_name filename = (
