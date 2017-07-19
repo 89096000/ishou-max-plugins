@@ -844,7 +844,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	group "モード" (
-		checkbutton modeSummary "大筋" width:50 across:4 checked:false
+		checkbutton modeSummary "サマリー" width:50 across:4 checked:false
 		checkbutton modeLayer "レイヤー" width:50 across:4 checked:false
 		checkbutton modeGroup "シーン" width:50 across:4 checked:false
 		checkbutton modeObject "リスト" width:50 across:4 checked:false
@@ -1167,12 +1167,20 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) catch ()
 	)
 
+	-- repositions buttons
+	fn reposition_buttons = (
+		--.pos = [50,_TV_HEIGHT+100]
+		--modeSummary.
+	)
+
 	on treeview_rollout resized val do (
 		format "rollout: %\n" val
 		tv.width = (val.x - _ROLLOUT_WIDTH + _TV_WIDTH)
 		OverwriteToIni PRODUCT_INFO_INI "settings" "main_width" val.x
 		tv.height = (val.y - _ROLLOUT_HEIGHT + _TV_HEIGHT)
 		OverwriteToIni PRODUCT_INFO_INI "settings" "main_height" val.y
+
+		reposition_buttons()
 	)
 
 	on tv Close arg do(
@@ -1241,6 +1249,8 @@ function open_kage = (
 	-- 2b. load last rollout mode selected (layer / scene / object) if object, flat=true
 	last_mode = ReadFromIni PRODUCT_INFO_INI "settings" "mode"
 	if last_mode == "none" then (
+		TV_MODE = "layer"
+	) else if objects.count > 500 then (
 		TV_MODE = "layer"
 	) else (
 		TV_MODE = last_mode
