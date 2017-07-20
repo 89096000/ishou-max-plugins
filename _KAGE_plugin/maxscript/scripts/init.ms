@@ -31,7 +31,7 @@ fileIn "rollout_export.ms";     -- export interface rollout
 fileIn "rollout_submenu.ms";    -- submenu (color picker) rollout
 fileIn "rollout_filter.ms";     -- filter tree rollout
 fileIn "rollout_select.ms";     -- select tree rollout
---fileIn "rollout_clone.ms";      -- copy tool rollout
+fileIn "rollout_clone.ms";      -- copy tool rollout
 fileIn "callbacks.ms";     		-- event callbacks
 fileIn "_rollout.ms";           -- main treeview rollout
 

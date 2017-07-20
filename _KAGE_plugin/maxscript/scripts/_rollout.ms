@@ -10,7 +10,7 @@ _VERSION = kageTools.getVersion asString:true
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
 _ROLLOUT_HEIGHT = 600;
-_ROLLOUT_CONTROL_PADDING = 220;
+_ROLLOUT_CONTROL_PADDING = 200;
 
 _btnvertpadding = 20
 _btnvertspacing = 5

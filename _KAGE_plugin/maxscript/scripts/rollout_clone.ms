@@ -11,32 +11,57 @@ _DIALOG_PREVENT_TIMER = dotNetObject "System.Windows.Forms.Timer";
 
 UNDO_OBJECTS = #()		-- objects created that can be deleted on undo
 
-fn onTick = (
-	-- http://help.autodesk.com/view/3DSMAX/2017/ENU/?guid=__files_GUID_282F32AC_5A80_4FDB_B8C0_275D2CC15845_htm
-	-- exposes window classess
-	-- print (windows.getChildrenHWND #max)
-
-	--try (
-		child = (windows.getChildHWND 0 "Clone Options" parent:#max)
-		if child != undefined do (
-			print (windows.getChildrenHWND child[1])
-			--h = windows.GetChildWindows child[1]
-			--counter = 1
-			--for a in (windows.getChildrenHWND child) do (
-		--		format "% : %\n" (counter as string) a
-		--		counter += 1
-		--	)
-			for btn in (windows.getChildrenHWND child[1]) where (btn[5] == "OK") do UIAccessor.PressButton btn[1]
-		)
-	--) catch ()
-)
-
 fn get_friendly_name filename = (
 	return trimright filename "1234567890\\/:"
 )
 
-rollout clone_rollout "クロン" (
+rollout clone_rollout "影クロン" (
 
+	checkbutton preventCloneDialog "クローンダイアログ停止" \
+	toolTip: "automatically closes clone dialog" \
+	pos: [5,5] \ 
+	width: 150
+
+	dropdownlist cloneType "" items:#("Copy", "Instance", "Reference") \
+	toolTip: "select default for clone dialog" \
+	pos: [160,5] \ 
+	width: 60
+
+	-- prevent clone dialog
+	fn onTick = (
+		try (
+			child = (windows.getChildHWND 0 "Clone Options" parent:#max)
+			if child == undefined do child = (windows.getChildHWND 0 "クローン オプション" parent:#max)
+			if child != undefined do (
+				if cloneType.selected == "Instance" then (
+					nihongoCloneOpt = "インスタンス"
+				) else if cloneType.selected == "Reference" then (
+					nihongoCloneOpt = "参照"
+				) else (
+					nihongoCloneOpt = "コピー"
+				)
+
+				for btn in (windows.getChildrenHWND child[1]) where (btn[5] == cloneType.selected or btn[5] == nihongoCloneOpt) do UIAccessor.PressButton btn[1]
+				for btn in (windows.getChildrenHWND child[1]) where (btn[5] == "OK") do UIAccessor.PressButton btn[1]
+
+				-- refresh the tree
+				if objects.count < 500 do treeview_rollout.refreshTreeView(tv)
+			)
+		) catch ()
+	)
+
+	on preventCloneDialog changed theState do (
+		format "preventCloneDialog was pressed for copy type %s\n" cloneType.selected
+		if preventCloneDialog.checked then (
+			_DIALOG_PREVENT_TIMER.interval = 1
+		  	dotnet.addEventHandler _DIALOG_PREVENT_TIMER "tick" onTick
+		  	_DIALOG_PREVENT_TIMER.Start()
+		) else (
+			_DIALOG_PREVENT_TIMER.Stop()
+		)
+	)
+
+	/*
 	-- checkbox to prevent clone dialog
 	-- http://www.scriptspot.com/forums/3ds-max/general-scripting/press-ok-btn-after-copying-an-object-with-shift
 	checkbutton preventCloneDialog "クロンダイアログ停止"
@@ -177,6 +202,40 @@ rollout clone_rollout "クロン" (
 	on clone_rollout close do (
 		_DIALOG_PREVENT_TIMER.Stop()
 	)
+	*/
 
 -- end sub rollout
+)
+
+struct CloneStatus (
+	is_open,
+
+	function reset = (
+		is_open = false
+	),
+
+	on create do ( 
+      reset()
+    )
+)
+
+struct CLONE_MAIN (
+
+function open_clone = (
+	-- 1. end previous rollouts
+	try (DestroyDialog clone_rollout) catch()
+
+	-- 2. create new dialog
+	CreateDialog clone_rollout 230 33;
+
+	KAGE_CLONE_STATUS = CloneStatus()
+	KAGE_CLONE_STATUS.is_open = true
+),
+
+function close_clone = (
+	try (DestroyDialog clone_rollout) catch()
+	KAGE_CLONE_STATUS.is_open = false
+)
+
+-- END STRUCT
 )

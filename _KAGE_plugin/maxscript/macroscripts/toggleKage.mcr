@@ -12,7 +12,8 @@ macroScript toggleKage
 		if KAGE_MAIN == undefined do
 			fileIn ((getDir #userScripts) + "/kage/init.ms");
 	
-		KAGE_MAIN;
+		-- call the main clone struct
+		CloneMain;
 	)
 
 	on isChecked do 
