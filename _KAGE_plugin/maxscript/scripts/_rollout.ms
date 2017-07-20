@@ -12,6 +12,13 @@ _ROLLOUT_WIDTH = 250;
 _ROLLOUT_HEIGHT = 600;
 _ROLLOUT_CONTROL_PADDING = 220;
 
+_btnvertpadding = 20
+_btnvertspacing = 5
+_btnhoripadding = 10
+_btnhorispacing = 5
+_btnheight = 25
+_btnwidth = 70
+
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
 _TV_HEIGHT = 400;
@@ -740,31 +747,40 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	-- controls ---------------------------------
-	group "コントロール" (
-		button btn_import "インポート" \
-		toolTip: "import an object into project" \
-		align: #left width:60 across: 3
+	button btn_import "インポート" \
+	toolTip: "import an object into project" \
+	pos:[_btnhoripadding,((_TV_HEIGHT+5)+_btnvertpadding)] \ 
+	align: #left width:_btnwidth
 
-		button btn_export "エクスポート" \
-		toolTip: "exports the selected objects" \
-		align: #left width:60 across: 3
+	button btn_export "エクスポート" \
+	toolTip: "exports the selected objects" \
+	pos:[(_btnhoripadding+_btnhorispacing+_btnwidth),((_TV_HEIGHT+5)+_btnvertpadding)] \ 
+	align: #left width:_btnwidth
 
-		button btn_filter "フィルター" \
-		toolTip: "filter a color" \
-		align: #left  width:60 across:3
+	button btn_filter "フィルター" \
+	toolTip: "filter a color" \
+	pos:[(_btnhoripadding+_btnhorispacing*2+_btnwidth*2),((_TV_HEIGHT+5)+_btnvertpadding)] \ 
+	align: #left width:_btnwidth
 
-		button btn_summary "全て開く" \
-		toolTip: "collapse all tree leaves" \
-		align: #left  width:60 across:3
+	button btn_summary "全て開く" \
+	toolTip: "collapse all tree leaves" \
+	pos:[_btnhoripadding,((_TV_HEIGHT+5)+_btnvertpadding+_btnheight)] \ 
+	align: #left width:_btnwidth
 
-		button btn_all "全て閉じる" \
-		toolTip: "expand all tree leaves" \
-		align: #left  width:60 across:3
+	button btn_all "全て閉じる" \
+	toolTip: "expand all tree leaves" \
+	pos:[(_btnhoripadding+_btnhorispacing+_btnwidth),((_TV_HEIGHT+5)+_btnvertpadding+_btnheight)] \ 
+	align: #left width:_btnwidth
 
-		button btn_select "セレクト" \
-		toolTip: "select all of one color" \
-		align: #left  width:60 across:3
-	)
+	button btn_select "セレクト" \
+	toolTip: "select all of one color" \
+	pos:[(_btnhoripadding+_btnhorispacing*2+_btnwidth*2),((_TV_HEIGHT+5)+_btnvertpadding+_btnheight)] \ 
+	align: #left width:_btnwidth
+
+	groupBox grpControls "コントロール" \
+	pos:[5,((_TV_HEIGHT+5)+_btnvertspacing)] \
+	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
+	height: (_btnvertspacing*3+_btnheight*2)
 
 	----- ----- -----
 	-- export button
@@ -843,16 +859,40 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	)
 
 	-- mode ---------------------------------
-	group "モード" (
-		checkbutton modeSummary "サマリー" width:50 across:4 checked:false
-		checkbutton modeLayer "レイヤー" width:50 across:4 checked:false
-		checkbutton modeGroup "シーン" width:50 across:4 checked:false
-		checkbutton modeObject "リスト" width:50 across:4 checked:false
-		checkbutton modeAll "全部" width:60 across:3 checked:true
-		checkbutton modeColor "カラー" width:60 across:3 checked:false
-		checkbutton modeWhite "ホワイト" width:60 across:3 checked:false
-		-- slider slr_width "Tree Width" range:[100,1000,_E_ROLLOUT_WIDTH] type:#integer orient:#horizontal width:200
-	)
+	checkbutton modeSummary "サマリー" checked:false \
+	toolTip: "summary view only showing top layers" \
+	pos:[_btnhoripadding,((_TV_HEIGHT+75)+_btnvertpadding)] \ 
+	align: #left width:50
+	checkbutton modeLayer "レイヤー" checked:false \
+	toolTip: "default Layer view" \
+	pos:[(_btnhoripadding+_btnhorispacing+50),((_TV_HEIGHT+75)+_btnvertpadding)] \ 
+	align: #left width:50
+	checkbutton modeGroup "シーン" checked:false \
+	toolTip: "default scene view" \
+	pos:[(_btnhoripadding+_btnhorispacing*2+50*2),((_TV_HEIGHT+75)+_btnvertpadding)] \ 
+	align: #left width:50
+	checkbutton modeObject "リスト" checked:false \
+	toolTip: "list only objects, no layers" \
+	pos:[(_btnhoripadding+_btnhorispacing*3+50*3),((_TV_HEIGHT+75)+_btnvertpadding)] \ 
+	align: #left width:50
+
+	checkbutton modeAll "全部" checked:true \
+	toolTip: "show everything in scene" \
+	pos:[_btnhoripadding,((_TV_HEIGHT+75)+_btnvertpadding+_btnheight)] \ 
+	align: #left width:_btnwidth
+	checkbutton modeColor "カラー" checked:false \
+	toolTip: "show only colored objects" \
+	pos:[(_btnhoripadding+_btnhorispacing+_btnwidth),((_TV_HEIGHT+75)+_btnvertpadding+_btnheight)] \ 
+	align: #left width:_btnwidth
+	checkbutton modeWhite "ホワイト" checked:false \
+	toolTip: "show only non-colored objects" \
+	pos:[(_btnhoripadding+_btnhorispacing*2+_btnwidth*2),((_TV_HEIGHT+75)+_btnvertpadding+_btnheight)] \ 
+	align: #left width:_btnwidth
+	
+	groupBox grpModes "モード" \
+	pos:[5,((_TV_HEIGHT+75)+_btnvertspacing)] \
+	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
+	height: (_btnvertspacing*3+_btnheight*2)
 
 	----- ----- -----
 	-- checkbutton states
@@ -1003,11 +1043,19 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
  	--)
 
 	-- mode ---------------------------------
-	group "ツール" (
-		-- button btn_clone "クローン" width:50 across:4 checked:false
-		checkbutton preventCloneDialog "クローンダイアログ停止" across:2
-		dropdownlist cloneType "" items:#("Copy", "Instance", "Reference") across:2
-	)
+	-- button btn_clone "クローン" width:50 across:4 checked:false
+	checkbutton preventCloneDialog "クローンダイアログ停止" \
+	toolTip: "automatically closes clone dialog" \
+	pos:[_btnhoripadding,((_TV_HEIGHT+145)+_btnvertpadding)] \ 
+	width: (_btnwidth*2)
+	dropdownlist cloneType "" items:#("Copy", "Instance", "Reference") \
+	toolTip: "select default for clone dialog" \
+	pos:[(_btnhoripadding+_btnhorispacing+(_btnwidth*2)),((_TV_HEIGHT+145)+_btnvertpadding)] \ 
+	width: _btnwidth
+	groupBox grpTools "ツール" \
+	pos:[5,((_TV_HEIGHT+145)+_btnvertspacing)] \
+	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
+	height: (_btnvertspacing*4+_btnheight)
 
 	-- prevent clone dialog
 	fn onTick = (
@@ -1169,8 +1217,30 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- repositions buttons
 	fn reposition_buttons = (
-		--.pos = [50,_TV_HEIGHT+100]
-		--modeSummary.
+		-- control buttons
+		format "repositioning button to %, %\n" _btnhoripadding ((_TV_HEIGHT+5)+_btnvertpadding)
+		btn_import.pos = [_btnhoripadding,((_TV_HEIGHT+5)+_btnvertpadding)]
+		btn_export.pos = [(_btnhoripadding+_btnhorispacing+_btnwidth),((_TV_HEIGHT+5)+_btnvertpadding)]
+		btn_filter.pos = [(_btnhoripadding+_btnhorispacing*2+_btnwidth*2),((_TV_HEIGHT+5)+_btnvertpadding)]
+		btn_summary.pos = [_btnhoripadding,((_TV_HEIGHT+5)+_btnvertpadding+_btnheight)]
+		btn_all.pos = [(_btnhoripadding+_btnhorispacing+_btnwidth),((_TV_HEIGHT+5)+_btnvertpadding+_btnheight)]
+		btn_select.pos = [(_btnhoripadding+_btnhorispacing*2+_btnwidth*2),((_TV_HEIGHT+5)+_btnvertpadding+_btnheight)]
+		grpControls.pos = [5,((_TV_HEIGHT+5)+_btnvertspacing)]
+
+		-- mode buttons
+		modeSummary.pos = [_btnhoripadding,((_TV_HEIGHT+75)+_btnvertpadding)]
+		modeLayer.pos = [(_btnhoripadding+_btnhorispacing+50),((_TV_HEIGHT+75)+_btnvertpadding)]
+		modeGroup.pos = [(_btnhoripadding+_btnhorispacing*2+50*2),((_TV_HEIGHT+75)+_btnvertpadding)]
+		modeObject.pos = [(_btnhoripadding+_btnhorispacing*3+50*3),((_TV_HEIGHT+75)+_btnvertpadding)]
+		modeAll.pos = [_btnhoripadding,((_TV_HEIGHT+75)+_btnvertpadding+_btnheight)]
+		modeColor.pos = [(_btnhoripadding+_btnhorispacing+_btnwidth),((_TV_HEIGHT+75)+_btnvertpadding+_btnheight)]
+		modeWhite.pos = [(_btnhoripadding+_btnhorispacing*2+_btnwidth*2),((_TV_HEIGHT+75)+_btnvertpadding+_btnheight)]
+		grpModes.pos = [5,((_TV_HEIGHT+75)+_btnvertspacing)]
+
+		-- tools
+		preventCloneDialog.pos = [_btnhoripadding,((_TV_HEIGHT+145)+_btnvertpadding)]
+		cloneType.pos = [(_btnhoripadding+_btnhorispacing+(_btnwidth*2)),((_TV_HEIGHT+145)+_btnvertpadding)]
+		grpTools.pos = [5,((_TV_HEIGHT+145)+_btnvertspacing)]
 	)
 
 	on treeview_rollout resized val do (
@@ -1179,6 +1249,10 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		OverwriteToIni PRODUCT_INFO_INI "settings" "main_width" val.x
 		tv.height = (val.y - _ROLLOUT_HEIGHT + _TV_HEIGHT)
 		OverwriteToIni PRODUCT_INFO_INI "settings" "main_height" val.y
+		_TV_WIDTH = tv.width
+		_TV_HEIGHT = tv.height
+		_ROLLOUT_WIDTH = treeview_rollout.width
+		_ROLLOUT_HEIGHT = treeview_rollout.height
 
 		reposition_buttons()
 	)
