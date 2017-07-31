@@ -1357,6 +1357,9 @@ function open_kage = (
 
 	-- 7. callbacks
 	KAGE_CALLBACKS.createCallbacks()
+
+	-- 8. set icons
+	
 	
 
 	KAGE_STATUS = KageStatus()

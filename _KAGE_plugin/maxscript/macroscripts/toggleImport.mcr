@@ -2,7 +2,7 @@ macroScript toggleKageImport
 	category:"Kage" 
 	toolTip:"インポート" 
 	buttonText:"Open/Close Import"
-	icon:#("icon_main", 1)
+	icon:#("kagemain", 3)
 (
 	global KAGE_IMPORT_MAIN;
 	global KAGE_IMPORT_STATUS;

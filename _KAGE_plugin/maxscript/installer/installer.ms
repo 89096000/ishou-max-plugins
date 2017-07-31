@@ -216,7 +216,6 @@ private function removeWorkflowTools =
          success = false;
    )
 
-
    -- Remove user macros
    local userMacroDir = (GetDir #userMacros);
    local oldUserMacros = (getFiles (userMacroDir + "/*Kage Workflow Tools*"));
@@ -309,6 +308,8 @@ private function copyScriptFiles =
       -- icons
       icon_dir = (userIconsDir + "/kage")
       copyDirectory (tempDir + "/scripts/icons") icon_dir;
+      -- copy script icons to main dir
+      copyDirectory (tempDir + "/scripts/ui") userIconsDir;
    ) catch (
       printException "copyScriptFiles" (getCurrentException());
       success = false;

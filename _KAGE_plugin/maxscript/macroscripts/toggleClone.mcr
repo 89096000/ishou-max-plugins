@@ -2,7 +2,7 @@ macroScript toggleKageClone
 	category:"Kage" 
 	toolTip:"影クローン" 
 	buttonText:"Open/Close Clone"
-	icon:#("icon_main", 4)
+	icon:#("kagemain", 4)
 (
 	global CLONE_MAIN;
 	global KAGE_CLONE_STATUS;

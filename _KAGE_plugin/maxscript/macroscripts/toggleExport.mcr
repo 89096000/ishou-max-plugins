@@ -2,7 +2,7 @@ macroScript toggleKageExport
 	category:"Kage" 
 	toolTip:"エクスポート" 
 	buttonText:"Open/Close Export"
-	icon:#("icon_main", 1)
+	icon:#("kagemain", 2)
 (
 	global KAGE_EXPORT_MAIN;
 	global KAGE_EXPORT_STATUS;

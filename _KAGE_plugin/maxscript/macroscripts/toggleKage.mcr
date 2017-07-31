@@ -2,7 +2,7 @@ macroScript toggleKage
 	category:"Kage" 
 	toolTip:"Open/Close Kage" 
 	buttonText:"Open/Close Kage"
-	icon:#("icon_main", 1)
+	icon:#("kagemain", 1)
 (
 	global KAGE_MAIN;
 	global KAGE_STATUS;
@@ -12,8 +12,7 @@ macroScript toggleKage
 		if KAGE_MAIN == undefined do
 			fileIn ((getDir #userScripts) + "/kage/init.ms");
 	
-		-- call the main clone struct
-		CloneMain;
+		KAGE_MAIN;
 	)
 
 	on isChecked do 
