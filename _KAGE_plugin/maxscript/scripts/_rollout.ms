@@ -1,4 +1,4 @@
-﻿/*
+/*
 To Open Rollout UI, Just run this script
 */
 
@@ -10,7 +10,7 @@ _VERSION = kageTools.getVersion asString:true
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
 _ROLLOUT_HEIGHT = 600;
-_ROLLOUT_CONTROL_PADDING = 200;
+_ROLLOUT_CONTROL_PADDING = 250;
 
 _btnvertpadding = 20
 _btnvertspacing = 5
@@ -1009,33 +1009,6 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		treeview_rollout.refreshTreeView(tv)
 	)
 
-	-- call functions on open
-	on treeview_rollout open do (
-		try (
-			initTreeView tv
-			refreshTreeView tv
-		) catch ()
-		KAGE_MAIN.setTreeInst tv
-		if TV_MODE == "layer" then (
-			modeSummary.checked = true
-		) else if TV_MODE == "detail" then (
-			modeLayer.checked = true
-		) else if TV_MODE == "group" then (
-			modeGroup.checked = true
-		) else (
-			modeObject.checked = true
-		)
-	)
-
-	on treeview_rollout close do (
-		KAGE_MAIN.close_kage()
-	)
-
-	on treeview_rollout help do (
-		print "help requested which refreshes the callout"
-		refreshTreeView tv
-	)
-
 	-- TOOLS ---------------------------------
  	--button TEST_ME "TEST" width:60 across:3
  	--on TEST_ME pressed do (
@@ -1044,6 +1017,9 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- mode ---------------------------------
 	-- button btn_clone "クローン" width:50 across:4 checked:false
+
+	-- TOOLS
+	--   clone tool
 	checkbutton preventCloneDialog "クローンダイアログ停止" \
 	toolTip: "automatically closes clone dialog" \
 	pos:[_btnhoripadding,((_TV_HEIGHT+145)+_btnvertpadding)] \ 
@@ -1052,10 +1028,20 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	toolTip: "select default for clone dialog" \
 	pos:[(_btnhoripadding+_btnhorispacing+(_btnwidth*2)),((_TV_HEIGHT+145)+_btnvertpadding)] \ 
 	width: _btnwidth
+	--   drag drop image
+	dotNetControl pb "System.Windows.Forms.PictureBox" \
+	pos:[_btnhoripadding,((_TV_HEIGHT+175)+_btnvertpadding)] \ 
+	width: (_btnwidth) \
+	height: (_btnheight + 20)
+	dropdownlist pbRatio "Drop Mapping File Scale" items:#("100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%") \
+	toolTip: "Select mapping file import ratio" \
+	pos:[(_btnhoripadding*2 + _btnwidth),((_TV_HEIGHT+175)+_btnvertpadding)] \ 
+	width: (_btnwidth*2)
+
 	groupBox grpTools "ツール" \
 	pos:[5,((_TV_HEIGHT+145)+_btnvertspacing)] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
-	height: (_btnvertspacing*4+_btnheight)
+	height: (_btnvertspacing*30+_btnheight)
 
 	-- prevent clone dialog
 	fn onTick = (
@@ -1243,6 +1229,72 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		grpTools.pos = [5,((_TV_HEIGHT+145)+_btnvertspacing)]
 	)
 
+	-- DragNDrop functionality
+	on pb DragOver s e do (
+		e.Effect = if e.data.ContainsFileDropList() then e.Effect.Move else e.Effect.None
+	)
+	on pb DragDrop s e do (
+		if e.data.ContainsFileDropList() do (
+			print "drag DROPPED"
+			data = e.data.GetFileDropList()
+			f = data.item[0]
+			if (doesFileExist f) do (
+				-- SAVE MAPPING FILE LOCALLY
+				if maxFilePath == "" then (
+					print "max file not saved, no directory to save mapping file to\n"
+					new_path = f
+				) else (
+					paths = filterString f "\\"
+					imgName = ""
+					for p in paths do (
+						imgName = p as string
+					)
+					local_path = maxFilePath + "import" + "\\"
+					print local_path
+					makeDir local_path
+					new_path = local_path + imgName
+					format "file from %\n" new_path
+					format "saving %\n" f
+					copyFile f new_path
+				)
+
+				-- ADD FILE				
+				bmt = BitmapTexture filename:new_path
+				difMap = bmt
+				theMat = Standard  twosided:true naerm:(uniqueName "Ref_Plane_Mat") showInViewport:true
+				theMat.diffuseMap = difMap
+				map_scale = 1.00
+				if pbRatio.selected == "90%" then (
+					map_scale = 0.90
+				) else if pbRatio.selected == "80%" then (
+					map_scale = 0.80
+				) else if pbRatio.selected == "70%" then (
+					map_scale = 0.70
+				) else if pbRatio.selected == "60%" then (
+					map_scale = 0.60
+				) else if pbRatio.selected == "50%" then (
+					map_scale = 0.50
+				) else if pbRatio.selected == "40%" then (
+					map_scale = 0.40
+				) else if pbRatio.selected == "30%" then (
+					map_scale = 0.30
+				) else if pbRatio.selected == "20%" then (
+					map_scale = 0.20
+				) else if pbRatio.selected == "10%" then (
+					map_scale = 0.10
+				)
+				format "mapping file scale picked as %\n" map_scale
+				pln = Plane width:(bmt.bitmap.width*map_scale) length:(bmt.bitmap.height*map_scale) material:theMat lengthsegs:1 widthsegs:1
+				-- sph = Sphere radius:(bmt.bitmap.width*.1) material:theMat
+				-- pbx = Box width:(bmt.bitmap.width*.25) \
+				--   height:(bmt.bitmap.height*.25) \
+				--   length:(bmt.bitmap.width*.25) \
+				--   material:theMat heightsegs:1 widthsegs:1 lengthsegs:1
+				rotate pln (angleaxis 90 [1,0,0])			
+			)
+		)
+	)
+
 	on treeview_rollout resized val do (
 		format "rollout: %\n" val
 		tv.width = (val.x - _ROLLOUT_WIDTH + _TV_WIDTH)
@@ -1259,6 +1311,37 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on tv Close arg do(
 		killRollouts()
+	)
+
+	-- call functions on open
+	on treeview_rollout open do (
+		try (
+			initTreeView tv
+			refreshTreeView tv
+		) catch ()
+		KAGE_MAIN.setTreeInst tv
+		if TV_MODE == "layer" then (
+			modeSummary.checked = true
+		) else if TV_MODE == "detail" then (
+			modeLayer.checked = true
+		) else if TV_MODE == "group" then (
+			modeGroup.checked = true
+		) else (
+			modeObject.checked = true
+		)
+
+		pb_image = (_ICON_DIR + @"\mapping_file_uploader.jpg")
+		pb.AllowDrop = on
+		pb.image = (dotnetclass "System.Drawing.Image").FromFile(pb_image);
+	)
+
+	on treeview_rollout close do (
+		KAGE_MAIN.close_kage()
+	)
+
+	on treeview_rollout help do (
+		print "help requested which refreshes the callout"
+		refreshTreeView tv
 	)
 
 	on treeview_rollout close do (
@@ -1357,10 +1440,6 @@ function open_kage = (
 
 	-- 7. callbacks
 	KAGE_CALLBACKS.createCallbacks()
-
-	-- 8. set icons
-	
-	
 
 	KAGE_STATUS = KageStatus()
 	KAGE_STATUS.is_open = true
