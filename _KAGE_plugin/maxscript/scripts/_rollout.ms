@@ -1226,6 +1226,8 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		-- tools
 		preventCloneDialog.pos = [_btnhoripadding,((_TV_HEIGHT+145)+_btnvertpadding)]
 		cloneType.pos = [(_btnhoripadding+_btnhorispacing+(_btnwidth*2)),((_TV_HEIGHT+145)+_btnvertpadding)]
+		pb.pos = [_btnhoripadding,((_TV_HEIGHT+175)+_btnvertpadding)]
+		pbRatio.pos = [(_btnhoripadding*2 + _btnwidth),((_TV_HEIGHT+190)+_btnvertpadding)]
 		grpTools.pos = [5,((_TV_HEIGHT+145)+_btnvertspacing)]
 	)
 
@@ -1249,7 +1251,37 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 					for p in paths do (
 						imgName = p as string
 					)
-					local_path = maxFilePath + "import" + "\\"
+					map_folder = pathConfig.removePathLeaf maxFilePath
+					map_folder += ("\\" + "2_map" + "\\")
+
+					try(
+						map_folder2 = pathConfig.removePathLeaf maxFilePath
+						map_folder2 = pathConfig.removePathLeaf map_folder2
+						map_folder2 += ("\\" + "2_map" + "\\")
+					) catch (
+						map_folder2 = "-x-"
+					)
+
+					try(
+						map_folder3 = pathConfig.removePathLeaf maxFilePath
+						map_folder3 = pathConfig.removePathLeaf map_folder3
+						map_folder3 = pathConfig.removePathLeaf map_folder3
+						map_folder3 += ("\\" + "2_map" + "\\")
+					) catch (
+						map_folder3 = "-x-"
+					)
+
+					local_path = ""
+					if (doesFileExist map_folder) then (
+						local_path = map_folder
+					) else if (doesFileExist map_folder2) then (
+						local_path = map_folder2
+					) else if (doesFileExist map_folder3) then (
+						local_path = map_folder3
+					) else (
+						local_path = maxFilePath + "import" + "\\"
+					)
+					
 					print local_path
 					makeDir local_path
 					new_path = local_path + imgName
@@ -1263,25 +1295,25 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 				difMap = bmt
 				theMat = Standard  twosided:true naerm:(uniqueName "Ref_Plane_Mat") showInViewport:true
 				theMat.diffuseMap = difMap
-				map_scale = 1.00
+				map_scale = 0.100
 				if pbRatio.selected == "90%" then (
-					map_scale = 0.90
+					map_scale = 0.090
 				) else if pbRatio.selected == "80%" then (
-					map_scale = 0.80
+					map_scale = 0.080
 				) else if pbRatio.selected == "70%" then (
-					map_scale = 0.70
+					map_scale = 0.070
 				) else if pbRatio.selected == "60%" then (
-					map_scale = 0.60
+					map_scale = 0.060
 				) else if pbRatio.selected == "50%" then (
-					map_scale = 0.50
+					map_scale = 0.050
 				) else if pbRatio.selected == "40%" then (
-					map_scale = 0.40
+					map_scale = 0.040
 				) else if pbRatio.selected == "30%" then (
-					map_scale = 0.30
+					map_scale = 0.030
 				) else if pbRatio.selected == "20%" then (
-					map_scale = 0.20
+					map_scale = 0.020
 				) else if pbRatio.selected == "10%" then (
-					map_scale = 0.10
+					map_scale = 0.010
 				)
 				format "mapping file scale picked as %\n" map_scale
 				pln = Plane width:(bmt.bitmap.width*map_scale) length:(bmt.bitmap.height*map_scale) material:theMat lengthsegs:1 widthsegs:1
