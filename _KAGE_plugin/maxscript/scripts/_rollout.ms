@@ -10,7 +10,7 @@ _VERSION = kageTools.getVersion asString:true
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
 _ROLLOUT_HEIGHT = 600;
-_ROLLOUT_CONTROL_PADDING = 250;
+_ROLLOUT_CONTROL_PADDING = 260;
 
 _btnvertpadding = 20
 _btnvertspacing = 5
@@ -1028,20 +1028,25 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	toolTip: "select default for clone dialog" \
 	pos:[(_btnhoripadding+_btnhorispacing+(_btnwidth*2)),((_TV_HEIGHT+145)+_btnvertpadding)] \ 
 	width: _btnwidth
+	groupBox grpTools "ツール" \
+	pos:[5,((_TV_HEIGHT+145)+_btnvertspacing)] \
+	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
+	height: (_btnvertspacing+_btnheight+10)
+
 	--   drag drop image
 	dotNetControl pb "System.Windows.Forms.PictureBox" \
-	pos:[_btnhoripadding,((_TV_HEIGHT+175)+_btnvertpadding)] \ 
+	pos:[_btnhoripadding,((_TV_HEIGHT+185)+_btnvertpadding)] \ 
 	width: (_btnwidth) \
 	height: (_btnheight + 20)
 	dropdownlist pbRatio "Drop Mapping File Scale" items:#("100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%") \
 	toolTip: "Select mapping file import ratio" \
-	pos:[(_btnhoripadding*2 + _btnwidth),((_TV_HEIGHT+175)+_btnvertpadding)] \ 
+	pos:[(_btnhoripadding*2 + _btnwidth),((_TV_HEIGHT+185)+_btnvertpadding)] \ 
 	width: (_btnwidth*2)
-
-	groupBox grpTools "ツール" \
-	pos:[5,((_TV_HEIGHT+145)+_btnvertspacing)] \
+	groupBox grpTemplate "テンプレート" \
+	pos:[5,((_TV_HEIGHT+185)+_btnvertspacing)] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
-	height: (_btnvertspacing*30+_btnheight)
+	height: (_btnvertspacing+_btnheight*2+10)
+
 
 	-- prevent clone dialog
 	fn onTick = (
@@ -1226,12 +1231,116 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		-- tools
 		preventCloneDialog.pos = [_btnhoripadding,((_TV_HEIGHT+145)+_btnvertpadding)]
 		cloneType.pos = [(_btnhoripadding+_btnhorispacing+(_btnwidth*2)),((_TV_HEIGHT+145)+_btnvertpadding)]
-		pb.pos = [_btnhoripadding,((_TV_HEIGHT+175)+_btnvertpadding)]
-		pbRatio.pos = [(_btnhoripadding*2 + _btnwidth),((_TV_HEIGHT+190)+_btnvertpadding)]
 		grpTools.pos = [5,((_TV_HEIGHT+145)+_btnvertspacing)]
+		pb.pos = [_btnhoripadding,((_TV_HEIGHT+185)+_btnvertpadding)]
+		pbRatio.pos = [(_btnhoripadding*2 + _btnwidth),((_TV_HEIGHT+185)+_btnvertpadding)]
+		grpTemplate.pos = [5,((_TV_HEIGHT+185)+_btnvertspacing)]
 	)
 
 	-- DragNDrop functionality
+	fn load_image_to_plane f = (
+		if (doesFileExist f) do (
+			-- SAVE MAPPING FILE LOCALLY
+			if maxFilePath == "" then (
+				print "max file not saved, no directory to save mapping file to\n"
+				new_path = f
+			) else (
+				paths = filterString f "\\"
+				imgName = ""
+				for p in paths do (
+					imgName = p as string
+				)
+				map_folder = pathConfig.removePathLeaf maxFilePath
+				map_folder += ("\\" + "2_map" + "\\")
+
+				try(
+					map_folder2 = pathConfig.removePathLeaf maxFilePath
+					map_folder2 = pathConfig.removePathLeaf map_folder2
+					map_folder2 += ("\\" + "2_map" + "\\")
+				) catch (
+					map_folder2 = "-x-"
+				)
+
+				try(
+					map_folder3 = pathConfig.removePathLeaf maxFilePath
+					map_folder3 = pathConfig.removePathLeaf map_folder3
+					map_folder3 = pathConfig.removePathLeaf map_folder3
+					map_folder3 += ("\\" + "2_map" + "\\")
+				) catch (
+					map_folder3 = "-x-"
+				)
+
+				local_path = ""
+				if (doesFileExist map_folder) then (
+					local_path = map_folder
+				) else if (doesFileExist map_folder2) then (
+					local_path = map_folder2
+				) else if (doesFileExist map_folder3) then (
+					local_path = map_folder3
+				) else (
+					local_path = maxFilePath + "import" + "\\"
+				)
+				
+				print local_path
+				makeDir local_path
+				new_path = local_path + imgName
+				format "file from %\n" new_path
+				format "saving %\n" f
+				copyFile f new_path
+			)
+
+			-- ADD FILE				
+			bmt = BitmapTexture filename:new_path
+			difMap = bmt
+			theMat = Standard  twosided:true naerm:(uniqueName "Ref_Plane_Mat") showInViewport:true
+			theMat.diffuseMap = difMap
+			map_scale = 0.100
+			if pbRatio.selected == "90%" then (
+				map_scale = 0.090
+			) else if pbRatio.selected == "80%" then (
+				map_scale = 0.080
+			) else if pbRatio.selected == "70%" then (
+				map_scale = 0.070
+			) else if pbRatio.selected == "60%" then (
+				map_scale = 0.060
+			) else if pbRatio.selected == "50%" then (
+				map_scale = 0.050
+			) else if pbRatio.selected == "40%" then (
+				map_scale = 0.040
+			) else if pbRatio.selected == "30%" then (
+				map_scale = 0.030
+			) else if pbRatio.selected == "20%" then (
+				map_scale = 0.020
+			) else if pbRatio.selected == "10%" then (
+				map_scale = 0.010
+			)
+			format "mapping file scale picked as %\n" map_scale
+			pln = Plane width:(bmt.bitmap.width*map_scale) length:(bmt.bitmap.height*map_scale) material:theMat lengthsegs:1 widthsegs:1
+			pln.name = "Template"
+			-- sph = Sphere radius:(bmt.bitmap.width*.1) material:theMat
+			-- pbx = Box width:(bmt.bitmap.width*.25) \
+			--   height:(bmt.bitmap.height*.25) \
+			--   length:(bmt.bitmap.width*.25) \
+			--   material:theMat heightsegs:1 widthsegs:1 lengthsegs:1
+			rotate pln (angleaxis 90 [1,0,0])
+			-- add map
+			m = uvwmap() 
+			m.maptype = 5
+			addModifier pln (copy m)
+			select pln
+		)
+	)
+
+	on pb Click e do (
+		print "picture button clicked"
+		f = ""
+		try (
+			f = getOpenFileName \
+				types:"Image Files(*.bmp;*.jpg;*.gif)|*.bmp;*.jpg;*.gif|All files (*.*)|*.*"
+				load_image_to_plane(f)
+		) catch ( )
+	)
+
 	on pb DragOver s e do (
 		e.Effect = if e.data.ContainsFileDropList() then e.Effect.Move else e.Effect.None
 	)
@@ -1240,90 +1349,7 @@ rollout treeview_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			print "drag DROPPED"
 			data = e.data.GetFileDropList()
 			f = data.item[0]
-			if (doesFileExist f) do (
-				-- SAVE MAPPING FILE LOCALLY
-				if maxFilePath == "" then (
-					print "max file not saved, no directory to save mapping file to\n"
-					new_path = f
-				) else (
-					paths = filterString f "\\"
-					imgName = ""
-					for p in paths do (
-						imgName = p as string
-					)
-					map_folder = pathConfig.removePathLeaf maxFilePath
-					map_folder += ("\\" + "2_map" + "\\")
-
-					try(
-						map_folder2 = pathConfig.removePathLeaf maxFilePath
-						map_folder2 = pathConfig.removePathLeaf map_folder2
-						map_folder2 += ("\\" + "2_map" + "\\")
-					) catch (
-						map_folder2 = "-x-"
-					)
-
-					try(
-						map_folder3 = pathConfig.removePathLeaf maxFilePath
-						map_folder3 = pathConfig.removePathLeaf map_folder3
-						map_folder3 = pathConfig.removePathLeaf map_folder3
-						map_folder3 += ("\\" + "2_map" + "\\")
-					) catch (
-						map_folder3 = "-x-"
-					)
-
-					local_path = ""
-					if (doesFileExist map_folder) then (
-						local_path = map_folder
-					) else if (doesFileExist map_folder2) then (
-						local_path = map_folder2
-					) else if (doesFileExist map_folder3) then (
-						local_path = map_folder3
-					) else (
-						local_path = maxFilePath + "import" + "\\"
-					)
-					
-					print local_path
-					makeDir local_path
-					new_path = local_path + imgName
-					format "file from %\n" new_path
-					format "saving %\n" f
-					copyFile f new_path
-				)
-
-				-- ADD FILE				
-				bmt = BitmapTexture filename:new_path
-				difMap = bmt
-				theMat = Standard  twosided:true naerm:(uniqueName "Ref_Plane_Mat") showInViewport:true
-				theMat.diffuseMap = difMap
-				map_scale = 0.100
-				if pbRatio.selected == "90%" then (
-					map_scale = 0.090
-				) else if pbRatio.selected == "80%" then (
-					map_scale = 0.080
-				) else if pbRatio.selected == "70%" then (
-					map_scale = 0.070
-				) else if pbRatio.selected == "60%" then (
-					map_scale = 0.060
-				) else if pbRatio.selected == "50%" then (
-					map_scale = 0.050
-				) else if pbRatio.selected == "40%" then (
-					map_scale = 0.040
-				) else if pbRatio.selected == "30%" then (
-					map_scale = 0.030
-				) else if pbRatio.selected == "20%" then (
-					map_scale = 0.020
-				) else if pbRatio.selected == "10%" then (
-					map_scale = 0.010
-				)
-				format "mapping file scale picked as %\n" map_scale
-				pln = Plane width:(bmt.bitmap.width*map_scale) length:(bmt.bitmap.height*map_scale) material:theMat lengthsegs:1 widthsegs:1
-				-- sph = Sphere radius:(bmt.bitmap.width*.1) material:theMat
-				-- pbx = Box width:(bmt.bitmap.width*.25) \
-				--   height:(bmt.bitmap.height*.25) \
-				--   length:(bmt.bitmap.width*.25) \
-				--   material:theMat heightsegs:1 widthsegs:1 lengthsegs:1
-				rotate pln (angleaxis 90 [1,0,0])			
-			)
+			load_image_to_plane(f)
 		)
 	)
 
