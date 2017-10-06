@@ -12,6 +12,8 @@ fn LoadMappingFiles loc = (
 	-- do something for each mapping reference
 	refFiles = #()
 	return_string = "\nMAPPING FILES:"
+
+	-- loop through bitmaps
 	for bmt in getClassInstances bitmaptex do
 	(
 		-- get reference info
@@ -26,8 +28,19 @@ fn LoadMappingFiles loc = (
 			)
 			print ("ref file: " + fname + " @ " + fpath)
 
+			-- check if this texture is actually referenced within selected objects
+			used = false
+			for mapObj in refs.dependentNodes bmt do (
+				for obj in selection do (
+					if obj.name == mapObj.name do (
+						format "Texture % is used in selected Object %\n" obj.name mapObj.name
+						used = true
+					)
+				)
+			)
+
 			-- sometimes reference files are empty
-			if fname != "" then (
+			if fname != "" and used then (
 				append refFiles fname
 
 				-- check if reference is local or on network
