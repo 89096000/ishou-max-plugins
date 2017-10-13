@@ -156,7 +156,9 @@ CHAIR_LIST = #(
 (Imp key:"204_aston_cord_loveseat"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\椅子_chair\204_aston cord loveseat"  img:"204_loveseat.jpg"  scr:"_204_aston_cord_loveseatv1-3-1.ms"),
 (Imp key:"205_Argenta"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\椅子_chair\205_Argenta"  img:"205_Argenta.jpeg"  scr:"_205_Argenta1-3-1.ms"),
 (Imp key:"206_Magis_Pipe_Stool"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\椅子_chair\206_Magis Pipe Stool"  img:"206_Magis Pipe Stool.jpeg"  scr:"_206_Magis_Pipe_Stool1-3-1.ms"),
-(Imp key:"208_Acapulco_Chair"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\椅子_chair\208_Acapulco Chair"  img:"Preview.jpg"  scr:"_208_Acapulco_Chairv1-3-1.ms")
+(Imp key:"208_Acapulco_Chair"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\椅子_chair\208_Acapulco Chair"  img:"Preview.jpg"  scr:"_208_Acapulco_Chairv1-3-1.ms"),
+(Imp key:"209_Bench_&quot"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\椅子_chair\209_Bench &quot"  img:"622930.57c8110d38492.jpeg"  scr:"_209_Bench_&quotv1-3-1.ms"),
+(Imp key:"211_Arper_Files"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\椅子_chair\211_Arper_Files"  img:"Arper_Catifa80_2010.jpg"  scr:"_211_Arper_Filesv1-3-1.ms")
 
 ),
 
@@ -253,7 +255,9 @@ TABLE_LIST = #(
 (Imp key:"015_四角テーブル_IWM"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\テーブル_table\015_四角テーブル_IWM"  img:"015_四角テーブル_IWM.jpg"  scr:"_015_四角テーブル_IWM1-3-1.ms"),
 (Imp key:"016_打ち合わせテーブル"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\テーブル_table\016_打ち合わせテーブル"  img:"打ち合わせテーブル.jpg"  scr:"_016_打ち合わせテーブル1-3-1.ms"),
 (Imp key:"017_オフィスデスク"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\テーブル_table\017_オフィスデスク"  img:"オフィスデスク.jpg"  scr:"_017_オフィスデスク1-3-1.ms"),
-(Imp key:"018_Cage_taccini_chima_2013"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\テーブル_table\018_Cage_taccini_chima_2013"  img:"Cage_taccini_chima_2013.jpg"  scr:"_018_Cage_taccini_chima_20131-3-1.ms")
+(Imp key:"018_Cage_taccini_chima_2013"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\テーブル_table\018_Cage_taccini_chima_2013"  img:"Cage_taccini_chima_2013.jpg"  scr:"_018_Cage_taccini_chima_20131-3-1.ms"),
+(Imp key:"23_Molly_Coffee_Table"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\テーブル_table\23_Molly_Coffee_Table"  img:"Dot&Bo_Molly_Coffee_Table_preview.jpg"  scr:"_23_Molly_Coffee_Tablev1-3-1.ms"),
+(Imp key:"24_Ridge_Square"  url:@"\\IMPORT-3\share1\01_Object\家具_Furniture\テーブル_table\24_Ridge_Square"  img:"Chista_Ridge_Square_preview.jpg"  scr:"_24_Ridge_Squarev1-3-1.ms")
 
 ),
 
@@ -344,7 +348,10 @@ LIGHTING_LIST = #(
 (Imp key:"064_EX_Light"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\064_EX Light"  img:"ex_light.jpg"  scr:"_064_EX_Light1-3-1.ms"),
 (Imp key:"065_Louis_Poulsen"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\065_Louis Poulsen"  img:"1.png"  scr:"_065_Louis_Poulsen1-3-1.ms"),
 (Imp key:"066_PENDANT"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\066_PENDANT"  img:"066_pendant.jpg"  scr:"_066_PENDANT1-3-1.ms"),
-(Imp key:"067_ブラケット"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\067_ブラケット"  img:"067_ブラケット.jpg"  scr:"_067_ブラケット1-3-1.ms")
+(Imp key:"067_ブラケット"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\067_ブラケット"  img:"067_ブラケット.jpg"  scr:"_067_ブラケット1-3-1.ms"),
+(Imp key:"070_Cloak_&amp"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\070_Cloak &amp"  img:"Cloak & Dagger_2.jpg"  scr:"_070_Cloak_&ampv1-3-1.ms"),
+(Imp key:"071_Kai_Z_Lamp"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\071_Kai_Z_Lamp"  img:"Kai_Z_Lamp.jpg"  scr:"_071_Kai_Z_Lampv1-3-1.ms"),
+(Imp key:"072_Welles_Double_Blown_Glass_Pendants"  url:@"\\IMPORT-3\share1\01_Object\照明_lighting\072_Welles_Double_Blown_Glass_Pendants"  img:"Gabriel_Scott_Welles_Double_Blown_Glass_Pendants_preview.jpg"  scr:"_072_Welles_Double_Blown_Glass_Pendantsv1-3-1.ms")
 
 ),
 

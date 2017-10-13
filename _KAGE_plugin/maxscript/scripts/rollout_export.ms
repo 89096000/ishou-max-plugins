@@ -10,9 +10,120 @@ MAX_FILE_LOC = @"\\IMPORT-3\share1\00_Test\ishoukeikaku_3dmax_tool\latest"
 
 fn LoadMappingFiles loc = (
 	-- do something for each mapping reference
-	refFiles = #()
 	return_string = "\nMAPPING FILES:"
 
+	-- BEGIN MAPPING FILE PROCESS
+	-- figure out map files with reference id
+	selectedMats = for o in selection where o.mat != undefined collect o
+	x = 1
+	materialsUsed = #()
+	usedMaterialsList = #()
+	nonMultiObjects = #()
+
+	-- STEP 1
+	for obj in selectedMats do (
+		if classof obj.material == MultiMaterial  then (
+			-- MULTIMATERIAL classes behave differently as they are mapped to a multimaterial mapping object
+			--  the mapping object might contain a lot of different ref files but only some are used
+			--  VRAY might be required for debugging
+			format "% IS multimaterial object\n" obj.name
+			
+			faces = getNumFaces obj
+			maxIndex = faces
+			if faces > 24 do maxIndex = 24
+			for i = 1 to maxIndex do (
+				refId = getFaceMatID obj.mesh i
+				appendIfUnique materialsUsed refId
+				if i == 1 do format "%|%. % - % (% faces)\n" x i obj.name refId faces
+				x += 1
+			)
+			
+			format "There are % materials used!\n" materialsUsed.count
+			
+			myMatID = 1
+			for om in obj.material.materialList do (
+				exists = finditem materialsUsed myMatID
+				if exists > 0 do (
+					try (
+						format "ID % : % has multiMATERIAL %\n" myMatID obj.name om.name
+						numMaps = getNumSubTexmaps om
+						print numMaps
+						firstMap = getSubTexmap om 1
+						print firstMap.filename
+						appendIfUnique usedMaterialsList firstMap.filename
+					) catch()
+				)
+				myMatID += 1
+			)
+			
+		) else (
+			
+			-- nonmultimaterial objects get processed in step 2
+			format "% is not a multimaterial object\n" obj.name
+			appendIfUnique nonMultiObjects obj		
+		)
+	)
+
+	-- STEP 2
+	-- THIS IS SCRIPT FOR NON MATERIAL OBJECT
+	for bmt in getClassInstances bitmaptex do (
+		for nmo in nonMultiObjects do (
+			exists = finditem (refs.dependentNodes bmt) nmo
+			if exists > 0 do (
+				format "Texture % is used in selected Object %\n" bmt.filename nmo.name
+				appendIfUnique usedMaterialsList bmt.filename
+			)
+		)
+	)
+
+	-- STEP 3 COPY EACH PATH LOCALLY
+	format "THERE ARE % MAPPING FILES!\n" usedMaterialsList.count
+	u = 1
+	for fpath in usedMaterialsList do (
+		format "% : %\n" u fpath
+		u += 1
+		fname = filenameFromPath fpath
+
+		-- check if reference is local or on network
+		lstatus = "LOCAL PATH"
+		if (fpath[1] == "/" or fpath[1] == "\\") then (
+			lstatus = "NETWORK PATH"
+		) else if (substring fpath 1 6) == "import" then (
+			lstatus = "IMPORT PATH"
+		)
+
+		-- figure out the path to the file
+		if lstatus == "LOCAL PATH" then (
+			full_fpath = (maxFilePath + fpath)
+		) else (
+			full_fpath = fpath
+		)
+
+		-- check if reference is valid
+		fpath_exists = doesFileExist fpath
+		fstatus = "FOUND"
+		if fpath_exists == false then (
+			fpath_exists = doesFileExist full_fpath
+			if fpath_exists == false then (
+				fstatus = "MISSING"
+			)
+		)
+		return_string += "\n" + fname + " - " + fstatus
+
+		-- create a copy to location
+		new_path = loc + "\\" + fname				
+		print (fstatus + " file with on " + lstatus)
+		print ("copy from : " + full_fpath)
+		print ("copy to : " + new_path)
+
+		-- copy files				
+		if fstatus == "FOUND" then (
+			copyFile full_fpath new_path
+		)
+
+	)
+
+/*		THIS IS THE OLD METHOD WHICH DOESNT ACCOUNT FOR PROJECT LEVEL MULTIMATERIAL OBJECTS
 	-- loop through bitmaps
 	for bmt in getClassInstances bitmaptex do
 	(
@@ -41,8 +152,6 @@ fn LoadMappingFiles loc = (
 
 			-- sometimes reference files are empty
 			if fname != "" and used then (
-				append refFiles fname
-
 				-- check if reference is local or on network
 				lstatus = "LOCAL PATH"
 				print fpath
@@ -84,6 +193,7 @@ fn LoadMappingFiles loc = (
 			)
 		)
 	)
+*/
 
 	return return_string
 )
