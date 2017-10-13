@@ -116,6 +116,13 @@ fn LoadMappingFiles loc = (
 		print ("copy from : " + full_fpath)
 		print ("copy to : " + new_path)
 
+		-- change set path
+		for bmt in getClassInstances bitmaptex do (
+			if bmt.filename == fpath do (
+				bmt.filename = new_path
+			)
+		)
+
 		-- copy files				
 		if fstatus == "FOUND" then (
 			copyFile full_fpath new_path
@@ -319,13 +326,26 @@ rollout export_rollout "Export Options" (
 			print ("map_path : " + map_path)
 			makeDir map_path
 			
+			-- save current list of mapping file paths
+			og_map_paths = #()
+			for bmt in getClassInstances bitmaptex do (
+				append og_map_paths bmt.filename
+			)
+
+			-- copy mapping files
+			mapping_files = LoadMappingFiles map_path
+
 			-- save selection as
 			file_name = file_sub_path + "\\" + friendly_name
 			print ("creating this file : " + file_name)
 			saveNodes selection file_name -- quiet:true
 
-			-- copy mapping files
-			mapping_files = LoadMappingFiles map_path
+			-- restore mapping file paths
+			p = 1
+			for bmt in getClassInstances bitmaptex do (
+				bmt.filename = og_map_paths[p]
+				p += 1
+			)
 
 			-- create description text file
 			description = txt_desc.text
