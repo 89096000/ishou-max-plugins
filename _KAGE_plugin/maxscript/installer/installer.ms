@@ -289,7 +289,11 @@ private function copyDirectory sourceDir targetDir =
       if (doesFileExist targetFile) then (
          deleteFile targetFile
       )
-      File.Copy sourceFile targetFile;
+      try (
+         File.Copy sourceFile targetFile;
+      ) catch (
+         format "% is locked\n" (tempDir + "/scripts/ui")
+      )
    )
 ),
 

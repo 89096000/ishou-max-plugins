@@ -42,8 +42,7 @@ fn LoadMappingFiles loc = (
 			
 			myMatID = 1
 			for om in obj.material.materialList do (
-				exists = finditem materialsUsed myMatID
-				if exists > 0 do (
+				if (findItem materialsUsed myMatID) > 0 do (
 					try (
 						format "ID % : % has multiMATERIAL %\n" myMatID obj.name om.name
 						numMaps = getNumSubTexmaps om
@@ -69,9 +68,11 @@ fn LoadMappingFiles loc = (
 	for bmt in getClassInstances bitmaptex do (
 		for nmo in nonMultiObjects do (
 			exists = finditem (refs.dependentNodes bmt) nmo
-			if exists > 0 do (
-				format "Texture % is used in selected Object %\n" bmt.filename nmo.name
-				appendIfUnique usedMaterialsList bmt.filename
+			if exists > 0 and bmt.filename != undefined do (
+				if (findItem usedMaterialsList bmt.filename) == 0 then (
+					format "Texture % is used in selected Object %\n" bmt.filename nmo.name
+					appendIfUnique usedMaterialsList bmt.filename
+				)
 			)
 		)
 	)
@@ -86,7 +87,7 @@ fn LoadMappingFiles loc = (
 
 		-- check if reference is local or on network
 		lstatus = "LOCAL PATH"
-		if (fpath[1] == "/" or fpath[1] == "\\") then (
+		if (pathIsNetworkPath fpath) then (
 			lstatus = "NETWORK PATH"
 		) else if (substring fpath 1 6) == "import" then (
 			lstatus = "IMPORT PATH"
@@ -94,6 +95,8 @@ fn LoadMappingFiles loc = (
 
 		-- figure out the path to the file
 		if lstatus == "LOCAL PATH" then (
+			full_fpath = (maxFilePath + fpath)
+		) else if lstatus == "IMPORT PATH" then (
 			full_fpath = (maxFilePath + fpath)
 		) else (
 			full_fpath = fpath
@@ -329,6 +332,7 @@ rollout export_rollout "Export Options" (
 			-- save current list of mapping file paths
 			og_map_paths = #()
 			for bmt in getClassInstances bitmaptex do (
+				print bmt.filename
 				append og_map_paths bmt.filename
 			)
 
@@ -343,7 +347,10 @@ rollout export_rollout "Export Options" (
 			-- restore mapping file paths
 			p = 1
 			for bmt in getClassInstances bitmaptex do (
-				bmt.filename = og_map_paths[p]
+				if bmt.filename != undefined do (
+					format "RESTORING path for bmt.filename : %\n" bmt.filename
+					bmt.filename = og_map_paths[p]
+				)
 				p += 1
 			)
 
