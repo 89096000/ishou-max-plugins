@@ -7,6 +7,7 @@ struct Pair
 
 -- Public shared variables
 global KAGE_MAIN;               -- main kage struct
+global KAGE_TREE;               -- rollout treeview
 global KAGE_STATUS;             -- rollout status struct
 global KAGE_HITNODE;            -- current selected node
 global KAGE_CALLBACKS;          -- callbacks struct
@@ -26,6 +27,7 @@ fileIn "color_mgr.ms";          -- sets up color profiles
 fileIn "tools.ms";              -- tool palette for misc functions
 fileIn "import_files.ms";       -- list of share drive import folders and files
 
+fileIn "rollout_treeview.ms";   -- import interface rollout
 fileIn "rollout_import.ms";     -- import interface rollout
 fileIn "rollout_export.ms";     -- export interface rollout
 fileIn "rollout_submenu.ms";    -- submenu (color picker) rollout
