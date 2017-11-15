@@ -299,11 +299,6 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			format "mapping file scale picked as %\n" map_scale
 			pln = Plane width:(bmt.bitmap.width*map_scale) length:(bmt.bitmap.height*map_scale) material:theMat lengthsegs:1 widthsegs:1
 			pln.name = "Template"
-			-- sph = Sphere radius:(bmt.bitmap.width*.1) material:theMat
-			-- pbx = Box width:(bmt.bitmap.width*.25) \
-			--   height:(bmt.bitmap.height*.25) \
-			--   length:(bmt.bitmap.width*.25) \
-			--   material:theMat heightsegs:1 widthsegs:1 lengthsegs:1
 			rotate pln (angleaxis 90 [1,0,0])
 			-- add map
 			m = uvwmap() 
@@ -338,7 +333,9 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- rollout functions	
 	-- call functions on open
 	on main_rollout open do (
-		
+		pb_image = (_ICON_DIR + @"\mapping_file_uploader.jpg")
+		pb.AllowDrop = on
+		pb.image = (dotnetclass "System.Drawing.Image").FromFile(pb_image)
 	)
 
 	on main_rollout resized val do (
