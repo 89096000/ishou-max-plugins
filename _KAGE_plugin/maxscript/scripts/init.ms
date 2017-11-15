@@ -19,7 +19,8 @@ global VIEW_STYLE = "none";     -- none / color / white
 global FLAT_MODE = false;       -- doesnt draw any nodes
 
 global PRODUCT_INFO_INI = (GetDir #userScripts) + "/kage_product_info.ini"
-global treeview_rollout			-- main treeview
+global main_rollout	            -- main rollout
+global tree_rollout			    -- treeview rollout
 
 -- Import scripts
 fileIn "ini_mgr.ms";            -- scripts to speak with ini files
@@ -52,5 +53,6 @@ try
 
 -- init rollout
 KAGE_MAIN = KageMain()
+KAGE_TREE = KageTree()
 KAGE_CALLBACKS = KageCallbacks()
 KAGE_IMPORTS = ImportFolders()

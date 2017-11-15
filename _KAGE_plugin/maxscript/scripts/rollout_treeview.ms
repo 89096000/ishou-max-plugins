@@ -3,44 +3,26 @@ To Open Rollout UI, Just run this script
 */
 
 -- Name
-_MAIN_ROLLOUT_NAME = "意匠計画の影"
-_VERSION = kageTools.getVersion asString:true
+_TREE_ROLLOUT_NAME = "エクスポーローラ"
 
 -- Rollout Settings
-_DEFAULT_INDENT = 13;
-_ROLLOUT_WIDTH = 250;
-_ROLLOUT_HEIGHT = 600;
 _ROLLOUT_CONTROL_PADDING = 150;
 
-_btnvertpadding = 20
-_btnvertspacing = 5
-_btnhoripadding = 10
-_btnhorispacing = 5
-_btnheight = 25
-_btnwidth = 70
+-- TreeView Rollout
+_TREEVIEW_WIDTH = 290;
+_TREEVIEW_HEIGHT = 550;
+_TREEVIEW_POS_X = 0;
+_TREEVIEW_POS_Y = 0;
 
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
 _TV_HEIGHT = 400;
-
--- Export Rollout
-_E_ROLLOUT_WIDTH = 340;
-_E_ROLLOUT_HEIGHT = 200;
-
--- Save Settings
-SETTINGS_FILE_LOCATION = ""
-TREE_INI = ""
 
 -- FONTS
 fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
 fontStyle = dotNetClass "system.drawing.fontStyle"
 _ON_FONT = dotNetObject "system.drawing.font" fontFam 8
 _OFF_FONT = dotNetObject "system.drawing.font" fontFam 7 fontStyle.italic
-
--- ICONS
-_ICON_DIR = ((GetDir #userIcons) + "/kage")
-IMAGE_LIST = dotNetObject "System.Windows.Forms.ImageList"
-IMAGE_LIST.imageSize = dotNetObject "System.Drawing.Size" 24 23
 
 -- CACHE
 pink_cache = #()
@@ -99,13 +81,10 @@ getIconFromBitmap 10 "box"
 
 
 -- kills secondary rollouts
-fn killRollouts = (
+fn killTreeRollouts = (
 	try (DestroyDialog submenu_rollout) catch()
-	try (DestroyDialog export_rollout) catch()
 	try (DestroyDialog filter_rollout) catch()
 	try (DestroyDialog select_rollout) catch()
-	try (DestroyDialog import_rollout) catch()
-	try (DestroyDialog clone_rollout) catch()
 )
 
 
@@ -182,7 +161,7 @@ fn getColorFromName node_name = (
 )
 
 
-rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
+rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 	-- create treeview activeX control in rollout
 	-- activeXControl tv "MSComctlLib.TreeCtrl" width:190 height:290 align:#center
 	dotNetControl tv "TreeView" width:_TV_WIDTH height:_TV_HEIGHT align:#center
@@ -481,40 +460,6 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else (
 			return false
 		)
-
-
-/*
-		-- new layer properties
-		if newNode == undefined then (
-			return false
-		) else (
-			try (
-				color_val = getColorFromName(layer.name as string)
-
-				newNode.tag = dotNetMXSValue layer
-				newNode.checked = not layer.isHidden
-				icon_ref = getIconId(layer)
-				newNode.imageIndex = newNode.selectedImageIndex = icon_ref
-
-				if layer.isHidden then (
-					newNode.foreColor = GetColorForKey "ltblack"
-					newNode.nodeFont = _OFF_FONT
-				) else (
-					newNode.foreColor = GetColorForKey "black"
-					newNode.nodeFont = _ON_FONT
-				)
-
-				-- read node ini file data
-				newNode.ToolTipText = color_val
-				if color_val != "none" then (
-					newNode.backcolor = (GetColorForKey color_val)
-				)
-
-			) catch ()
-			return true
-		)
-*/
-
 	)
 
 	-- *******************************************************
@@ -546,15 +491,6 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			if not new_node_found do
 				append missed_layers_final missed_layers[i]
 		)
-
-		/*
-		-- alert any layers that werent added
-		if missed_layers_final.count > 0 then (
-			for i = 1 to missed_layers_final.count do (
-				format "ERROR: % could not be found\n" missed_layers_final[i].name
-			)
-		)
-		*/
 	)
 
 	-- *******************************************************
@@ -653,15 +589,6 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 			-- add object into respective layer
 			add_object tv obj_layer_node obj
-			
-			--end = timeStamp()
-			--try (
-			--	obj_name = obj.name
-			--) catch (
-			--	obj_name = "undefined"
-			--)
-			--format "TreeView Fill took % seconds to fill %\n" ((end - start) / 1000.0) obj_name
-			--start = timeStamp()
 
 		) -- end object iterator
 	)
@@ -772,8 +699,8 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- filter button
 	on btn_filter pressed do (
-		killRollouts()
-		local dialog_pos = GetDialogPos treeview_rollout
+		killTreeRollouts()
+		local dialog_pos = GetDialogPos tree_rollout
 		local posx = dialog_pos.x - 30 + _TV_WIDTH
 		local posy = dialog_pos.y - 50 + _TV_HEIGHT
 		CreateDialog filter_rollout ((_COLOR_BTN_SIZE*2)+2)\
@@ -785,8 +712,8 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- special select button
 	on btn_select pressed do (
-		killRollouts()
-		local dialog_pos = GetDialogPos treeview_rollout
+		killTreeRollouts()
+		local dialog_pos = GetDialogPos tree_rollout
 		local posx = dialog_pos.x - 30 + _TV_WIDTH
 		local posy = dialog_pos.y - 50 + _TV_HEIGHT
 		CreateDialog select_rollout ((_COLOR_BTN_SIZE*2)+2)\
@@ -962,7 +889,7 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- option to refresh the tree
 	fn refresh_tree_externally = (
-		treeview_rollout.refreshTreeView(tv)
+		tree_rollout.refreshTreeView(tv)
 	)
 
 	-- HANDLERS
@@ -974,23 +901,15 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			-- RIGHT CLICK - bring up color menu
 			KAGE_HITNODE = tv.GetNodeAt (dotNetObject "System.Drawing.Point" arg.x arg.y)
 			try (
-				killRollouts()
+				killTreeRollouts()
 				local mousepoint = dotNetObject "System.Drawing.Point" arg.x arg.y
-				local dialog_pos = GetDialogPos treeview_rollout
+				local dialog_pos = GetDialogPos tree_rollout
 				local posx = dialog_pos.x + mousepoint.X + 30
 				local posy = dialog_pos.y + mousepoint.Y + 30
 				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
 											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
 											 pos:[posx, posy];
 			) catch ( )
-			
-			-- print "start variable tests"
-			-- try ( print mousepoint.Y ) catch ( print "fail xy test")
-			-- try ( print KAGE_HITNODE.tag.value ) catch ( print "fail test 1" )
-			-- try ( print mainVars.THE_HITNODE.backcolor ) catch ( print "fail test 2" )
-			-- try ( print KAGE_HITNODE.text ) catch ( print "fail test 3" )
-			-- try ( print mainVars.THE_HITNODE.name ) catch ( print "fail test 4" )
-			-- try ( print (KAGE_HITNODE.isVisible as string) ) catch ( print "fail test 6" )
 
 		) else (
 			-- LEFT CLICK - SELECT OBJECT
@@ -1094,30 +1013,14 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		grpModes.pos = [5,((_TV_HEIGHT+75)+_btnvertspacing)]
 	)
 
-	on treeview_rollout resized val do (
-		format "rollout: %\n" val
-		tv.width = (val.x - _ROLLOUT_WIDTH + _TV_WIDTH)
-		OverwriteToIni PRODUCT_INFO_INI "settings" "main_width" val.x
-		tv.height = (val.y - _ROLLOUT_HEIGHT + _TV_HEIGHT)
-		OverwriteToIni PRODUCT_INFO_INI "settings" "main_height" val.y
-		_TV_WIDTH = tv.width
-		_TV_HEIGHT = tv.height
-		_ROLLOUT_WIDTH = treeview_rollout.width
-		_ROLLOUT_HEIGHT = treeview_rollout.height
-
-		reposition_buttons()
-	)
-
 	on tv Close arg do(
-		killRollouts()
+		killTreeRollouts()
 	)
 
 	-- call functions on open
-	on treeview_rollout open do (
-		try (
-			initTreeView tv
-			refreshTreeView tv
-		) catch ()
+	on tree_rollout open do (
+		initTreeView tv
+		refreshTreeView tv
 		KAGE_TREE.setTreeInst tv
 		if TV_MODE == "layer" then (
 			modeSummary.checked = true
@@ -1130,21 +1033,33 @@ rollout tree_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 	)
 
-	on treeview_rollout close do (
-		KAGE_TREE.close_kage()
+	on tree_rollout resized val do (
+		format "tree resized: %\n" val
+		OverwriteToIni PRODUCT_INFO_INI "settings" "tree_width" val.x
+		OverwriteToIni PRODUCT_INFO_INI "settings" "tree_height" val.y
+		_ROLLOUT_WIDTH = main_rollout.width
+		_ROLLOUT_HEIGHT = main_rollout.height
+
+		reposition_buttons()
 	)
 
-	on treeview_rollout help do (
+	on tree_rollout moved pos do (
+		format "tree moved: %\n" pos
+		OverwriteToIni PRODUCT_INFO_INI "settings" "tree_x_pos" pos.x
+		OverwriteToIni PRODUCT_INFO_INI "settings" "tree_y_pos" pos.y
+	)
+
+	on tree_rollout help do (
 		print "help requested which refreshes the callout"
 		refreshTreeView tv
 	)
 
-	on treeview_rollout close do (
-		try (DestroyDialog treeview_rollout) catch()
-		killRollouts()
+	on tree_rollout close do (
+		KAGE_TREE.close_kage()
+		try (DestroyDialog tree_rollout) catch()
+		killTreeRollouts()
 		KAGE_CALLBACKS.removeCallbacks()
-		KAGE_STATUS.is_open = false
-		print "kage was closed"
+		print "kage tree was closed"
 	)
 
 -- end main rollout
@@ -1162,7 +1077,7 @@ function setTreeInst tv = (
 
 function open_tree = (
 	-- 1. end previous rollouts
-	try (DestroyDialog treeview_rollout) catch()
+	try (DestroyDialog tree_rollout) catch()
 
 	-- 2. load last rollout mode selected (layer / scene / object) if object, flat=true
 	last_mode = ReadFromIni PRODUCT_INFO_INI "settings" "mode"
@@ -1176,35 +1091,39 @@ function open_tree = (
 	FLAT_MODE = TV_MODE == "object"
 	format "last mode was %\n" TV_MODE
 
-	-- 3. check for settings folder
-	if maxFilePath == "" then (
-		messageBox "Unable to load settings, max file not saved"
-	) else (
-		SETTINGS_FILE_LOCATION = maxFilePath + @"\settings"
-		makeDir SETTINGS_FILE_LOCATION
-		TREE_INI = SETTINGS_FILE_LOCATION + @"\kage_tree.ini"
+	-- 3. positioning
+	user_set_tree_x = ReadFromIni PRODUCT_INFO_INI "settings" "tree_x_pos"
+	format "user set x pos: %\n" (user_set_tree_x as string)
+	if user_set_tree_x != "none" do (
+		_TREEVIEW_POS_X = (user_set_tree_x as Integer)
+	)
+	
+	user_set_tree_y = ReadFromIni PRODUCT_INFO_INI "settings" "tree_y_pos"
+	format "user set y pos: %\n" (user_set_tree_y as string)
+	if user_set_tree_y != "none" do (
+		_TREEVIEW_POS_Y = (user_set_tree_y as Integer)
 	)
 
-	if SETTINGS_FILE_LOCATION != "" then (
-		-- 4. check for settings file
-		CreateIniFile TREE_INI
-
-		-- 5. check for color settings file
-		InitColorSettings(SETTINGS_FILE_LOCATION)
-	)
-
-	-- 6. create new dialog
-	CreateDialog treeview_rollout \
-		_ROLLOUT_WIDTH\
-	 	_ROLLOUT_HEIGHT\
+	-- 4. create new dialog
+	if _TREEVIEW_POS_X > 0 and _TREEVIEW_POS_Y > 0 then (
+		CreateDialog tree_rollout \
+		_TREEVIEW_WIDTH \
+	 	_TREEVIEW_HEIGHT \
+	 	pos[_TREEVIEW_POS_X, _TREEVIEW_POS_Y] \
 	 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
+	) else (
+		CreateDialog tree_rollout \
+		_TREEVIEW_WIDTH \
+	 	_TREEVIEW_HEIGHT \
+	 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
+	)
 
-	-- 7. callbacks
+	-- 5. callbacks
 	KAGE_CALLBACKS.createCallbacks()
 ),
 
 function close_tree = (
-	try (DestroyDialog treeview_rollout) catch()
+	try (DestroyDialog tree_rollout) catch()
 	KAGE_CALLBACKS.removeCallbacks()
 )
 

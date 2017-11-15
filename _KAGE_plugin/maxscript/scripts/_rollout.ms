@@ -33,19 +33,9 @@ _template_height = 70
 _E_ROLLOUT_WIDTH = 340;
 _E_ROLLOUT_HEIGHT = 200;
 
--- TreeView Rollout
-_E_TREEVIEW_WIDTH = 250;
-_E_TREEVIEW_HEIGHT = 500;
-
 -- Save Settings
 SETTINGS_FILE_LOCATION = ""
 TREE_INI = ""
-
--- FONTS
-fontFam = dotNetObject "system.drawing.fontfamily" "MS Gothic"
-fontStyle = dotNetClass "system.drawing.fontStyle"
-_ON_FONT = dotNetObject "system.drawing.font" fontFam 8
-_OFF_FONT = dotNetObject "system.drawing.font" fontFam 7 fontStyle.italic
 
 -- ICONS
 _ICON_DIR = ((GetDir #userIcons) + "/kage")
@@ -159,11 +149,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- treeview button
 	on btn_tree pressed do (
-		KAGE_TREE = KageTree()
-		CreateDialog tree_rollout \
-			_E_TREEVIEW_WIDTH \
-			_E_TREEVIEW_HEIGHT \
-			style:#(#style_border, #style_sunkenedge)
+		KAGE_TREE.open_tree()
 	)
 
 	-- prevent clone dialog
@@ -438,11 +424,18 @@ function open_kage = (
 	)
 
 	-- 6. create new dialog
-	CreateDialog main_rollout \
-		_ROLLOUT_WIDTH \
-	 	_ROLLOUT_HEIGHT \
-	 	pos:[_ROLLOUT_X_POS, _ROLLOUT_Y_POS] \
-	 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
+	if _ROLLOUT_X_POS > 0 and _ROLLOUT_Y_POS > 0 then (
+		CreateDialog main_rollout \
+			_ROLLOUT_WIDTH \
+		 	_ROLLOUT_HEIGHT \
+		 	pos:[_ROLLOUT_X_POS, _ROLLOUT_Y_POS] \
+		 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
+	) else (
+		CreateDialog main_rollout \
+			_ROLLOUT_WIDTH \
+		 	_ROLLOUT_HEIGHT \
+		 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
+	)
 
 	-- 7. callbacks
 	KAGE_STATUS = KageStatus()

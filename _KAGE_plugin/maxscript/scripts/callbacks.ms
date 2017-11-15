@@ -14,8 +14,8 @@ tree_selectObjectRangeFn,
 --Cache tree functions to minimize lookup time.
 function createFunctionCache =
 (
-   tree_beginUpdateFn            = KAGE_MAIN.tree.BeginUpdate;
-   tree_endUpdateFn              = KAGE_MAIN.tree.EndUpdate;
+   tree_beginUpdateFn            = KAGE_TREE.tree.BeginUpdate;
+   tree_endUpdateFn              = KAGE_TREE.tree.EndUpdate;
 ),
 
 function disposeFunctionCache =
@@ -67,7 +67,7 @@ fn selectionChanged evt handles = (
    format "kage selection callback for % items\n" selection.count
    try (
 --      if (processEvent evt) do (
-         KAGE_MAIN.tree.SelectedNode = null
+         KAGE_TREE.tree.SelectedNode = null
          if selection.count == 0 then (            
          ) else (
             tree_beginUpdateFn();
