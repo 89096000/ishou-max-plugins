@@ -151,6 +151,9 @@ fn load_image_to_plane f = (
 rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- options ---------------------------------
+	checkbox chkRenameMaterials "スレートマテリアルの自動にレネーム"
+	toolTip: "automatically renames slate material editor" \
+	pos:(returnPos 1 1 _option_start)
 	groupBox grpOptions "オプション" \
 	pos:[5,_option_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
@@ -202,6 +205,17 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	pos:[5,_template_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
 	height: _template_height
+
+	----- ----- -----
+	-- slate material rename checkbox
+	on chkRenameMaterials changed theState do (
+		if chkRenameMaterials.checked then (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_rename" "true"
+			fileIn "material_map_rename.ms";
+		) else (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_rename" "false"
+		)
+	)
 
 	----- ----- -----
 	-- export button
@@ -313,6 +327,14 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- rollout functions	
 	-- call functions on open
 	on main_rollout open do (
+		user_checked_material_rename = ReadFromIni PRODUCT_INFO_INI "settings" "material_rename"
+		format "material_rename: %\n" (user_checked_material_rename as string)
+		if user_checked_material_rename == "none" then (
+			chkRenameMaterials.checked = false
+		) else (
+			chkRenameMaterials.checked = user_checked_material_rename == "true"
+		)
+
 		pb_image = (_ICON_DIR + @"\mapping_file_uploader.jpg")
 		pb.AllowDrop = on
 		pb.image = (dotnetclass "System.Drawing.Image").FromFile(pb_image)

@@ -11,13 +11,13 @@ rollout kage_install ""
 
 struct kage_installer (
 
-
 --Directories and files.
 private tempDir              = (GetDir #temp) + "/kage",
 private strings_file         = tempDir + "/installer/strings.ini",
 private installer_data_file  = tempDir + "/installer/installer_data.ini",
 private userUIDir            = pathConfig.removePathLeaf (GetDir #userIcons),
 private userScriptDir        = (GetDir #userScripts) + "/kage",
+private startupDir           = (GetDir #userStartupScripts) + "/kage",
 private userIconsDir         = (GetDir #userIcons),
 private prefs_file           = (GetDir #userScripts) + "/kage_prefs.ini",
 private user_colors_file     = (GetDir #userScripts) + "/kage_user_colors.ini",
@@ -314,6 +314,8 @@ private function copyScriptFiles =
       copyDirectory (tempDir + "/scripts/icons") icon_dir;
       -- copy script icons to main dir
       copyDirectory (tempDir + "/scripts/ui") userIconsDir;
+      -- startup scripts
+      copyDirectory (tempDir + "/scripts/startup") startupDir;
    ) catch (
       printException "copyScriptFiles" (getCurrentException());
       success = false;
@@ -734,6 +736,9 @@ public function install silent:false =
 
    messageBox "インストールをできました！"
                         
+   XxS = ((GetDir #maxroot) + "/stdplugs/stdscripts/kage");
+   print XxS;
+
    
    true;
 ),--End install function.
