@@ -5,14 +5,29 @@ To Open Rollout UI, Just run this script
 -- Name
 _TREE_ROLLOUT_NAME = "エクスポーローラ"
 
+-- Settings
+SETTINGS_FILE_LOCATION = ""
+TREE_INI = ""
+
 -- Rollout Settings
 _ROLLOUT_CONTROL_PADDING = 150;
 
 -- TreeView Rollout
+_DEFAULT_INDENT = 13;
 _TREEVIEW_WIDTH = 290;
 _TREEVIEW_HEIGHT = 550;
 _TREEVIEW_POS_X = 0;
 _TREEVIEW_POS_Y = 0;
+
+_ROLLOUT_WIDTH = 250;
+_ROLLOUT_HEIGHT = 600;
+
+_btnvertpadding = 20
+_btnvertspacing = 5
+_btnhoripadding = 10
+_btnhorispacing = 5
+_btnheight = 25
+_btnwidth = 70
 
 -- TREEVIEW SETTINGS
 _TV_WIDTH = 240;
@@ -40,6 +55,11 @@ LAYER_OBJECTS = #()		-- cache of what object goes to what layer - array of PAIR 
 CACHED_LAYERS = #()		-- keeps track of what layers were already cached - array of string
 
 -- FUNCTIONS
+
+-- ICONS
+_ICON_DIR = ((GetDir #userIcons) + "/kage")
+IMAGE_LIST = dotNetObject "System.Windows.Forms.ImageList"
+IMAGE_LIST.imageSize = dotNetObject "System.Drawing.Size" 24 23
 
 -- cache bmp icons
 fn getIconFromBitmap number iconFileName = (
@@ -1055,7 +1075,7 @@ rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 	)
 
 	on tree_rollout close do (
-		KAGE_TREE.close_kage()
+		KAGE_TREE.close_tree()
 		try (DestroyDialog tree_rollout) catch()
 		killTreeRollouts()
 		KAGE_CALLBACKS.removeCallbacks()
@@ -1104,12 +1124,26 @@ function open_tree = (
 		_TREEVIEW_POS_Y = (user_set_tree_y as Integer)
 	)
 
-	-- 4. create new dialog
+	-- 4. settings
+	if maxFilePath != "" do (
+		SETTINGS_FILE_LOCATION = maxFilePath + @"\settings"
+		makeDir SETTINGS_FILE_LOCATION
+		TREE_INI = SETTINGS_FILE_LOCATION + @"\kage_tree.ini"
+	)
+
+	if SETTINGS_FILE_LOCATION != "" then (
+		-- check for settings file
+		CreateIniFile TREE_INI
+		-- check for color settings file
+		InitColorSettings(SETTINGS_FILE_LOCATION)
+	)
+
+	-- 5. create new dialog
 	if _TREEVIEW_POS_X > 0 and _TREEVIEW_POS_Y > 0 then (
 		CreateDialog tree_rollout \
 		_TREEVIEW_WIDTH \
 	 	_TREEVIEW_HEIGHT \
-	 	pos[_TREEVIEW_POS_X, _TREEVIEW_POS_Y] \
+	 	pos:[_TREEVIEW_POS_X, _TREEVIEW_POS_Y] \
 	 	style:#(#style_toolwindow, #style_sysmenu, #style_resizing)
 	) else (
 		CreateDialog tree_rollout \
