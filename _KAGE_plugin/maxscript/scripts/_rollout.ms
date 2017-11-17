@@ -21,12 +21,12 @@ _btnheight = 25
 _btnwidth = 70
 
 _option_start = 5
-_option_height = 46
-_control_start = 5 + 55
+_option_height = 87
+_control_start = 5 + (55*2)
 _control_height = 87
-_tool_start = 5 + 50 + (55*2)
+_tool_start = 5 + (50*2) + (55*2)
 _tool_height = 46
-_template_start = 5 + 50 + (55*3)
+_template_start = 5 + (50*2) + (55*3)
 _template_height = 70
 
 -- Export Rollout
@@ -151,9 +151,12 @@ fn load_image_to_plane f = (
 rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	-- options ---------------------------------
+	checkbox chkAutoOpen "影を自動に開く"
+	toolTip: "automatically opens kage" \
+	pos:(returnPos 1 1 _option_start)
 	checkbox chkRenameMaterials "スレートマテリアルの自動にレネーム"
 	toolTip: "automatically renames slate material editor" \
-	pos:(returnPos 1 1 _option_start)
+	pos:(returnPos 1 2 _option_start)
 	groupBox grpOptions "オプション" \
 	pos:[5,_option_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
@@ -205,6 +208,16 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	pos:[5,_template_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
 	height: _template_height
+
+	----- ----- -----
+	-- kage auto-open checkbox
+	on chkAutoOpen changed theState do (
+		if chkRenameMaterials.checked then (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "auto_open" "true"
+		) else (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "auto_open" "false"
+		)
+	)
 
 	----- ----- -----
 	-- slate material rename checkbox
@@ -333,6 +346,14 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			chkRenameMaterials.checked = false
 		) else (
 			chkRenameMaterials.checked = user_checked_material_rename == "true"
+		)
+
+		user_checked_auto_open = ReadFromIni PRODUCT_INFO_INI "settings" "auto_open"
+		format "auto_open: %\n" (user_checked_auto_open as string)
+		if user_checked_auto_open == "none" then (
+			chkAutoOpen.checked = false
+		) else (
+			chkAutoOpen.checked = user_checked_auto_open == "true"
 		)
 
 		pb_image = (_ICON_DIR + @"\mapping_file_uploader.jpg")

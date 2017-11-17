@@ -126,4 +126,4 @@ for sm in mmList do (
 )
 
 -- display change events to user
-if changeCount > 0 do ( messageBox user_msg )
+-- if changeCount > 0 do ( messageBox user_msg )

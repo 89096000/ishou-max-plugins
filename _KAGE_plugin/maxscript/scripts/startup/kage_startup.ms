@@ -21,7 +21,23 @@ fn kage_startup_duties =
 		format "loading material rename script%\n" material_rename_script
 		fileIn material_rename_script;
 	)
+
+	-- CHECK IF KAGE SHOULD AUTOOPEN
+	
+	k = "auto_open"
+	already_there = hasINISetting product_ini sect k
+	if already_there then (
+		user_checked_auto_open = (getINISetting product_ini sect k)
+	) else (
+		user_checked_auto_open = "none"
+	)
+
+	if user_checked_auto_open == "true" then (
+		format "auto_open is on"
+	) else (
+		format "auto_open is off"
+	)
+	macros.run "Kage" "toggleKage"
 )
-callbacks.removescripts id:#my_postload -- was testing callback
 callbacks.removescripts id:#kage_postload
 callbacks.addscript #filePostOpenProcess "kage_startup_duties()" id:#kage_postload
