@@ -14,7 +14,7 @@ _ROLLOUT_X_POS = 0;
 _ROLLOUT_Y_POS = 0;
 
 _btnvertpadding = 20
-_btnvertspacing = 5
+_btnvertspacing = 3
 _btnhoripadding = 10
 _btnhorispacing = 5
 _btnheight = 25
@@ -157,10 +157,22 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	checkbox chkRenameMaterials "スレートマテリアルの自動にレネーム"
 	toolTip: "automatically renames slate material editor" \
 	pos:(returnPos 1 2 _option_start)
+	button btnTest "TEST" \
+	pos:(returnPos 1 3 _option_start) \ 
+	align: #left width:_btnwidth
 	groupBox grpOptions "オプション" \
 	pos:[5,_option_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
 	height: _option_height
+
+	on btnTest pressed do (
+		-- http://forums.cgsociety.org/archive/index.php?t-1278027.html
+		-- http://www.scriptspot.com/3ds-max/scripts/sme-get-selected-materials
+
+		-- https://knowledge.autodesk.com/support/3ds-max/learn-explore/caas/CloudHelp/cloudhelp/2017/ENU/3DSMax/files/GUID-B5F995B4-9E93-4A62-B156-E75B9B6B74A5-htm.html
+		x = SME.GetMtlinParamEditor
+		print x
+	)
 
 	-- controls ---------------------------------
 	button btn_import "インポート" \

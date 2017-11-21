@@ -37,7 +37,7 @@ fn kage_startup_duties =
 	) else (
 		format "auto_open is off"
 	)
-	macros.run "Kage" "toggleKage"
+	macros.run "Kage" "checkKageOpen"
 )
 callbacks.removescripts id:#kage_postload
 callbacks.addscript #filePostOpenProcess "kage_startup_duties()" id:#kage_postload
