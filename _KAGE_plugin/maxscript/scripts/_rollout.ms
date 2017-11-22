@@ -157,22 +157,20 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	checkbox chkRenameMaterials "スレートマテリアルの自動にレネーム"
 	toolTip: "automatically renames slate material editor" \
 	pos:(returnPos 1 2 _option_start)
-	button btnTest "TEST" \
-	pos:(returnPos 1 3 _option_start) \ 
-	align: #left width:_btnwidth
+	checkbox ckSmeCallback "マテリアルを自動にセレクトする"
+	toolTip: "automatically renames slate material editor" \
+	pos:(returnPos 1 3 _option_start)
+--	button btnTest "TEST" \
+--	pos:(returnPos 1 3 _option_start) \ 
+--	align: #left width:_btnwidth
 	groupBox grpOptions "オプション" \
 	pos:[5,_option_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
 	height: _option_height
 
-	on btnTest pressed do (
-		-- http://forums.cgsociety.org/archive/index.php?t-1278027.html
-		-- http://www.scriptspot.com/3ds-max/scripts/sme-get-selected-materials
-
-		-- https://knowledge.autodesk.com/support/3ds-max/learn-explore/caas/CloudHelp/cloudhelp/2017/ENU/3DSMax/files/GUID-B5F995B4-9E93-4A62-B156-E75B9B6B74A5-htm.html
-		x = SME.GetMtlinParamEditor
-		print x
-	)
+--	on btnTest pressed do (
+--
+--	)
 
 	-- controls ---------------------------------
 	button btn_import "インポート" \
@@ -239,6 +237,18 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			fileIn "material_map_rename.ms";
 		) else (
 			OverwriteToIni PRODUCT_INFO_INI "settings" "material_rename" "false"
+		)
+	)
+
+	----- ----- -----
+	-- material editor object selection callback
+	on ckSmeCallback changed theState do (
+		if chkRenameMaterials.checked then (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_select_cb" "true"
+			KAGE_SME_CALLBACKS.createCallbacks()
+		) else (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_select_cb" "false"
+			KAGE_SME_CALLBACKS.removeCallbacks()
 		)
 	)
 
@@ -368,6 +378,15 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			chkAutoOpen.checked = user_checked_auto_open == "true"
 		)
 
+		user_checked_sme_callback = ReadFromIni PRODUCT_INFO_INI "settings" "material_select_cb"
+		format "material select callback: %\n" (user_checked_sme_callback as string)
+		if user_checked_sme_callback == "none" then (
+			ckSmeCallback.checked = false
+		) else (
+			ckSmeCallback.checked = user_checked_sme_callback == "true"
+		)
+		if user_checked_sme_callback == "true" do KAGE_SME_CALLBACKS.createCallbacks()
+
 		pb_image = (_ICON_DIR + @"\mapping_file_uploader.jpg")
 		pb.AllowDrop = on
 		pb.image = (dotnetclass "System.Drawing.Image").FromFile(pb_image)
@@ -488,6 +507,7 @@ function close_kage = (
 	killRollouts()
 
 	KAGE_CALLBACKS.removeCallbacks()
+	KAGE_SME_CALLBACKS.removeCallbacks()
 
 	KAGE_STATUS.is_open = false
 )

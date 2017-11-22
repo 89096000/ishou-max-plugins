@@ -66,15 +66,12 @@ function callbackEnd evt handles = (
 fn selectionChanged evt handles = (
    format "kage selection callback for % items\n" selection.count
    try (
---      if (processEvent evt) do (
-         KAGE_TREE.tree.SelectedNode = null
-         if selection.count == 0 then (            
-         ) else (
-            tree_beginUpdateFn();
-            treeview_rollout.tag_search()
-            tree_endUpdateFn();
-         )
---      )
+      KAGE_TREE.tree.SelectedNode = null
+      if selection.count > 0 then (
+         tree_beginUpdateFn();
+         treeview_rollout.tag_search()
+         tree_endUpdateFn();
+      )
    ) catch ( )
 )
 

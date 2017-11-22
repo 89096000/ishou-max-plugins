@@ -11,6 +11,7 @@ global KAGE_TREE;               -- rollout treeview
 global KAGE_STATUS;             -- rollout status struct
 global KAGE_HITNODE;            -- current selected node
 global KAGE_CALLBACKS;          -- callbacks struct
+global KAGE_SME_CALLBACKS;		-- slate material editor callbacks
 global KAGE_IMPORTS;			-- import folder lists
 global CALLBACKS_MODE = true;	-- set to false for actions to not trigger callbacks
 global CURRENT_FILTER = "all";  -- all or some color
@@ -36,6 +37,7 @@ fileIn "rollout_filter.ms";     -- filter tree rollout
 fileIn "rollout_select.ms";     -- select tree rollout
 fileIn "rollout_clone.ms";      -- copy tool rollout
 fileIn "callbacks.ms";     		-- event callbacks
+fileIn "sme_callbacks.ms";     	-- slate material editor callbacks
 fileIn "_rollout.ms";           -- main treeview rollout
 
 -- load scripts
@@ -55,4 +57,5 @@ try
 KAGE_MAIN = KageMain()
 KAGE_TREE = KageTree()
 KAGE_CALLBACKS = KageCallbacks()
+KAGE_SME_CALLBACKS = KageSlateCallbacks()
 KAGE_IMPORTS = ImportFolders()

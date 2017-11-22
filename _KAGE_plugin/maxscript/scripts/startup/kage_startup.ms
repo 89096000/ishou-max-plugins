@@ -23,7 +23,6 @@ fn kage_startup_duties =
 	)
 
 	-- CHECK IF KAGE SHOULD AUTOOPEN
-	
 	k = "auto_open"
 	already_there = hasINISetting product_ini sect k
 	if already_there then (
@@ -34,10 +33,10 @@ fn kage_startup_duties =
 
 	if user_checked_auto_open == "true" then (
 		format "auto_open is on"
+		macros.run "Kage" "checkKageOpen"
 	) else (
 		format "auto_open is off"
 	)
-	macros.run "Kage" "checkKageOpen"
 )
 callbacks.removescripts id:#kage_postload
 callbacks.addscript #filePostOpenProcess "kage_startup_duties()" id:#kage_postload
