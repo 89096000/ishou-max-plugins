@@ -21,7 +21,7 @@ _btnheight = 25
 _btnwidth = 70
 
 _option_start = 5
-_option_height = 87
+_option_height = 97
 _control_start = 5 + (55*2)
 _control_height = 87
 _tool_start = 5 + (50*2) + (55*2)
@@ -158,8 +158,11 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	toolTip: "automatically renames slate material editor" \
 	pos:(returnPos 1 2 _option_start)
 	checkbox ckSmeCallback "マテリアルを自動にセレクトする"
-	toolTip: "automatically renames slate material editor" \
+	toolTip: "automatically selects slate materials on click" \
 	pos:(returnPos 1 3 _option_start)
+	checkbox ckSmeAutoZoom "ズーム"
+	toolTip: "automatically zoom and center" \
+	pos:(returnPos 3.5 3 _option_start)
 --	button btnTest "TEST" \
 --	pos:(returnPos 1 3 _option_start) \ 
 --	align: #left width:_btnwidth
@@ -249,6 +252,14 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else (
 			OverwriteToIni PRODUCT_INFO_INI "settings" "material_select_cb" "false"
 			KAGE_SME_CALLBACKS.removeCallbacks()
+		)
+	)
+
+	on ckSmeAutoZoom changed theState do (
+		if ckSmeAutoZoom.checked then (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_select_zoom" "true"
+		) else (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_select_zoom" "false"
 		)
 	)
 

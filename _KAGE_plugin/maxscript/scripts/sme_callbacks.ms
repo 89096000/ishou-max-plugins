@@ -1,4 +1,5 @@
 global kage_slate_callbacks;
+global kage_slate_zoom;
 
 struct KageSlateCallbacks (
 
@@ -86,7 +87,14 @@ fn sme_selection = (
       --for sm in selectedMatsInView do sme.SetMtlInParamEditor sm
       sme.SetMtlInParamEditor selectedMatsInView[1]
    )
-   --if selectedMatsInView.Count > 0 do curSME.ZoomExtents type: #selected
+   if selectedMatsInView.Count > 0 do (
+      try (
+         kage_slate_zoom = ReadFromIni PRODUCT_INFO_INI "settings" "material_select_zoom"
+         if kage_slate_zoom != undefined do (
+            if kage_slate_zoom == "true" do curSME.ZoomExtents type: #selected
+         )
+      ) catch ()
+   )
 ),
 
 fn selectionChanged = (
