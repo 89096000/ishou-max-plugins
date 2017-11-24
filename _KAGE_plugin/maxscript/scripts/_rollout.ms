@@ -398,6 +398,14 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 		if user_checked_sme_callback == "true" do KAGE_SME_CALLBACKS.createCallbacks()
 
+		user_checked_sme_zoom = ReadFromIni PRODUCT_INFO_INI "settings" "material_select_zoom"
+		format "material select zoom: %\n" (user_checked_sme_zoom as string)
+		if user_checked_sme_zoom == "none" then (
+			ckSmeAutoZoom.checked = false
+		) else (
+			ckSmeAutoZoom.checked = user_checked_sme_zoom == "true"
+		)
+
 		pb_image = (_ICON_DIR + @"\mapping_file_uploader.jpg")
 		pb.AllowDrop = on
 		pb.image = (dotnetclass "System.Drawing.Image").FromFile(pb_image)
