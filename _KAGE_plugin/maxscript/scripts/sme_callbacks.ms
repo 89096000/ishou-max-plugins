@@ -3,6 +3,8 @@ global kage_slate_zoom;
 
 struct KageSlateCallbacks (
 
+kage_sm_time,
+
 function createCallbacks =  (
    callbacks.addScript #selectionSetChanged "KAGE_SME_CALLBACKS.selectionChanged()" id:#kagesme
 ),
@@ -49,6 +51,9 @@ fn get_multimaterial_mats obj = (
 
 -- FN to reselect in SME materials used on selected materials
 fn sme_selection = (
+   -- Add time buffer until next script can run
+   kage_sm_time = timeStamp()+100f
+
    -- check there's an active view
    curSME = sme.GetView (sme.activeView)
    if curSME == undefined do (
@@ -107,10 +112,15 @@ fn sme_selection = (
 ),
 
 fn selectionChanged = (
-   --format "kage SME callback for % items\n" selection.count
-   --try (
-   sme_selection()
-   --) catch ( )
+   if kage_sm_time == undefined do kage_sm_time = timeStamp()
+
+   if kage_sm_time <= timeStamp() do (
+      --format "kage SME callback for % items\n" selection.count
+      --try (
+      sme_selection()
+      --) catch ( )
+   )
+
 )
 
 )--End struct.
