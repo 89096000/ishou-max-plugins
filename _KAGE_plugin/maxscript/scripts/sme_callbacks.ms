@@ -18,7 +18,7 @@ fn get_multimaterial_mats obj = (
    try (
       faces = getNumFaces obj
       maxIndex = faces
-      if faces > 24 do maxIndex = 24
+      --if faces > 24 do maxIndex = 24
       for i = 1 to maxIndex do (
          refId = getFaceMatID obj.mesh i
          appendIfUnique materialsIds refId
@@ -40,6 +40,9 @@ fn get_multimaterial_mats obj = (
       )
       myMatID += 1
    )
+
+   format "Found % materials\n"
+   for ml in matList do print ml
    
    return matList
 ),

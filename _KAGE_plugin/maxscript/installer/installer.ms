@@ -615,6 +615,16 @@ public function uninstall silent:false =
  */
 public function install silent:false =
 (   
+   print "close kage if open"
+   if KAGE_STATUS == undefined or KAGE_STATUS.is_open == false then (
+      KAGE_WAS_OPEN = false
+      print "kage is not currently open"
+   ) else (
+      print "close kage"
+      KAGE_WAS_OPEN = true
+      KAGE_MAIN.close_kage()
+   )
+
    print "Uninstall Previous Version"
    addStatusText (getString #uninstPrevVer);
    if (removeScriptFiles()) then
@@ -728,6 +738,10 @@ public function install silent:false =
    
    print "Install Complete"
    setIsKageInstalled true;
+
+   print "Open Kage?!?!?"
+   fileIn ((getDir #userScripts) + "/kage/init.ms");
+   KAGE_MAIN.open_kage()
 
    print "Show Complete MsgBox"
    --installation_success (getString #inst) \

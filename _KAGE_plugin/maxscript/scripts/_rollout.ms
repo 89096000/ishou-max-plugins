@@ -246,7 +246,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	----- ----- -----
 	-- material editor object selection callback
 	on ckSmeCallback changed theState do (
-		if chkRenameMaterials.checked then (
+		if ckSmeCallback.checked then (
 			OverwriteToIni PRODUCT_INFO_INI "settings" "material_select_cb" "true"
 			KAGE_SME_CALLBACKS.createCallbacks()
 		) else (
