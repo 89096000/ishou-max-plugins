@@ -739,7 +739,7 @@ public function install silent:false =
    print "Install Complete"
    setIsKageInstalled true;
 
-   print "Open Kage?!?!?"
+   print "Open Kage"
    fileIn ((getDir #userScripts) + "/kage/init.ms");
    KAGE_MAIN.open_kage()
 

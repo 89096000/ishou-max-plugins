@@ -8,7 +8,7 @@ function createCallbacks =  (
 ),
 
 function removeCallbacks = (
-   callbacks.removeScripts id:#kagesme;
+   callbacks.removeScripts #selectionSetChanged id:#kagesme;
 ),
 
 -- FN to get get multimaterial object (recursive)
@@ -41,7 +41,7 @@ fn get_multimaterial_mats obj = (
       myMatID += 1
    )
 
-   format "Found % materials\n"
+   format "Found % materials\n" matList.count
    for ml in matList do print ml
    
    return matList
@@ -49,6 +49,13 @@ fn get_multimaterial_mats obj = (
 
 -- FN to reselect in SME materials used on selected materials
 fn sme_selection = (
+   -- check there's an active view
+   curSME = sme.GetView (sme.activeView)
+   if curSME == undefined do (
+      print "no SME view"
+      return undefined
+   )
+
    -- GET LIST OF SELECTED MATERIALS FROM SCENE
    selectedMats = #()
    selectedMatsInView = #()
@@ -64,7 +71,6 @@ fn sme_selection = (
    )
 
    -- GET LIST OF MATERIALS IN SME
-   curSME = sme.GetView (sme.activeView)
    viewNodeCount = curSME.GetNumNodes()
    smeViewMaterials = for n = 1 to viewNodeCount collect (curSME.GetNode n)
    curSME.SelectNone()
@@ -102,9 +108,9 @@ fn sme_selection = (
 
 fn selectionChanged = (
    --format "kage SME callback for % items\n" selection.count
-   try (
-      sme_selection()
-   ) catch ( )
+   --try (
+   sme_selection()
+   --) catch ( )
 )
 
 )--End struct.
