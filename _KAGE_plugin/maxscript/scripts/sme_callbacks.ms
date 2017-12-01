@@ -4,6 +4,7 @@ global kage_slate_zoom;
 struct KageSlateCallbacks (
 
 kage_sm_time,
+kage_last_obj,
 
 function createCallbacks =  (
    callbacks.addScript #selectionSetChanged "KAGE_SME_CALLBACKS.selectionChanged()" id:#kagesme
@@ -126,17 +127,27 @@ fn sme_selection = (
 
 fn selectionChanged = (
    if kage_sm_time == undefined do kage_sm_time = timeStamp()
+   if kage_last_obj == undefined then (
+      obj_is_new = true
+   ) else (
+      obj_is_new = kage_last_obj != (selection[1] as string)
+   )
 
-   if selection.count > 25 then (
+   if obj_is_new == false then (
+      format "same object no SME callback needed\n"
+   ) else if selection.count > 25 then (
       format "too many items for SME callback: % items\n" selection.count
    ) else if kage_sm_time <= timeStamp() and selection.count > 0 then (
       format "kage SME callback for % items\n" selection.count
       --try (
       sme_selection()
       --) catch ( )
-
+      try (
+         kage_last_obj = (selection[1] as string)
+      ) catch (
+         kage_last_obj = undefined
+      )
    )
-
 )
 
 )--End struct.
