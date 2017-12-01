@@ -20,7 +20,7 @@ fn get_multimaterial_mats obj = (
    try (
       faces = getNumFaces obj
       maxIndex = faces
-      --if faces > 24 do maxIndex = 24
+      if faces > 96 do maxIndex = 96
       for i = 1 to maxIndex do (
          refId = getFaceMatID obj.mesh i
          appendIfUnique materialsIds refId
@@ -43,8 +43,8 @@ fn get_multimaterial_mats obj = (
       myMatID += 1
    )
 
-   format "Found % materials\n" matList.count
-   for ml in matList do print ml
+   --format "Found % materials\n" matList.count
+   --for ml in matList do print ml
    
    return matList
 ),
@@ -65,6 +65,12 @@ fn sme_selection = (
    selectedMats = #()
    selectedMatsInView = #()
    for obj in selection do (
+      isPoly = (classOf obj) == Editable_Poly
+      if isPoly do (
+         format "% will convert to poly and then convert back\n" obj.name
+         convertToMesh obj
+      )
+
       if obj.material != undefined do (
          if classof obj.material == MultiMaterial then (
             myMats = get_multimaterial_mats obj
@@ -72,6 +78,10 @@ fn sme_selection = (
          ) else (
             appendIfUnique selectedMats obj.material
          )
+      )
+
+      if isPoly do (
+         max undo
       )
    )
 
@@ -86,7 +96,7 @@ fn sme_selection = (
          r = trackViewNodes[#sme][(sme.activeView)][i].reference
       ) catch (
          format "unable to get sme trackViewNodes for %" (i as string)
-         return undefined
+         exit
       )
       
       if (findItem selectedMats r) > 0 do (
@@ -117,7 +127,7 @@ fn sme_selection = (
 fn selectionChanged = (
    if kage_sm_time == undefined do kage_sm_time = timeStamp()
 
-   if selection.count > 10 then (
+   if selection.count > 25 then (
       format "too many items for SME callback: % items\n" selection.count
    ) else if kage_sm_time <= timeStamp() and selection.count > 0 then (
       format "kage SME callback for % items\n" selection.count
