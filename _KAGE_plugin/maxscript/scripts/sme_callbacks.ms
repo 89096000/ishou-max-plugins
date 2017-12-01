@@ -117,7 +117,9 @@ fn sme_selection = (
 fn selectionChanged = (
    if kage_sm_time == undefined do kage_sm_time = timeStamp()
 
-   if kage_sm_time <= timeStamp() and selection.count > 0 then (
+   if selection.count > 10 then (
+      format "too many items for SME callback: % items\n" selection.count
+   ) else if kage_sm_time <= timeStamp() and selection.count > 0 then (
       format "kage SME callback for % items\n" selection.count
       --try (
       sme_selection()
