@@ -190,7 +190,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	button btn_tree "エクスポーローラ" \
 	toolTip: "shows scene explorer" \
 	pos:(returnPos 1 2 _control_start) \ 
-	align: #left width:(_btnwidth*2)
+	align: #left width:(_btnwidth*2+4)
 	groupBox grpControls "コントロール" \
 	pos:[5,_control_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
