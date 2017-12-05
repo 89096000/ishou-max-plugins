@@ -1,3 +1,6 @@
+-- name limit
+NAME_LIMIT = 10
+
 -- output message
 displayLog = false
 changeCount = 0
@@ -7,12 +10,66 @@ maxCount = 20
 -- save names that were used before
 usedNames = #()
 
+-- if user wishes to also rename maps
+rename_maps = false
+try (
+	user_checked_rename_map = ReadFromIni PRODUCT_INFO_INI "settings" "material_map_rename"
+	rename_maps = user_checked_rename_map == "true"
+) catch ()
+
 -- create a list of multimaterial objects
 mmAllList = for o in material.classes where (o as string) == "Multimaterial" collect (getClassInstances o processAllAnimatables:true)
 mmList = (for o in sceneMaterials where classof(o) == Multimaterial collect o)
 for matType in mmAllList do (
 	for o in matType do (
 		appendIfUnique mmList o
+	)
+)
+
+-- fn process find materials in object
+fn process_material nstring ml m = (
+	if m != undefined do (
+		has_smtn = false
+
+		if isProperty m #fileName do (
+			has_smtn = true
+			fname = nstring + "-" + substring (filenameFromPath m.fileName) 1 NAME_LIMIT
+			-- format "object % mapped to %\n" (m as string) fname
+			m.name = fname
+		)
+
+		if isProperty m #map do (
+			has_smtn = true
+			fname = nstring + "-" + substring (filenameFromPath m.map.fileName) 1 NAME_LIMIT
+			m.map.name = fname
+		)
+
+		if isProperty m #map1 do (
+			has_smtn = true
+			process_material nstring ml m.map1
+		)
+
+		if isProperty m #map2 do (
+			has_smtn = true
+			process_material nstring ml m.map2
+		)
+
+		if isProperty m #normal_map do (
+			has_smtn = true
+			process_material nstring ml m.normal_map
+		)
+
+		if isProperty m #bump_map do (
+			has_smtn = true
+			process_material nstring ml m.bump_map
+		)
+
+		-- if not has_smtn do (
+		-- 	print ("TESTING" + ml.name)
+		-- 	print (classOf ml)
+		-- 	format "object % mapped but no file\n" (m as string)
+		-- 	showProperties m
+		-- )
 	)
 )
 
@@ -81,11 +138,41 @@ for sm in mmList do (
 				)
 			)
 
+			-- Rename related map slate material objects
+			if rename_maps do (
+
+				if isProperty ml #texmap_bump do (
+					if ml.texmap_diffuse != undefined do process_material nstring ml ml.texmap_diffuse
+					if ml.texmap_roughness != undefined do process_material nstring ml ml.texmap_roughness
+					if ml.texmap_self_illumination != undefined do process_material nstring ml ml.texmap_self_illumination
+					if ml.texmap_reflection != undefined do process_material nstring ml ml.texmap_reflection
+					if ml.texmap_hilightGlossiness != undefined do process_material nstring ml ml.texmap_hilightGlossiness
+					if ml.texmap_reflectionGlossiness != undefined do process_material nstring ml ml.texmap_reflectionGlossiness
+					if ml.texmap_reflectionIOR != undefined do process_material nstring ml ml.texmap_reflectionIOR
+					if ml.texmap_anisotropy != undefined do process_material nstring ml ml.texmap_anisotropy
+					if ml.texmap_anisotropy_rotation != undefined do process_material ml nstring ml.texmap_anisotropy_rotation
+					if ml.texmap_refraction != undefined do process_material nstring ml ml.texmap_refraction
+					if ml.texmap_refractionGlossiness != undefined do process_material nstring ml ml.texmap_refractionGlossiness
+					if ml.texmap_refractionIOR != undefined do process_material nstring ml ml.texmap_refractionIOR
+					if ml.texmap_translucent != undefined do process_material nstring ml ml.texmap_translucent
+					if ml.texmap_refraction_fog != undefined do process_material nstring ml ml.texmap_refraction_fog
+					if ml.texmap_bump != undefined do process_material nstring ml ml.texmap_bump
+					if ml.texmap_displacement != undefined do process_material nstring ml ml.texmap_displacement
+					if ml.texmap_opacity != undefined do process_material nstring ml ml.texmap_opacity
+					if ml.texmap_environment != undefined do process_material nstring ml ml.texmap_environment
+					-- print ml.texmap_diffuse.fileName
+				)
+
+				if isProperty ml #frontMtl do (
+					if ml.frontMtl != undefined do process_material nstring ml ml.frontMtl
+					if ml.backMtl != undefined do process_material nstring ml ml.backMtl
+				)
+
+			)
+
 		) else (
 
-			if displayLog do (
-				format "% is invalid at reference %\n" sm.name (n as string)
-			)
+			if displayLog do format "% is invalid at reference %\n" sm.name (n as string)
 
 		)
 		n += 1

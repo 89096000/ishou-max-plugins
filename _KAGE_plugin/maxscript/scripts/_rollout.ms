@@ -154,9 +154,12 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	checkbox chkAutoOpen "影を自動に開く"
 	toolTip: "automatically opens kage" \
 	pos:(returnPos 1 1 _option_start)
-	checkbox chkRenameMaterials "スレートマテリアルの自動にレネーム"
+	checkbox chkRenameMaterials "スレートマテリアルレネーム"
 	toolTip: "automatically renames slate material editor" \
 	pos:(returnPos 1 2 _option_start)
+	checkbox ckRenameMaps "マップ"
+	toolTip: "rename script will also rename mapped bitmaps" \
+	pos:(returnPos 3.5 2 _option_start)
 	checkbox ckSmeCallback "マテリアルを自動にセレクトする"
 	toolTip: "automatically selects slate materials on click" \
 	pos:(returnPos 1 3 _option_start)
@@ -240,6 +243,16 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			fileIn "material_map_rename.ms";
 		) else (
 			OverwriteToIni PRODUCT_INFO_INI "settings" "material_rename" "false"
+		)
+	)
+
+	----- ----- -----
+	-- slate material option to also rename
+	on ckRenameMaps changed theState do (
+		if chkRenameMaterials.checked then (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_map_rename" "true"
+		) else (
+			OverwriteToIni PRODUCT_INFO_INI "settings" "material_map_rename" "false"
 		)
 	)
 
@@ -379,6 +392,13 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			chkRenameMaterials.checked = false
 		) else (
 			chkRenameMaterials.checked = user_checked_material_rename == "true"
+		)
+		user_checked_rename_map = ReadFromIni PRODUCT_INFO_INI "settings" "material_map_rename"
+		format "map_rename: %\n" (user_checked_rename_map as string)
+		if user_checked_rename_map == "none" then (
+			ckRenameMaps.checked = false
+		) else (
+			ckRenameMaps.checked = user_checked_rename_map == "true"
 		)
 
 		user_checked_auto_open = ReadFromIni PRODUCT_INFO_INI "settings" "auto_open"
