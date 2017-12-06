@@ -1,6 +1,9 @@
 global kage_slate_callbacks;
 global kage_slate_zoom;
 
+-- note on subObjectSelectionChanged to get face change
+-- http://forums.cgsociety.org/archive/index.php?t-710774.html
+
 struct KageSlateCallbacks (
 
 kage_sm_time,
@@ -58,7 +61,6 @@ fn sme_selection = (
    -- check there's an active view
    curSME = sme.GetView (sme.activeView)
    if curSME == undefined do (
-      print "no SME view"
       return undefined
    )
 
@@ -66,11 +68,12 @@ fn sme_selection = (
    selectedMats = #()
    selectedMatsInView = #()
    for obj in selection do (
-      isPoly = (classOf obj) == Editable_Poly
-      if isPoly do (
-         format "% will convert to poly and then convert back\n" obj.name
-         convertToMesh obj
-      )
+      
+      --isPoly = (classOf obj) == Editable_Poly
+      --if isPoly do (
+      --   format "% will convert to poly and then convert back\n" obj.name
+      --   convertToMesh obj
+      --)
 
       if obj.material != undefined do (
          if classof obj.material == MultiMaterial then (
@@ -81,9 +84,9 @@ fn sme_selection = (
          )
       )
 
-      if isPoly do (
-         max undo
-      )
+      --if isPoly do (
+      --   max undo
+      --)
    )
 
    -- GET LIST OF MATERIALS IN SME
