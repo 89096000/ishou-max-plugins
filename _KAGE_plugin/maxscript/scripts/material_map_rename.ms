@@ -28,36 +28,48 @@ fn process_material nstring ml m = (
 		has_smtn = false
 
 		if isProperty m #fileName do (
-			has_smtn = true
-			fname = nstring + "-" + substring (filenameFromPath m.fileName) 1 NAME_LIMIT
-			-- format "object % mapped to %\n" (m as string) fname
-			m.name = fname
+			if m.fileName != undefined do (
+				has_smtn = true
+				fname = nstring + "-" + substring (filenameFromPath m.fileName) 1 NAME_LIMIT
+				-- format "object % mapped to %\n" (m as string) fname
+				m.name = fname
+			)
 		)
 
 		if isProperty m #map do (
-			has_smtn = true
-			fname = nstring + "-" + substring (filenameFromPath m.map.fileName) 1 NAME_LIMIT
-			m.map.name = fname
+			if m.map != undefined do (
+				has_smtn = true
+				fname = nstring + "-" + substring (filenameFromPath m.map.fileName) 1 NAME_LIMIT
+				m.map.name = fname
+			)
 		)
 
 		if isProperty m #map1 do (
-			has_smtn = true
-			process_material nstring ml m.map1
+			if m.map1 != undefined do (
+				has_smtn = true
+				process_material nstring ml m.map1
+			)
 		)
 
 		if isProperty m #map2 do (
-			has_smtn = true
-			process_material nstring ml m.map2
+			if m.map2 != undefined do (
+				has_smtn = true
+				process_material nstring ml m.map2
+			)
 		)
 
 		if isProperty m #normal_map do (
-			has_smtn = true
-			process_material nstring ml m.normal_map
+			if m.normal_map != undefined do (
+				has_smtn = true
+				process_material nstring ml m.normal_map
+			)
 		)
 
 		if isProperty m #bump_map do (
-			has_smtn = true
-			process_material nstring ml m.bump_map
+			if m.bump_map != undefined do (
+				has_smtn = true
+				process_material nstring ml m.bump_map
+			)
 		)
 
 		-- if not has_smtn do (
