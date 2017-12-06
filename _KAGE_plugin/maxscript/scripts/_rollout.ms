@@ -9,7 +9,7 @@ _VERSION = kageTools.getVersion asString:true
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
-_ROLLOUT_HEIGHT = 600;
+_ROLLOUT_HEIGHT = 400;
 _ROLLOUT_X_POS = 0;
 _ROLLOUT_Y_POS = 0;
 
@@ -157,15 +157,15 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	checkbox chkRenameMaterials "スレートマテリアルレネーム"
 	toolTip: "automatically renames slate material editor" \
 	pos:(returnPos 1 2 _option_start)
-	checkbox ckRenameMaps "マップ"
+	button btnRenameMaps "マップ"
 	toolTip: "rename script will also rename mapped bitmaps" \
-	pos:(returnPos 3.5 2 _option_start)
+	pos:(returnPos 3.2 2 _option_start)
 	checkbox ckSmeCallback "マテリアルを自動にセレクトする"
 	toolTip: "automatically selects slate materials on click" \
 	pos:(returnPos 1 3 _option_start)
 	checkbox ckSmeAutoZoom "ズーム"
 	toolTip: "automatically zoom and center" \
-	pos:(returnPos 3.5 3 _option_start)
+	pos:(returnPos 3.2 3 _option_start)
 --	button btnTest "TEST" \
 --	pos:(returnPos 1 3 _option_start) \ 
 --	align: #left width:_btnwidth
@@ -248,12 +248,8 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	----- ----- -----
 	-- slate material option to also rename
-	on ckRenameMaps changed theState do (
-		if chkRenameMaterials.checked then (
-			OverwriteToIni PRODUCT_INFO_INI "settings" "material_map_rename" "true"
-		) else (
-			OverwriteToIni PRODUCT_INFO_INI "settings" "material_map_rename" "false"
-		)
+	on btnRenameMaps pressed do (
+		fileIn "material_map_rename.ms";
 	)
 
 	----- ----- -----
@@ -386,6 +382,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	-- rollout functions	
 	-- call functions on open
 	on main_rollout open do (
+		-- slate material editor rename
 		user_checked_material_rename = ReadFromIni PRODUCT_INFO_INI "settings" "material_rename"
 		format "material_rename: %\n" (user_checked_material_rename as string)
 		if user_checked_material_rename == "none" then (
@@ -393,14 +390,9 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else (
 			chkRenameMaterials.checked = user_checked_material_rename == "true"
 		)
-		user_checked_rename_map = ReadFromIni PRODUCT_INFO_INI "settings" "material_map_rename"
-		format "map_rename: %\n" (user_checked_rename_map as string)
-		if user_checked_rename_map == "none" then (
-			ckRenameMaps.checked = false
-		) else (
-			ckRenameMaps.checked = user_checked_rename_map == "true"
-		)
-
+		if user_checked_material_rename == "true" do fileIn "material_map_rename.ms"
+		
+		-- auto open kage
 		user_checked_auto_open = ReadFromIni PRODUCT_INFO_INI "settings" "auto_open"
 		format "auto_open: %\n" (user_checked_auto_open as string)
 		if user_checked_auto_open == "none" then (
@@ -409,6 +401,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			chkAutoOpen.checked = user_checked_auto_open == "true"
 		)
 
+		-- slate material editor callback
 		user_checked_sme_callback = ReadFromIni PRODUCT_INFO_INI "settings" "material_select_cb"
 		format "material select callback: %\n" (user_checked_sme_callback as string)
 		if user_checked_sme_callback == "none" then (
@@ -418,6 +411,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 		if user_checked_sme_callback == "true" do KAGE_SME_CALLBACKS.createCallbacks()
 
+		-- default sme callback zoom setting
 		user_checked_sme_zoom = ReadFromIni PRODUCT_INFO_INI "settings" "material_select_zoom"
 		format "material select zoom: %\n" (user_checked_sme_zoom as string)
 		if user_checked_sme_zoom == "none" then (
@@ -426,6 +420,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			ckSmeAutoZoom.checked = user_checked_sme_zoom == "true"
 		)
 
+		-- drop image functionality
 		pb_image = (_ICON_DIR + @"\mapping_file_uploader.jpg")
 		pb.AllowDrop = on
 		pb.image = (dotnetclass "System.Drawing.Image").FromFile(pb_image)

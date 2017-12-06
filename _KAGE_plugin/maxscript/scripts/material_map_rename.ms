@@ -11,11 +11,7 @@ maxCount = 20
 usedNames = #()
 
 -- if user wishes to also rename maps
-rename_maps = false
-try (
-	user_checked_rename_map = ReadFromIni PRODUCT_INFO_INI "settings" "material_map_rename"
-	rename_maps = user_checked_rename_map == "true"
-) catch ()
+RENAME_MAPS = true
 
 -- create a list of multimaterial objects
 mmAllList = for o in material.classes where (o as string) == "Multimaterial" collect (getClassInstances o processAllAnimatables:true)
@@ -139,7 +135,7 @@ for sm in mmList do (
 			)
 
 			-- Rename related map slate material objects
-			if rename_maps do (
+			if RENAME_MAPS do (
 
 				if isProperty ml #texmap_bump do (
 					if ml.texmap_diffuse != undefined do process_material nstring ml ml.texmap_diffuse
