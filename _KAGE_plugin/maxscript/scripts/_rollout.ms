@@ -191,6 +191,14 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	toolTip: "shows scene explorer" \
 	pos:(returnPos 1 2 _control_start) \ 
 	align: #left width:(_btnwidth*2+4)
+	button btnSaveMap "ビューを保存" \
+	toolTip: "saves the current slate editor map" \
+	pos:(returnPos 3 1 _control_start) \ 
+	align: #left width:_btnwidth
+	button btnLoadMap "ビューをロード" \
+	toolTip: "loads a slate editor map" \
+	pos:(returnPos 3 2 _control_start) \ 
+	align: #left width:_btnwidth
 	groupBox grpControls "コントロール" \
 	pos:[5,_control_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
@@ -303,6 +311,16 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	on btn_tree pressed do (
 		KAGE_TREE.open_tree()
 	)
+
+	----- ----- -----
+	-- SME loading options
+	on btnSaveMap pressed do (
+		fileIn "sme_view_save.ms";
+	)
+
+	on btnLoadMap pressed do (
+		fileIn "sme_view_load.ms";
+	)	
 
 	-- prevent clone dialog
 	fn onTick = (
