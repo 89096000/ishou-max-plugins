@@ -5,151 +5,13 @@ xName = smeview_dir + "sme_testing_log.ms"
 print xName
 
 -- XML
-
-DotNet.LoadAssembly "System.Xml"
-
-struct XMLNode(
-	Tag,
-	Parent,
-	DotNetNode,
-	
-	fn init dnNode = (
-		DotNetNode = dnNode
-		Tag = dnNode.LocalName
-		Parent = dnNode.ParentNode
-	),
-	fn GetTag = (
-		DotNetNode.Name
-	),
-	fn SetTag newTag =(
-		try(DotNetNode.Name = newTag)catch(False)
-	),
-	fn GetText = (
-		DotNetNode.InnerText
-	), 
-	fn SetText txt = (
-		DotNetNode.InnerText = txt
-	),
-	fn AddAttribute attribute value = (
-		DotNetNode.SetAttribute attribute value
-	),
-	fn GetAttribute attribute = (
-		DotNetNode.GetAttribute attribute
-	),
-	fn SetAttributeValue attribute value = (
-		DotNetNode.SetAttribute attribute value
-	),
-	fn DeleteAttribute attribute = (
-		DotNetNode.RemoveAttribute attribute
-	),
-	fn GetAllAttributes = (
-		ret = #()
-		attribs = DotNetNode.Attributes
-		for i = 0 to (attribs.Count - 1) do(
-			append ret (attribs.ItemOf i)
-		)
-		return ret
-	),
-	fn HasAttribute attribute =(
-		DotNetNode.HasAttribute attribute
-	),
-	
-	fn AppendNode newNode = (
-		if classof newNode == XMLNode then(
-			DotNetNode.AppendChild newNode.DotNetNode
-			return True
-		)else(False)
-	),
-	
-	fn GetChild index = (
-		dNode = DotNetNode.ChildNodes.ItemOf index
-		if dNode.Name != "#text" then(
-			newNode = XMLNode()
-			newNode.init dnode
-			newNode
-		)else(return False)
-	),
-	fn GetChildren = (
-		nodes = #()
-		for i = 0 to (DotNetNode.ChildNodes.Count - 1) do(
-			dNode = DotNetNode.ChildNodes.ItemOf i
-			newNode = XMLNode()
-			newNode.init dNode
-			append nodes newNode
-		)
-		nodes
-	),
-	fn DeleteChild childNode = (
-		if classof childNode == XMLNode then (
-			DotNetNode.RemoveChild childNode.DotNetNode
-			return True
-		)else(False)
-	)
-)
-
-struct XMLDocument ( 
-	file = undefined,
-	rootNode = undefined,
-	dom = dotNetObject "System.Xml.XmlDocument",
-	loaded = undefined,
-	
-	fn LoadXML pathToXml = (
-		doc = dom.Load pathToXml
-		loaded = True
-		True
-	),
-	
-	fn SaveXML = (
-		if loaded == True then(
-			dom.Save file
-			return True
-		)else(False)
-	),
-	
-	fn GetRootNode = (
-		rootNode = XMLNode()
-		rootNode.init dom.DocumentElement
-		rootNode
-	),
-	fn getNewNode tag = (
-		dNode=dom.CreateElement tag
-		newNode=XMLNode()
-		newNode.init dNode
-		newNode
-	),
-	fn AppendNode newNode = (
-		if classof newNode == XMLNode then(
-			dom.AppendChild newNode.DotNetNode
-			return True
-		)else(False)
-	),
-	fn PrettySaveXML = (
-		if loaded == True then(
-			writer = dotNetClass "System.Xml.XmlTextWriter"
-			wSettings = dotNetObject "System.Xml.XmlWriterSettings"
-			wSettings.indent = True
-			w = writer.create file wSettings
-			dom.writeContentTo w
-			w.close()
-			True
-		)
-	)
-)
-
+fileIn "struct_xml.ms"
+--fileIn "C:\Users\Orbit-Kwa\Desktop\git\ishous-max-plugins\_KAGE_plugin\maxscript\scripts\struct_xml"
 
 -- class for node property
 struct MaterialNode(
 	property,
 	value
-)
-
--- class for new node property
-struct NewMaterialNode(
-	name,
-	type,
-	posx,
-	posy,
-	map
 )
 
 -- function for analyzing node properties
@@ -159,9 +21,7 @@ fn EvalNodeProperty arr property pname default = (
 	-- pname = property name
 	-- default = default value of property (not sure if ill use this to restrict to only certain values)
 		
-	isDupe = false
-
-	if (property as string) == default or isDupe then (
+	if (property as string) == default then (
 		return undefined
 	) else (
 		mn = MaterialNode()
@@ -236,6 +96,15 @@ fn make_temp_texture textureList mValue = (
 			bmt.name = mValue
 			return bmt
 		)
+	)
+)
+
+-- FN checks a filename if it has been localized and return full path if it was
+fn check_local_map filename = (
+	if (substring filename 2 10) == "mapping_fi" then (
+		return (maxFilePath + (filename as string))
+	) else (
+		return filename
 	)
 )
 
@@ -487,9 +356,9 @@ for m in smeViewMaterials do (
 			-- .endCondition : integer
 			-- .tieTimeToMatIDs (Tie_Time_to_Mat_IDs) : boolean
 			if hasProperty r "fileName" then (
-				mappingFile = r.fileName
+				mappingFile = check_local_map r.fileName
 			) else if hasProperty r "map" then (
-				mappingFile = r.map.name
+				mappingFile = check_local_map r.map.name
 			)
 		)
 	)
