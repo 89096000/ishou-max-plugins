@@ -9,7 +9,7 @@ _VERSION = kageTools.getVersion asString:true
 -- Rollout Settings
 _DEFAULT_INDENT = 13;
 _ROLLOUT_WIDTH = 250;
-_ROLLOUT_HEIGHT = 400;
+_ROLLOUT_HEIGHT = 300;
 _ROLLOUT_X_POS = 0;
 _ROLLOUT_Y_POS = 0;
 
@@ -23,7 +23,7 @@ _btnwidth = 70
 _option_start = 5
 _option_height = 97
 _control_start = 5 + (55*2)
-_control_height = 87
+_control_height = 99
 _tool_start = 5 + (50*2) + (55*2)
 _tool_height = 46
 _template_start = 5 + (50*2) + (55*3)
@@ -190,15 +190,19 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	button btn_tree "エクスポーローラ" \
 	toolTip: "shows scene explorer" \
 	pos:(returnPos 1 2 _control_start) \ 
-	align: #left width:(_btnwidth*2+4)
+	align: #left width:(_btnwidth*2-4)
 	button btnSaveMap "ビューを保存" \
 	toolTip: "saves the current slate editor map" \
 	pos:(returnPos 3 1 _control_start) \ 
 	align: #left width:_btnwidth
-	button btnLoadMap "ビューをロード" \
+	button btnLoadMap "ビューのロード" \
 	toolTip: "loads a slate editor map" \
 	pos:(returnPos 3 2 _control_start) \ 
 	align: #left width:_btnwidth
+	button btnLocalizeFiles "Localize Mapping Files" \
+	toolTip: "saves all mapping files into project folder" \
+	pos:(returnPos 1 3 _control_start) \ 
+	align: #left width:(_btnwidth*2-4)
 	groupBox grpControls "コントロール" \
 	pos:[5,_control_start] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
@@ -226,7 +230,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	height: (_btnheight + 20)
 	dropdownlist pbRatio "Drop Mapping File Scale" items:#("100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%") \
 	toolTip: "Select mapping file import ratio" \
-	pos:(returnPos 2 1 _template_start)
+	pos:(returnPos 2 1.25 _template_start)
 	width: (_btnwidth*2)
 	groupBox grpTemplate "テンプレート" \
 	pos:[5,_template_start] \
@@ -320,7 +324,13 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 	on btnLoadMap pressed do (
 		fileIn "sme_view_load.ms";
-	)	
+	)
+
+	----- ----- -----
+	-- folder localization
+	on btnLocalizeFiles pressed do (
+		fileIn "localize_mapping_files.ms";
+	)
 
 	-- prevent clone dialog
 	fn onTick = (
@@ -528,7 +538,7 @@ function open_kage = (
 
 	-- 3. check for settings folder
 	if maxFilePath == "" then (
-		messageBox "Unable to load settings, max file not saved"
+		messageBox "設定を見つけません, プロジェクトを保存してください"
 	) else (
 		SETTINGS_FILE_LOCATION = maxFilePath + @"\settings"
 		makeDir SETTINGS_FILE_LOCATION
