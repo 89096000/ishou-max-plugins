@@ -57,6 +57,7 @@ fn killRollouts = (
 	try (DestroyDialog select_rollout) catch()
 	try (DestroyDialog import_rollout) catch()
 	try (DestroyDialog clone_rollout) catch()
+	try (DestroyDialog sme_rollout) catch()
 )
 
 -- DragNDrop functionality
@@ -273,6 +274,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else (
 			OverwriteToIni PRODUCT_INFO_INI "settings" "material_select_cb" "false"
 			KAGE_SME_CALLBACKS.removeCallbacks()
+			KAGE_SME_CALLBACKS.removeNodeEvents()
 		)
 	)
 
@@ -478,6 +480,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		KAGE_MAIN.close_kage()
 		try (DestroyDialog main_rollout) catch()
 		KAGE_CALLBACKS.removeCallbacks()
+		KAGE_SME_CALLBACKS.removeNodeEvents()
 		KAGE_STATUS.is_open = false
 		print "kage was closed"
 	)
@@ -570,6 +573,7 @@ function close_kage = (
 
 	KAGE_CALLBACKS.removeCallbacks()
 	KAGE_SME_CALLBACKS.removeCallbacks()
+	KAGE_SME_CALLBACKS.removeNodeEvents()
 
 	KAGE_STATUS.is_open = false
 )
