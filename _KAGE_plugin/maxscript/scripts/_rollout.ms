@@ -196,7 +196,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	toolTip: "saves the current slate editor map" \
 	pos:(returnPos 3 1 _control_start) \ 
 	align: #left width:_btnwidth
-	button btnLoadMap "ビューのロード" \
+	button btnLoadMap "ビューをロード" \
 	toolTip: "loads a slate editor map" \
 	pos:(returnPos 3 2 _control_start) \ 
 	align: #left width:_btnwidth
