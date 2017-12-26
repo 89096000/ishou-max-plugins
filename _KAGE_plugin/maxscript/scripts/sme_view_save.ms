@@ -1,7 +1,7 @@
 -- Vars
-smeview_dir = (GetDir #userScripts) + "\\kage\\smeviews\\"
+smeview_dir = (GetDir #userScripts) + "\\kageviews\\"
 makeDir smeview_dir
-xName = smeview_dir + "sme_testing_log.ms"
+xName = smeview_dir + "sme_testing_log.xml"
 print xName
 
 -- XML
@@ -49,13 +49,6 @@ xDoc.SaveXML()
 
 start = timestamp()
 
-/*
-TEMPLATE_FILE_LOCATION = "C:\Users\Orbit-Kwa\Desktop\maxTesting\sme_testing_log_template.txt"
-TEST_FILE_LOCATION = "C:\Users\Orbit-Kwa\Desktop\maxTesting\sme_testing_log.txt"
-deleteFile TEST_FILE_LOCATION
-copyFile TEMPLATE_FILE_LOCATION TEST_FILE_LOCATION
-f = (openFile TEST_FILE_LOCATION mode:"a")
-*/
 
 -- FN to get get multimaterial object (recursive)
 fn get_multimaterial_mats obj = (

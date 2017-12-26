@@ -1,7 +1,8 @@
 -- vars
-smeview_dir = (GetDir #userScripts) + "\\kage\\smeviews\\"
+smeview_dir = (GetDir #userScripts) + "\\kageviews\\"
 makeDir smeview_dir
-xName = smeview_dir + "sme_testing_log.ms"
+xName = smeview_dir + "sme_testing_log.xml"
+viewName = "KageSaved"
 print xName
 
 -- XML
@@ -22,26 +23,20 @@ struct NewMaterialNode(
 	map
 )
 
--- save an empty xml document with root node
+-- load xml document
+/*
 xDoc = XMLDocument()
 xDoc.file = xName
 xDoc.loaded = True
 rNode = xDoc.getNewNode "MaxSlateData"
 xDoc.AppendNode rnode
 rNode = xDoc.getRootNode()
+*/
 
 
 -- http://www.scriptspot.com/forums/3ds-max/general-scripting/how-to-loop-the-materials-in-the-slate-material-editor 
 
 start = timestamp()
-
-/*
-TEMPLATE_FILE_LOCATION = "C:\Users\Orbit-Kwa\Desktop\maxTesting\sme_testing_log_template.txt"
-TEST_FILE_LOCATION = "C:\Users\Orbit-Kwa\Desktop\maxTesting\sme_testing_log.txt"
-deleteFile TEST_FILE_LOCATION
-copyFile TEMPLATE_FILE_LOCATION TEST_FILE_LOCATION
-f = (openFile TEST_FILE_LOCATION mode:"a")
-*/
 
 -- FN to get get multimaterial object (recursive)
 fn get_multimaterial_mats obj = (
@@ -118,10 +113,10 @@ for ch in childs do (
 )
 
 -- test making a new view
-deleteMe = sme.GetViewByName "testView"
+deleteMe = sme.GetViewByName viewName
 sme.DeleteView deleteMe false
 
-newViewIndex = sme.CreateView "testView"
+newViewIndex = sme.CreateView viewName
 newView = sme.GetView newViewIndex
 sme.activeView = newViewIndex
 

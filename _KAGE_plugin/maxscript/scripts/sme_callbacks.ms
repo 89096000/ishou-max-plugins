@@ -14,17 +14,35 @@ fn selectMatsInSME curSME selectedMats = (
 
    selectedMatsInView = #()
    i = 1
+   found_mat = false 
    for m in smeViewMaterials do (
+      if found_mat == true do exit
+      
       try (
-         r = trackViewNodes[#sme][(sme.activeView)][i].reference
+         r = undefined
+         rr = undefined
+         retry = 0
+         while r == undefined and retry <= 25 do (
+            rr = trackViewNodes[#sme][(sme.activeView)][i].reference
+            -- wrapping name in string accounts for undefined
+            if (rr.name as string) == m.name then (
+               r = rr
+            ) else (
+               i += 1
+               retry += 1
+            )
+         )
       ) catch (
          format "unable to get sme trackViewNodes for %" (i as string)
          exit
       )
       
-      if (findItem selectedMats r) > 0 do (
-         m.selected = true
-         appendIfUnique selectedMatsInView r
+      if r != undefined do (
+         if (findItem selectedMats r) > 0 do (
+            m.selected = true
+            appendIfUnique selectedMatsInView r
+            found_mat = true
+         )
       )
 
       i += 1
