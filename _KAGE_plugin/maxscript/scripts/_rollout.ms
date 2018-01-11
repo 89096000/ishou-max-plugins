@@ -229,7 +229,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 	pos:(returnPos 1 1 _template_start)
 	width: (_btnwidth) \
 	height: (_btnheight + 20)
-	dropdownlist pbRatio "Drop Mapping File Scale" items:#("100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%") \
+	dropdownlist pbRatio "オブジェクトの比率" items:#("100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%") \
 	toolTip: "Select mapping file import ratio" \
 	pos:(returnPos 2 1.25 _template_start)
 	width: (_btnwidth*2)
@@ -383,7 +383,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 
 		-- template
 		pb.pos = (returnPos 1 1 _template_start)
-		pbRatio.pos = (returnPos 2 1 _template_start)
+		pbRatio.pos = (returnPos 2 1.5 _template_start)
 		grpTemplate.pos = [5,_template_start]
 	)
 
