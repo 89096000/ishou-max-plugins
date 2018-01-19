@@ -36,6 +36,9 @@ _E_ROLLOUT_HEIGHT = 200;
 -- Save Settings
 SETTINGS_FILE_LOCATION = ""
 
+-- Control settings
+PB_IMPORT_RATIO = 0.100;
+
 -- TIMERS
 _DIALOG_PREVENT_TIMER = dotNetObject "System.Windows.Forms.Timer";
 
@@ -117,28 +120,8 @@ fn load_image_to_plane f = (
 		difMap = bmt
 		theMat = Standard  twosided:true naerm:(uniqueName "Ref_Plane_Mat") showInViewport:true
 		theMat.diffuseMap = difMap
-		map_scale = 0.100
-		if pbRatio.selected == "90%" then (
-			map_scale = 0.090
-		) else if pbRatio.selected == "80%" then (
-			map_scale = 0.080
-		) else if pbRatio.selected == "70%" then (
-			map_scale = 0.070
-		) else if pbRatio.selected == "60%" then (
-			map_scale = 0.060
-		) else if pbRatio.selected == "50%" then (
-			map_scale = 0.050
-		) else if pbRatio.selected == "40%" then (
-			map_scale = 0.040
-		) else if pbRatio.selected == "30%" then (
-			map_scale = 0.030
-		) else if pbRatio.selected == "20%" then (
-			map_scale = 0.020
-		) else if pbRatio.selected == "10%" then (
-			map_scale = 0.010
-		)
-		format "mapping file scale picked as %\n" map_scale
-		pln = Plane width:(bmt.bitmap.width*map_scale) length:(bmt.bitmap.height*map_scale) material:theMat lengthsegs:1 widthsegs:1
+		format "mapping file scale picked as %\n" PB_IMPORT_RATIO
+		pln = Plane width:(bmt.bitmap.width*PB_IMPORT_RATIO) length:(bmt.bitmap.height*PB_IMPORT_RATIO) material:theMat lengthsegs:1 widthsegs:1
 		pln.name = "Template"
 		rotate pln (angleaxis 90 [1,0,0])
 		-- add map
@@ -365,28 +348,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		)
 	)
 
-	-- repositions buttons
-	fn reposition_buttons = (
-		format "repositioning buttons\n"
-		-- option buttons
-		grpOptions.pos = [5,_option_start]
-
-		-- control buttons
-		btn_import.pos = (returnPos 1 1 _control_start)
-		btn_export.pos = (returnPos 2 1 _control_start)
-		grpControls.pos = [5,_control_start]
-
-		-- tools
-		preventCloneDialog.pos = (returnPos 1 1 _tool_start)
-		cloneType.pos = (returnPos 3 1 _tool_start)
-		grpTools.pos = [5,_tool_start]
-
-		-- template
-		pb.pos = (returnPos 1 1 _template_start)
-		pbRatio.pos = (returnPos 2 1.5 _template_start)
-		grpTemplate.pos = [5,_template_start]
-	)
-
+	-- img import
 	on pb Click e do (
 		print "picture button clicked"
 		f = ""
@@ -407,6 +369,53 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 			f = data.item[0]
 			load_image_to_plane(f)
 		)
+	)
+
+	on pbRatio selected arg do (
+		s = pbRatio.selected
+		if s == "100%" then (
+			PB_IMPORT_RATIO = 0.100
+		) else if s == "90%" then (
+			PB_IMPORT_RATIO = 0.090
+		) else if s == "80%" then (
+			PB_IMPORT_RATIO = 0.080
+		) else if s == "70%" then (
+			PB_IMPORT_RATIO = 0.070
+		) else if s == "60%" then (
+			PB_IMPORT_RATIO = 0.060
+		) else if s == "50%" then (
+			PB_IMPORT_RATIO = 0.050
+		) else if s == "40%" then (
+			PB_IMPORT_RATIO = 0.040
+		) else if s == "30%" then (
+			PB_IMPORT_RATIO = 0.030
+		) else if s == "20%" then (
+			PB_IMPORT_RATIO = 0.020
+		) else (
+			PB_IMPORT_RATIO = 0.010
+		)
+	)
+
+	-- repositions buttons
+	fn reposition_buttons = (
+		format "repositioning buttons\n"
+		-- option buttons
+		grpOptions.pos = [5,_option_start]
+
+		-- control buttons
+		btn_import.pos = (returnPos 1 1 _control_start)
+		btn_export.pos = (returnPos 2 1 _control_start)
+		grpControls.pos = [5,_control_start]
+
+		-- tools
+		preventCloneDialog.pos = (returnPos 1 1 _tool_start)
+		cloneType.pos = (returnPos 3 1 _tool_start)
+		grpTools.pos = [5,_tool_start]
+
+		-- template
+		pb.pos = (returnPos 1 1 _template_start)
+		pbRatio.pos = (returnPos 2 1.5 _template_start)
+		grpTemplate.pos = [5,_template_start]
 	)
 
 	-- rollout functions	
