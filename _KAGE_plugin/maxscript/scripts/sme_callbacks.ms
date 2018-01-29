@@ -74,65 +74,67 @@ fn subSelectionChanged change_name change_id = (
 
    if sme.IsOpen() == false then (
       format "sme not open\n"
-   ) else if selection.count >= 5 then (
+   ) else if selection.count >= 10 then (
       format "too many items selected for SME sub-object select: % items\n" selection.count
    ) else (
 
-      for obj in selection do (
+      try (
+         for obj in selection do (
 
-         if obj.material == undefined then (
-            exit
-         ) else (
+            if obj.material == undefined then (
+               exit
+            ) else (
 
-            mObj = modPanel.getCurrentObject()
-            selectedMats = #()
+               mObj = modPanel.getCurrentObject()
+               selectedMats = #()
 
-            case classOf mObj of (
-               Edit_Poly : (
-                  faces = (mObj.GetSelection #Face) as array
-                  selectedMats = for f in faces collect (mObj.GetFaceMaterial f)
-               )
-               Editable_Poly : (
-                  faces = (polyop.getFaceSelection obj) as array
-                  selectedMats = for f in faces collect (mObj.GetFaceMaterial f)
-               )
-               Edit_Mesh : (
-                  faces = for sf in obj.selectedFaces collect sf.index
-                  selectedMats = for f in faces collect (getFaceMatID obj.mesh f)
-               )
-               Mesh_Select : (
-                  faces = for sf in obj.selectedFaces collect sf.index
-                  selectedMats = for f in faces collect (getFaceMatID obj.mesh f)
-               )
-               default : (
-                  print ("UNABLE TO PROCESS CLASS : " + (classOf mObj as string))
-               )
-            )
-            
-            usedMaterials = #()
-            myMatID = 1
-            for om in obj.material.materialList do (
-               exists = finditem selectedMats myMatID
-               if exists > 0 do (
-                  if classOf om == MultiMaterial then (
-                     print "this obj is multimaterial - need recursive"
-                  ) else (
-                     if om != undefined do append usedMaterials om
+               case classOf mObj of (
+                  Edit_Poly : (
+                     faces = (mObj.GetSelection #Face) as array
+                     selectedMats = for f in faces collect (mObj.GetFaceMaterial f)
                   )
-                )
-               myMatID += 1
-            )
+                  Editable_Poly : (
+                     faces = (polyop.getFaceSelection obj) as array
+                     selectedMats = for f in faces collect (mObj.GetFaceMaterial f)
+                  )
+                  Edit_Mesh : (
+                     faces = for sf in obj.selectedFaces collect sf.index
+                     selectedMats = for f in faces collect (getFaceMatID obj.mesh f)
+                  )
+                  Mesh_Select : (
+                     faces = for sf in obj.selectedFaces collect sf.index
+                     selectedMats = for f in faces collect (getFaceMatID obj.mesh f)
+                  )
+                  default : (
+                     print ("UNABLE TO PROCESS CLASS : " + (classOf mObj as string))
+                  )
+               )
+               
+               usedMaterials = #()
+               myMatID = 1
+               for om in obj.material.materialList do (
+                  exists = finditem selectedMats myMatID
+                  if exists > 0 do (
+                     if classOf om == MultiMaterial then (
+                        print "this obj is multimaterial - need recursive"
+                     ) else (
+                        if om != undefined do append usedMaterials om
+                     )
+                   )
+                  myMatID += 1
+               )
 
-            --format "%\n" "Used Materials"
-            --for um in usedMaterials do (
-            --   print um.name
-            --)
-            -- SET CURRENT EDITOR
-            curSME = sme.GetView (sme.activeView)
-            selectMatsInSME curSME usedMaterials 
+               --format "%\n" "Used Materials"
+               --for um in usedMaterials do (
+               --   print um.name
+               --)
+               -- SET CURRENT EDITOR
+               curSME = sme.GetView (sme.activeView)
+               selectMatsInSME curSME usedMaterials 
 
-         ) -- end check obj material is defined
-      ) -- end for obj in selection
+            ) -- end check obj material is defined
+         ) -- end for obj in selection
+      ) catch ( print "Unintended Submaterial Callback" )
    ) -- end check selection count
 ),
 
