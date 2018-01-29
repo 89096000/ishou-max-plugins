@@ -2,10 +2,13 @@
 Opens an import listview
 */
 
-_IMAGE_FILE = "";
-_SCRIPT_FILE = "";
+_IMAGE_FILE = ""
+_SCRIPT_FILE = ""
+_URL_LOC = ""
 _ICON_DIR = ((GetDir #userIcons) + "/kage")
 _ITEM_LIST = #()
+_CURRENT_MS_VERSION = "v1-4-2"
+_MS_WILDCARD = "xyzz$MS$VERS"
 
 alpha_icon = bitmap 128 128 color:black
 car_path = (_ICON_DIR + "/_cars.bmp")
@@ -146,11 +149,15 @@ dotNetControl pictureBox "System.Windows.Forms.PictureBox" \
 -- buttons ---------------------------------
 button btn_back "帰る" \
 toolTip: "go back" \
-align: #left width:60 across:2
+align: #left width:70 across:3
 
 button btn_import "インポート" \
 toolTip: "import this file" \
-align: #left  width:60 across:2
+align: #left  width:70 across:3
+
+button btn_open_folder "フォルダ" \
+toolTip: "open file location" \
+align: #left  width:70 across:3
 
 on btn_back pressed do (
 	try (DestroyDialog import_rollout) catch ()
@@ -165,7 +172,6 @@ on btn_back pressed do (
 	)
 )
 
--- test only
 on btn_import pressed do (
 	try (
 		fileIn _SCRIPT_FILE
@@ -176,11 +182,20 @@ on btn_import pressed do (
 	)
 )
 
+on btn_open_folder pressed do (
+	try (
+		shellLaunch "explorer.exe" _URL_LOC
+	) catch (
+		format "% FAILED to open!\n" _URL_LOC
+	)
+)
+
 
 -- rollout events -------------------------------
 on import_rollout open do (
 	btn_back.visible = true
 	btn_import.visible = false
+	btn_open_folder.visible = false
 	lv_objects.width = 1
 	lv_objects.height = 1
 	pictureBox.width = 1
@@ -196,6 +211,7 @@ fn render_listview_mode = (
 	pictureBox.height = 140
 	btn_back.visible = true
 	btn_import.visible = true
+	btn_open_folder.visible = true
 	initListView lv_objects
 	fillInSpreadSheet lv_objects
 )
@@ -262,7 +278,8 @@ on lv_objects mouseDown arg do (
 		loadPictureBox pictureBox
 
 		-- set script location
-		_SCRIPT_FILE = url + "\\" + hit.item.subItems.item[3].text
+		_URL_LOC = url + "\\"
+		_SCRIPT_FILE = _URL_LOC + (substituteString hit.item.subItems.item[3].text _MS_WILDCARD _CURRENT_MS_VERSION)
 		format "SCR:%\n" _SCRIPT_FILE
 	) catch ()
 )

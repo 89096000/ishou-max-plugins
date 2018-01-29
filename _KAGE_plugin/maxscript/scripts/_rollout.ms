@@ -31,7 +31,7 @@ _template_height = 70
 
 -- Export Rollout
 _E_ROLLOUT_WIDTH = 340;
-_E_ROLLOUT_HEIGHT = 200;
+_E_ROLLOUT_HEIGHT = 210;
 
 -- Save Settings
 SETTINGS_FILE_LOCATION = ""
@@ -394,7 +394,7 @@ rollout main_rollout (_MAIN_ROLLOUT_NAME + " V" + _VERSION) (
 		) else (
 			PB_IMPORT_RATIO = 0.010
 		)
-	)
+	)	
 
 	-- repositions buttons
 	fn reposition_buttons = (
