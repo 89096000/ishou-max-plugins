@@ -1,4 +1,5 @@
 -- vars
+_DEBUG_MODE = false
 smeview_dir = (GetDir #userScripts) + "\\kageviews\\"
 makeDir smeview_dir
 xName = smeview_dir + "sme_testing_log.xml"
@@ -144,7 +145,9 @@ for ch in childs do (
 			print ("No Struct Var for " + item.Name + "(" + newMat.type + ")")
 		)
 	)
-	format "New Item: % % [%, %] %\n" newMat.name newMat.type newMat.posx (newMat.posy as string) newMat.map
+	if _DEBUG_MODE do (
+		format "New Item: % % [%, %] %\n" newMat.name newMat.type newMat.posx (newMat.posy as string) newMat.map
+	)
 
 	-- depending on type, create node
 --	if newMat.type == "multimaterial" then (
@@ -395,7 +398,9 @@ for ch in childs do (
 			)
 		) -- end materialProperty for loop
 
-		appendIfUnique mapObjects newNode
+		if newMat.type != "category" do (
+			appendIfUnique mapObjects newNode
+		)
 		
 	) --end material handler
 
@@ -494,7 +499,9 @@ for ch in childs do (
 					print ("No MultiMaterialProperty Variable for " + item.Name)
 				)
 			)
-			format "MultiSub % : % -- %\n" mName mId mMat
+			if _DEBUG_MODE do (
+				format "MultiSub % : % -- %\n" mName mId mMat
+			)
 
 			newNode.names[(mId as integer)] = mName
 			newNode[(mId as integer)] = undefined
@@ -519,7 +526,9 @@ newView.SelectNone()
 nodes = for n = 1 to newView.GetNumNodes() collect (newView.GetNode n)
 for node in nodes do (
 	if findItem nameList node.name == 0 do (
-		print ("deleting system generated node " + node.name)
+		if _DEBUG_MODE do (
+			print ("deleting system generated node " + node.name)
+		)
 		node.selected = true
 		newView.DeleteSelection()
 	)
