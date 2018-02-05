@@ -13,41 +13,44 @@ fn localize_mapping_files = (
 	-- loop through each mapping file
 	for bmt in getClassInstances bitmaptex do (
 		fpath = bmt.filename
-		print fpath
-		
-		-- check to make sure file name is unique
-		newFileName = (getFilenameFile fpath)
-		fileExtension = (getFilenameType fpath)
-		newPath = localDir + newFileName + fileExtension
-		nameExists = (findItem usedNameList newFileName) > 0
 
-		-- if name exists but was previously used path, we can ignore loading this file
-		filePathProcessed = (findItem usedPathList fpath) > 0
-		if nameExists and filePathProcessed then (
-			format "ALREADY PROCESSED - SKIP : %\n" newPath
+		if fpath != undefined do (
+			print fpath
 			
-		) else (	
-			-- dedupe names
-			while nameExists do (
-				newFileName += "|"
-				newPath = localDir + newFileName + fileExtension
-				nameExists = (findItem usedNameList newFileName) > 0
+			-- check to make sure file name is unique
+			newFileName = (getFilenameFile fpath)
+			fileExtension = (getFilenameType fpath)
+			newPath = localDir + newFileName + fileExtension
+			nameExists = (findItem usedNameList newFileName) > 0
+
+			-- if name exists but was previously used path, we can ignore loading this file
+			filePathProcessed = (findItem usedPathList fpath) > 0
+			if nameExists and filePathProcessed then (
+				format "ALREADY PROCESSED - SKIP : %\n" newPath
+				
+			) else (	
+				-- dedupe names
+				while nameExists do (
+					newFileName += "|"
+					newPath = localDir + newFileName + fileExtension
+					nameExists = (findItem usedNameList newFileName) > 0
+				)
+				
+				-- save file locally
+				if (substring fpath 1 10) != "mapping_fi" do (
+					copyFile fpath newPath
+					format "%\n" newPath 
+				)
+				
+				-- save used name to avoid future duplicates
+				appendIfUnique usedNameList newFileName
+				appendIfUnique usedPathList fpath
 			)
 			
-			-- save file locally
-			if (substring fpath 1 10) != "mapping_fi" do (
-				copyFile fpath newPath
-				format "%\n" newPath 
-			)
-			
-			-- save used name to avoid future duplicates
-			appendIfUnique usedNameList newFileName
-			appendIfUnique usedPathList fpath
-		)
-		
-		-- change path to local referenced path
-		relLocalPath = "\\mapping_files\\" + newFileName + fileExtension
-		bmt.filename = relLocalPath
+			-- change path to local referenced path
+			relLocalPath = "\\mapping_files\\" + newFileName + fileExtension
+			bmt.filename = relLocalPath
+		) --end check fpath is valid
 	)
 
 
