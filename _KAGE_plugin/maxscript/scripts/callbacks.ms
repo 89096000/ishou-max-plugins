@@ -31,7 +31,7 @@ nodeEventCB,
 
 function createCallbacks =  (
    createFunctionCache();
-   callbacks.addScript #selectionSetChanged "treeview_rollout.tag_search treeview_rollout.tv" id:#kage
+   callbacks.addScript #selectionSetChanged "tree_rollout.tag_search tree_rollout.tv" id:#kage
    /*
    nodeEventCB = NodeEventCallback mouseUp:true delay:10;
    nodeEventCB.callbackBegin    = (fn a e h = kage_callbacks.callbackBegin e h);
@@ -69,7 +69,7 @@ fn selectionChanged evt handles = (
       KAGE_TREE.tree.SelectedNode = null
       if selection.count > 0 then (
          tree_beginUpdateFn();
-         treeview_rollout.tag_search()
+         tree_rollout.tag_search()
          tree_endUpdateFn();
       )
    ) catch ( )

@@ -83,10 +83,11 @@ rollout select_rollout "何色？" (
 				color_val = getColorFromName(obj.name as string)
 				if color_val == color_name do
 					selectmore obj
-				for obj in selection do (
-					if obj.children != undefined do
-						selectmore obj.children
-				)
+			)
+			-- TODO this should probably be a recursive function to select children
+			for obj in selection do (
+				if obj.children != undefined do
+					selectmore obj.children
 			)
 		)
 		try (DestroyDialog select_rollout) catch()

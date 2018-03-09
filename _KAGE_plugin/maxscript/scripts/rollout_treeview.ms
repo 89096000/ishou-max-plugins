@@ -217,7 +217,6 @@ rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 			)
 		) else if superclassy == "GeometryClass" then (
 			subname = substring layer_obj.name 1 3
-			-- print subname
 			if subname == "Cyl" then (
 				id = 4
 			) else if subname == "Lin" then(
@@ -247,9 +246,6 @@ rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 			id = 2
 		)
 
-		--print superclassy
-		--print classy
-		--print (" returned id of " + (id as string))
 		return id
 	)
 
@@ -714,7 +710,7 @@ rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 	groupBox grpControls "コントロール" \
 	pos:[5,((_TV_HEIGHT+5)+_btnvertspacing)] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
-	height: (_btnvertspacing*3+_btnheight*2)
+	height: (_btnvertspacing*3+_btnheight*2+10)
 
 	----- ----- -----
 	-- filter button
@@ -800,7 +796,7 @@ rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 	groupBox grpModes "モード" \
 	pos:[5,((_TV_HEIGHT+75)+_btnvertspacing)] \
 	width:(_ROLLOUT_WIDTH-_btnhoripadding) \
-	height: (_btnvertspacing*3+_btnheight*2)
+	height: (_btnvertspacing*3+_btnheight*2+10)
 
 	----- ----- -----
 	-- checkbutton states
@@ -909,7 +905,7 @@ rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 
 	-- option to refresh the tree
 	fn refresh_tree_externally = (
-		tree_rollout.refreshTreeView(tv)
+		refreshTreeView tv
 	)
 
 	-- HANDLERS
@@ -927,8 +923,8 @@ rollout tree_rollout (_TREE_ROLLOUT_NAME) (
 				local posx = dialog_pos.x + mousepoint.X + 30
 				local posy = dialog_pos.y + mousepoint.Y + 30
 				CreateDialog submenu_rollout ((_COLOR_BTN_SIZE*2)+2)\
-											 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
-											 pos:[posx, posy];
+					 ((_COLOR_BTN_SIZE*_COLOR_ROLLOUT_ROWS)+2)\
+					 pos:[posx, posy];
 			) catch ( )
 
 		) else (

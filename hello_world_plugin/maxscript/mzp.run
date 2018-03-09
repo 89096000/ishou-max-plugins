@@ -1,9 +1,0 @@
-name "MoshiMoshiSekai"
-version 1.0
-
-extract to $temp\sekai
-
-run installer\installer_dialog.ms
-drop installer\installer_dialog.ms
-
-clear temp on MAX exit

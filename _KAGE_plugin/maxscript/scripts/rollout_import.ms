@@ -162,7 +162,7 @@ align: #left  width:70 across:3
 on btn_back pressed do (
 	try (DestroyDialog import_rollout) catch ()
 	if _ITEM_LIST.count > 0 then (
-		local dialog_pos = GetDialogPos treeview_rollout
+		local dialog_pos = GetDialogPos tree_rollout
 		local posx = dialog_pos.x - 250 + _TV_WIDTH
 		local posy = dialog_pos.y - 250 + _TV_HEIGHT
 		CreateDialog import_rollout 350\
